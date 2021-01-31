@@ -25,17 +25,16 @@ The directory is structured as following.
 
 ```
 .
-├─ cmake/          # contains file(s) used for build
-├─ app/            # put main task of mapreduce
-|   ├─ inputs/     # directory to store input files to process
-|   ├─ outputs/    # directory to store processed output
-|   |                (this will be generated if not exist)
-|   |                (inputs/ and outputs/ can be vary depending on the scripts)
+├─ app/                  # put main task of mapreduce
 |   ├─ CMakeLists.txt    # cmake file for main task
 |   ├─ sourcelist.cmake  # put all source file used in the mapreduce task
 |   └─ word_count.cc     # example mapreduce task
 |
+├─ cmake/          # contains file(s) used for build
 ├─ include/        # directory containing documents and related items
+├─ inputs/         # directory to store input files to process
+├─ outputs/        # directory to store processed output
+|                    (this will be generated if not exist)
 ├─ src/            # contains all source files used for mapreduce
 |
 ├─ baseline.cc     # baseline script for performance comparison
@@ -83,6 +82,14 @@ $ cmake ..
 $ make -j
 ```
 
+or, if you want to build both library and executable(see section 3.2),
+run the following instead:
+```sh
+$ mkdir -p build && cd build
+$ cmake -DSIMPLEMR_BUILD_APP=ON ..
+$ make -j
+```
+
 ### 3.2 Example task (Word count)
 
 As an example task, the popular preprocessing steps "word count" is adopted,
@@ -103,11 +110,21 @@ $ cd app
 $ mkdir -p build && cd build
 $ cmake ..
 $ make -j
-$ cd ..
+```
+
+then, this will generate `run_task` in root directory,
+so change directory to root and execute `run_task` with *MPI*.
+
+```sh
+# change directory to root
+$ cd ../..
 $ mpirun [options] ./run_task
 
-# for instance, if you set machines in host_file
-$ mpirun --hostfile host_file ./run_task
+# for instance,
+# use all node on the local machine
+$ mpirun ./run_task
+# use machines set in `host_file` and 4 nodes in total
+$ mpirun -np 4 --hostfile host_file ./run_task
 ```
 
 If you need root privilages to execute `mpirun`, create a user and run with `su -c`.
@@ -129,6 +146,7 @@ So make sure your environment has multicores available.
 ### 3.3 Run on Docker
 
 If you would like to run the task on Docker container, execute `run_docker` script as following:
+
 ```sh
 $ ./run_docker --input ./inputs --output ./outputs
 
@@ -221,12 +239,12 @@ Additionally, made sure other processes were idle or ran few processes which wou
 
 The result was shown in the following table.
 
-| Baseline | SimpleMapReduce(1 master, 7 workers) |
-|--|--|
-|14.065 sec. | 7.700 sec. |
+| Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
+|--|--|--|
+|14.065 sec. | 5.275 sec. | 7.700 sec. |
 
-If the datasize is small, the overhead of network connection is large so it can see the benefit only when processing the large dataset both in terms of number of files and the file sizes.
-(Baseline is still faster using 4000 files with 30+ MB)
+If the datasize is small, the overhead of network connection is large,
+so it can see benefit only when processing the large dataset both in terms of number of files and the file sizes.
 
 ## <a name="5-todo"></a>5 TODO
 

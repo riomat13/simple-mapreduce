@@ -15,12 +15,9 @@ WORKDIR /home/smruser
   
 ADD . .
 
-RUN mkdir -p build app/build \
+RUN mkdir -p build \
   && cd build \
-  && cmake .. \
-  && make -j \
-  && cd ../app/build \
-  && cmake .. \
+  && cmake -DSIMPLEMR_BUILD_APP=ON .. \
   && make -j \
   && chown smruser /home/smruser/app
 

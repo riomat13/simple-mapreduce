@@ -1,5 +1,8 @@
 build/
 
+# generated executable
+run_task
+
 # data
 inputs/
 outputs/

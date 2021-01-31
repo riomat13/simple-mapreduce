@@ -17,8 +17,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-i', '--input', type=str, default='./app/inputs',
-        help='Directory containing target files to process (default: ./app/inputs)'
+        '-i', '--input', type=str, default='./inputs',
+        help='Directory containing target files to process (default: ./inputs)'
     )
 
     parser.add_argument('-o', '--output', type=str, default='./outputs',
@@ -56,10 +56,10 @@ if __name__ == '__main__':
 
     # execute the script
     docker run --rm -ti --name simple-mr \
-      --mount type=bind,source={input_dir},destination=/home/smruser/app/inputs \
-      --mount type=bind,source={out_dir},destination=/home/smruser/app/outputs \
+      --mount type=bind,source={input_dir},destination=/home/smruser/inputs \
+      --mount type=bind,source={out_dir},destination=/home/smruser/outputs \
       simple-mr \
-      bash -c "cd app; mpirun ./run_task"
+      bash -c "mpirun ./run_task"
 
     echo "======================================================================"
 
