@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Script to run task on docker container.
+
+Usage: ./run_docker [-o/--output path]
+    -o/--output: output directory path
+                 if the directory exists, remove all files in it,
+                 otherwise, create a new one
+"""
+
+# TODO: can pass host list file to communicate with other machines
+
+import os
+import argparse
+import subprocess
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-i', '--input', type=str, default='./app/inputs',
+        help='Directory containing target files to process (default: ./app/inputs)'
+    )
+
+    parser.add_argument('-o', '--output', type=str, default='./outputs',
+                        help='Output directory (default: ./outputs)')
+
+    parser.add_argument('--rmi', action='store_true',
+                        help='Remove docker image after finished')
+
+    args = parser.parse_args()
+
+    curr_dir = os.getcwd()
+    input_dir = os.path.abspath(args.input)
+    out_dir = os.path.abspath(args.output)
+
+    rmi = "echo '[INFO] Cleaning up docker image...\n'; docker rmi simple-mr" if args.rmi else ""
+
+    bash_script = f'''
+    # create docker image with compiling source codes
+    docker build -t simple-mr .
+
+    echo ""
+    echo "[Start MapReduce]"
+
+    echo "[INFO] Output directory: {out_dir}"
+
+    if [ -d "{out_dir}" ]; then
+      echo "[INFO] {out_dir} exists. Cleaning up..."
+      rm -rf {out_dir}/*
+    else
+      echo "[INFO] Creating directory: {out_dir}"
+      mkdir -p {out_dir}
+    fi
+
+    echo "=============================[   Log   ]=============================="
+
+    # execute the script
+    docker run --rm -ti --name simple-mr \
+      --mount type=bind,source={input_dir},destination=/home/smruser/app/inputs \
+      --mount type=bind,source={out_dir},destination=/home/smruser/app/outputs \
+      simple-mr \
+      bash -c "cd app; mpirun ./run_task"
+
+    echo "======================================================================"
+
+    # clean up environment
+    {rmi}
+
+    echo "done"
+    '''
+
+    subprocess.run(bash_script, shell=True)

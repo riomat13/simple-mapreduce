@@ -16,7 +16,7 @@ but not fully tested, so it may have bugs.
 2. [Setup](#2-setup)
 3. [Execute example](#3-execute-example)
 4. [Performance](#4-performance)
-5. [Further Improvements](#5-improvements)
+5. [TODO](#5-todo)
 6. [References](#6-references)
 
 ## <a name="1-project-structure"></a>1 Project structure
@@ -41,7 +41,7 @@ The directory is structured as following.
 ├─ baseline.cc     # baseline script for performance comparison
 ├─ CMakeLists.txt  # cmake file for library
 ├─ Dockerfile      # build container to run app
-└─ README.md
+└─ run_docker      # script to run tasks on docker container
 ```
 
 ## <a name="2-setup"></a>2 Setup
@@ -83,7 +83,7 @@ $ cmake ..
 $ make -j
 ```
 
-### 3.2 Word count example task
+### 3.2 Example task (Word count)
 
 As an example task, the popular preprocessing steps "word count" is adopted,
 because it is simple and easy to implement, but good for checking performances.
@@ -125,7 +125,20 @@ Note that if the environment has **only 1 core available**, similar to following
 The process will be aborted if only 1 core is available to avoid hanging.
 So make sure your environment has multicores available.
 
-### 3.3 Custom task
+
+### 3.3 Run on Docker
+
+If you would like to run the task on Docker container, execute `run_docker` script as following:
+```sh
+$ ./run_docker --input ./inputs --output ./outputs
+
+# if you want to remove image after finished task
+$ ./run_docker -i ./inputs -o ./outputs --rmi
+```
+
+(Note: currently running on a single container)
+
+### 3.4 Custom task
 
 The structure is following:
 ```cpp
@@ -215,10 +228,11 @@ The result was shown in the following table.
 If the datasize is small, the overhead of network connection is large so it can see the benefit only when processing the large dataset both in terms of number of files and the file sizes.
 (Baseline is still faster using 4000 files with 30+ MB)
 
-## <a name="5-improvements"></a>5 Further Improvements
+## <a name="5-todo"></a>5 TODO
 
-- Add configurations(mid)
+- Add configurations (mid)
 - Performance test with publicly available dataset (mid) (with details including source link)
+- Test with other compilers (e.g. clang++)
 - Testings(high)
 - Add more types to process (currently only string for keys and int,long for values) (mid)
 - Error handling (high)
