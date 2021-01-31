@@ -1,14 +1,14 @@
-#ifndef MR_REDUCER_H_
-#define MR_REDUCER_H_
+#ifndef SIMPLEMAPREDUCE_REDUCER_H_
+#define SIMPLEMAPREDUCE_REDUCER_H_
 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "commons.h"
-#include "ops/context.h"
-#include "ops/job.h"
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/ops/context.h"
+#include "simplemapreduce/ops/job.h"
 
 namespace mapreduce {
 
@@ -51,6 +51,6 @@ namespace mapreduce {
 
 } // namespace mapreduce
 
-#include "reducer.tcc"
+#include "simplemapreduce/reducer.tcc"
 
 #endif

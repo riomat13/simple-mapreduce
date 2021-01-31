@@ -1,10 +1,10 @@
-#include "proc/writer.h"
+#include "simplemapreduce/proc/writer.h"
 
 #include <iomanip>
 #include <mutex>
 #include <thread>
 
-#include "commons.h"
+#include "simplemapreduce/commons.h"
 
 namespace mapreduce {
 namespace proc {

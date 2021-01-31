@@ -1,4 +1,4 @@
-#include "util/log.h"
+#include "simplemapreduce/util/log.h"
 
 using namespace mapreduce::util;
 

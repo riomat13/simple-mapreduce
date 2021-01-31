@@ -1,5 +1,5 @@
-#ifndef OPS_FILE_FORMAT_H
-#define OPS_FILE_FORMAT_H
+#ifndef SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H
+#define SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H
 
 #include <filesystem>
 #include <string>

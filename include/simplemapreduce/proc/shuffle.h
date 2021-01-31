@@ -1,16 +1,16 @@
-#ifndef PROC_SHUFFLE_H_
-#define PROC_SHUFFLE_H_
+#ifndef SIMPLEMAPREDUCE_PROC_SHUFFLE_H_
+#define SIMPLEMAPREDUCE_PROC_SHUFFLE_H_
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "commons.h"
-#include "data/queue.h"
-#include "ops/conf.h"
-#include "ops/context.h"
-#include "ops/job.h"
-#include "proc/writer.h"
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/data/queue.h"
+#include "simplemapreduce/ops/conf.h"
+#include "simplemapreduce/ops/context.h"
+#include "simplemapreduce/ops/job.h"
+#include "simplemapreduce/proc/writer.h"
 
 using namespace mapreduce::data;
 
@@ -64,6 +64,6 @@ namespace proc {
 } // namespace proc
 } // namespace mapreduce
 
-#include "proc/shuffle.tcc"
+#include "simplemapreduce/proc/shuffle.tcc"
 
 #endif

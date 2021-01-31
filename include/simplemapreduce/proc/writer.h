@@ -1,5 +1,5 @@
-#ifndef PROC_WRITER_H_
-#define PROC_WRITER_H_
+#ifndef SIMPLEMAPREDUCE_PROC_WRITER_H_
+#define SIMPLEMAPREDUCE_PROC_WRITER_H_
 
 #include <iostream>
 
@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-#include "data/queue.h"
+#include "simplemapreduce/data/queue.h"
 
 namespace fs = std::filesystem;
 using namespace mapreduce::data;
@@ -99,6 +99,6 @@ namespace proc {
 } // namespace proc
 } // namespace mapreduce
 
-#include "proc/writer.tcc"
+#include "simplemapreduce/proc/writer.tcc"
 
 #endif

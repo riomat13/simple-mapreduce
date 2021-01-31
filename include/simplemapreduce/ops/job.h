@@ -1,5 +1,5 @@
-#ifndef OPS_JOB_H_
-#define OPS_JOB_H_
+#ifndef SIMPLEMAPREDUCE_OPS_JOB_H_
+#define SIMPLEMAPREDUCE_OPS_JOB_H_
 
 #include <filesystem>
 #include <future>
@@ -9,12 +9,12 @@
 
 #include <mpi.h>
 
-#include "commons.h"
-#include "ops/context.h"
-#include "ops/fileformat.h"
-#include "ops/conf.h"
-#include "proc/shuffle.h"
-#include "proc/sorter.h"
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/ops/context.h"
+#include "simplemapreduce/ops/fileformat.h"
+#include "simplemapreduce/ops/conf.h"
+#include "simplemapreduce/proc/shuffle.h"
+#include "simplemapreduce/proc/sorter.h"
 
 namespace fs = std::filesystem;
 
@@ -209,6 +209,6 @@ namespace mapreduce {
 
 } // namespace mapreduce
 
-#include "ops/job.tcc"
+#include "simplemapreduce/ops/job.tcc"
 
 #endif

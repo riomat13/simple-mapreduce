@@ -1,5 +1,5 @@
-#ifndef OPS_CONF_H_
-#define OPS_CONF_H_
+#ifndef SIMPLEMAPREDUCE_OPS_CONF_H_
+#define SIMPLEMAPREDUCE_OPS_CONF_H_
 
 namespace mapreduce {
 

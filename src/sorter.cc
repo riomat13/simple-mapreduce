@@ -1,6 +1,6 @@
-#include "proc/sorter.h"
+#include "simplemapreduce/proc/sorter.h"
 
-#include "ops/job.h"
+#include "simplemapreduce/ops/job.h"
 
 namespace mapreduce {
 namespace proc {

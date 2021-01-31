@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "mapreduce.h"
+#include "simplemapreduce.h"
 
 // This is an example app using mapreduce to count each word
 // appeared in texts.

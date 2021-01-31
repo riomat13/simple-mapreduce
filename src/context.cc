@@ -1,4 +1,4 @@
-#include "ops/context.h"
+#include "simplemapreduce/ops/context.h"
 
 #include <filesystem>
 #include <fstream>
@@ -6,7 +6,7 @@
 
 #include <mpi.h>
 
-#include "util/log.h"
+#include "simplemapreduce/util/log.h"
 
 namespace fs = std::filesystem;
 

@@ -5,8 +5,8 @@
 #include <sstream>
 #include <thread>
 
-#include "proc/writer.h"
-#include "util/log.h"
+#include "simplemapreduce/proc/writer.h"
+#include "simplemapreduce/util/log.h"
 
 using namespace mapreduce::proc;
 using namespace mapreduce::util;

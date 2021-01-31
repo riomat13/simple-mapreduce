@@ -25,19 +25,22 @@ The directory is structured as following.
 
 ```
 .
-├─ cmake/         # contains file(s) used for build
-├─ example/       # contains example word count app
-|                   (this will be a main app as a submission)
-├─ include/       # directory containing documents and related items
-├─ inputs/        # directory to store input files to process
-├─ outputs/       # directory to store processed output
-|                   (this will be generated if not exist)
-|                   (inputs/ and outputs/ can be vary depending on the scripts)
-├─ src/           # contains all source files used for mapreduce
+├─ cmake/          # contains file(s) used for build
+├─ app/            # put main task of mapreduce
+|   ├─ inputs/     # directory to store input files to process
+|   ├─ outputs/    # directory to store processed output
+|   |                (this will be generated if not exist)
+|   |                (inputs/ and outputs/ can be vary depending on the scripts)
+|   ├─ CMakeLists.txt    # cmake file for main task
+|   ├─ sourcelist.cmake  # put all source file used in the mapreduce task
+|   └─ word_count.cc     # example mapreduce task
 |
-├─ baseline.cc    # baseline script for performance comparison
-├─ CMakeLists.txt
-├─ Makefile       # simplified step (used for development)
+├─ include/        # directory containing documents and related items
+├─ src/            # contains all source files used for mapreduce
+|
+├─ baseline.cc     # baseline script for performance comparison
+├─ CMakeLists.txt  # cmake file for library
+├─ Dockerfile      # build container to run app
 └─ README.md
 ```
 
@@ -66,11 +69,21 @@ Once conneced machines to the same network, need to set host machines.
 The host list should be stored in `./conf/host_file`.
 If use the script from the next section to run the operation, the file name and hte location must match.
 
-## <a name="3-execute-example"></a>3 Execute example
+## <a name="3-execute-example"></a>3 Execution
 
-In this section, an example to run a mapreduce task to count words in texts will be shown.
 
-### Word count
+### 3.1 Initial build
+
+Before starting all tasks, need to build mapreduce library first.
+In order to do that, run the following script in shell:
+```sh
+# at root directory
+$ mkdir -p build && cd build
+$ cmake ..
+$ make -j
+```
+
+### 3.2 Word count example task
 
 As an example task, the popular preprocessing steps "word count" is adopted,
 because it is simple and easy to implement, but good for checking performances.
@@ -80,18 +93,21 @@ The tokenizing processes are:
   - Remove punctuations
   - Split by space or tabs
 
-The word counting app itself is located at `./example/word_count.cc`.
+The word counting app itself is located at `./app/word_count.cc`.
 
 Note that, in the app script, relative paths are used
 so that it needs to follow the commands below otherwise crash when execute the code.
 
 ```sh
-$ mkdir -p build
-$ cd build
+$ cd app
+$ mkdir -p build && cd build
 $ cmake ..
 $ make -j
 $ cd ..
-$ mpirun [options] build/main
+$ mpirun [options] ./run_task
+
+# for instance, if you set machines in host_file
+$ mpirun --hostfile host_file ./run_task
 ```
 
 If you need root privilages to execute `mpirun`, create a user and run with `su -c`.
@@ -109,11 +125,11 @@ Note that if the environment has **only 1 core available**, similar to following
 The process will be aborted if only 1 core is available to avoid hanging.
 So make sure your environment has multicores available.
 
-### 3.2 Custom task
+### 3.3 Custom task
 
 The structure is following:
 ```cpp
-// main.cpp
+// app/custom_mr.cpp
 #include "mapreduce.h"
 
 using namespace mapreduce;
@@ -160,10 +176,13 @@ int main(int &, char *[])
 }
 ```
 
-Then, update `example.sourcelist.cmake` to the following:
+Put every scripts in `./app` directory. 
+Then, update `app/sourcelist.cmake` like the following:
 ```
+# list all related source/header files
 target_sources(main PRIVATE
-  ${SimpleMapReduce_SOURCE_DIR}/example/{a name of the created file}.cc
+  ${PROJECT_SOURCE_DIR}/app/custom_mr.cpp
+              :
 )
 ```
 
@@ -199,10 +218,8 @@ If the datasize is small, the overhead of network connection is large so it can 
 ## <a name="5-improvements"></a>5 Further Improvements
 
 - Add configurations(mid)
-- Restructure the project(mid)
 - Performance test with publicly available dataset (mid) (with details including source link)
 - Testings(high)
-- Packaging(mid)
 - Add more types to process (currently only string for keys and int,long for values) (mid)
 - Error handling (high)
 - Check performance by connecting more machines (high)

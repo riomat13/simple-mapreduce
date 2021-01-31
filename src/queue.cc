@@ -1,4 +1,4 @@
-#include "data/queue.h"
+#include "simplemapreduce/data/queue.h"
 
 #include <string>
 

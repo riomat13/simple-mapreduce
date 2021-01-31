@@ -1,5 +1,5 @@
-#ifndef PROC_SORTER_H_
-#define PROC_SORTER_H_
+#ifndef SIMPLEMAPREDUCE_PROC_SORTER_H_
+#define SIMPLEMAPREDUCE_PROC_SORTER_H_
 
 #include <filesystem>
 #include <fstream>
@@ -8,8 +8,8 @@
 #include <utility>
 #include <vector>
 
-#include "commons.h"
-#include "ops/conf.h"
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/ops/conf.h"
 
 namespace fs = std::filesystem;
 
@@ -91,6 +91,6 @@ namespace proc {
 } // namespace proc
 } // namespace mapreduce
 
-#include "sorter.tcc"
+#include "simplemapreduce/proc/sorter.tcc"
 
 #endif

@@ -1,12 +1,12 @@
-#ifndef OPS_CONTEXT_H_
-#define OPS_CONTEXT_H_
+#ifndef SIMPLEMAPREDUCE_OPS_CONTEXT_H_
+#define SIMPLEMAPREDUCE_OPS_CONTEXT_H_
 
 #include <fstream>
 #include <memory>
 #include <string>
 
-#include "commons.h"
-#include "proc/writer.h"
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/proc/writer.h"
 
 using namespace mapreduce::proc;
 

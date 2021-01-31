@@ -1,10 +1,10 @@
 #ifndef IS_COMMONS
 #define IS_COMMONS
-#include "commons.h"
+#include "simplemapreduce/commons.h"
 #endif
 
-#ifndef UTIL_LOG_H_
-#define UTIL_LOG_H_
+#ifndef SIMPLEMAPREDUCE_UTIL_LOG_H_
+#define SIMPLEMAPREDUCE_UTIL_LOG_H_
 
 #include <chrono>
 #include <ctime>
@@ -136,6 +136,6 @@ namespace util {
 } // namespace util
 } // namespace mapreduce
 
-#include "util/log.tcc"
+#include "simplemapreduce/util/log.tcc"
 
 #endif

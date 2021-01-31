@@ -5,6 +5,10 @@ set(SIMPLE_MR_VERSION 0.0.1)
 project(SimpleMapReduce VERSION ${SIMPLE_MR_VERSION} LANGUAGES CXX)
 message(STATUS "Build SimpleMapReduce: v${SIMPLE_MR_VERSION}")
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Set build type" FORCE)
+endif()
+
 # for OPEN-MPI
 # ref: https://github.com/open-mpi/ompi/issues/5157
 add_definitions(-DOMPI_SKIP_MPICXX)
@@ -16,21 +20,28 @@ if((NOT CMAKE_CXX_STANDARD) OR (CMAKE_CXX_STANDARD LESS 17))
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-set(CMAKE_CXX_COMPILER mpic++)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lmpi_cxx")
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories(${SimpleMapReduce_SOURCE_DIR}/include)
-include_directories(${SimpleMapReduce_SOURCE_DIR}/include/data)
-include_directories(${SimpleMapReduce_SOURCE_DIR}/include/mr)
-include_directories(${SimpleMapReduce_SOURCE_DIR}/include/ops)
-include_directories(${SimpleMapReduce_SOURCE_DIR}/include/proc)
-include_directories(${SimpleMapReduce_SOURCE_DIR}/include/util)
+set(CMAKE_CXX_COMPILER mpic++)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # grouping main task and package source files
-add_executable(main "")
-include(${SimpleMapReduce_SOURCE_DIR}/cmake/sourcelist.cmake)
-include(${SimpleMapReduce_SOURCE_DIR}/example/sourcelist.cmake)
+add_library(simplemapreduce SHARED "")
+include(${CMAKE_SOURCE_DIR}/cmake/sourcelist.cmake)
+target_include_directories(simplemapreduce
+  PUBLIC 
+    ${CMAKE_SOURCE_DIR}/include
+)
 
-set_property(TARGET main PROPERTY CXX_STANDARD 17)
-
-target_compile_options(main PRIVATE -Wall -Wextra)
+target_compile_options(simplemapreduce
+  PUBLIC
+    $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Debug>:-O0 -g -Wall -Wextra>
+    $<$<CONFIG:RelWithDebInfo>:-O3 -g>
+)
+target_compile_definitions(simplemapreduce
+  PUBLIC
+    $<$<NOT:$<CONFIG:Debug>>:NDEBUG>
+)

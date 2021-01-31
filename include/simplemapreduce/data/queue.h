@@ -1,5 +1,5 @@
-#ifndef DATA_QUEUE_H_
-#define DATA_QUEUE_H_
+#ifndef SIMPLEMAPREDUCE_DATA_QUEUE_H_
+#define SIMPLEMAPREDUCE_DATA_QUEUE_H_
 
 #include <condition_variable>
 #include <deque>
@@ -37,6 +37,6 @@ namespace data {
 } // namespace data
 } // namespace mapreduce
 
-#include "queue.tcc"
+#include "simplemapreduce/data/queue.tcc"
 
 #endif

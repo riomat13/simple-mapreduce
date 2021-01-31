@@ -1,17 +1,17 @@
-#ifndef MR_MAPPER_H_
-#define MR_MAPPER_H_
+#ifndef SIMPLEMAPREDUCE_MAPPER_H_
+#define SIMPLEMAPREDUCE_MAPPER_H_
 
 #include <filesystem>
 #include <memory>
 #include <string>
 
-#include "commons.h"
-#include "data/queue.h"
-#include "ops/conf.h"
-#include "ops/context.h"
-#include "ops/job.h"
-#include "proc/shuffle.h"
-#include "proc/sorter.h"
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/data/queue.h"
+#include "simplemapreduce/ops/conf.h"
+#include "simplemapreduce/ops/context.h"
+#include "simplemapreduce/ops/job.h"
+#include "simplemapreduce/proc/shuffle.h"
+#include "simplemapreduce/proc/sorter.h"
 
 namespace fs = std::filesystem;
 
@@ -91,6 +91,6 @@ namespace mapreduce {
 
 } // namespace mapreduce
 
-#include "mr/mapper.tcc"
+#include "simplemapreduce/mapper.tcc"
 
 #endif

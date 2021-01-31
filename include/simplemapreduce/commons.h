@@ -1,5 +1,5 @@
-#ifndef COMMONS_H_
-#define COMMONS_H_
+#ifndef SIMPLEMAPREDUCE_COMMONS_H_
+#define SIMPLEMAPREDUCE_COMMONS_H_
 
 #include <mutex>
 #include <thread>
