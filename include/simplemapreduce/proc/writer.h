@@ -11,6 +11,7 @@
 #include "simplemapreduce/data/queue.h"
 
 namespace fs = std::filesystem;
+
 using namespace mapreduce::data;
 
 namespace mapreduce {
@@ -22,10 +23,10 @@ namespace proc {
    public:
     virtual ~Writer() = default;
 
-    virtual void write(std::string &, int&) = 0;
-    virtual void write(std::string &, long&) = 0;
-    virtual void write(std::string &, float&) = 0;
-    virtual void write(std::string &, double&) = 0;
+    virtual void write(std::string&, int&) = 0;
+    virtual void write(std::string&, long&) = 0;
+    virtual void write(std::string&, float&) = 0;
+    virtual void write(std::string&, double&) = 0;
   };
 
   /**
@@ -37,14 +38,15 @@ namespace proc {
   class BinaryFileWriter : public Writer
   {
    public:
+    BinaryFileWriter(const fs::path &path);
     BinaryFileWriter(const std::string &path);
     ~BinaryFileWriter();
 
     /* Write data to file */
-    void write(std::string &, int&);
-    void write(std::string &, long&);
-    void write(std::string &, float&);
-    void write(std::string &, double&);
+    void write(std::string&, int&);
+    void write(std::string&, long&);
+    void write(std::string&, float&);
+    void write(std::string&, double&);
 
     // TODO
     // void write(const std::string &, const float&);
@@ -68,11 +70,10 @@ namespace proc {
     ~MQWriter() {};
 
     /* Save data to Message Queue */
-    void write(std::string &, int&);
-    void write(std::string &, long&);
-    /// TODO
-    void write(std::string &, float&) {};
-    void write(std::string &, double&) {};
+    void write(std::string&, int&);
+    void write(std::string&, long&);
+    void write(std::string&, float&);
+    void write(std::string&, double&);
 
    private:
     std::shared_ptr<Queue> mq_ = nullptr;
@@ -85,16 +86,15 @@ namespace proc {
   class OutputWriter : public Writer
   {
    public:
-    OutputWriter(const fs::path &);
-    OutputWriter(const std::string &);
+    OutputWriter(const fs::path&);
+    OutputWriter(const std::string&);
     ~OutputWriter();
 
     /* Write data to output file */
-    void write(std::string &, int&);
-    void write(std::string &, long&);
-    /// TODO
-    void write(std::string &, float&) {};
-    void write(std::string &, double&) {};
+    void write(std::string&, int&);
+    void write(std::string&, long&);
+    void write(std::string&, float&);
+    void write(std::string&, double&);
   
    private:
     std::ofstream fout_;

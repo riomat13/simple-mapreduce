@@ -1,30 +1,18 @@
 #include "simplemapreduce/proc/sorter.h"
 
 #include <array>
-#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "catch.hpp"
 
+#include "utils.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/proc/writer.h"
 
 using namespace mapreduce;
 using namespace mapreduce::proc;
-
-/**
- * Clear all content in a file with given path.
- * 
- *  @param path&  target file path to clear data
- */
-void clear_file(const fs::path &path)
-{
-  std::ifstream ifs;
-  ifs.open(path, std::istream::trunc);
-  ifs.close();
-}
 
 /**
  * Compare written items and items read from files.
@@ -52,9 +40,8 @@ void check_tuple_items(const Arrays &arr, const Map &map, const K &keywords)
 
 TEST_CASE("test_grouping_items", "[sorter]")
 {
-  /// Set up directory to store binary data
-  fs::path dirpath{"/tmp/test_smr"};
-  fs::create_directory(dirpath);
+  /// Tmp file to store data
+  fs::create_directory(testdir);
   fs::path fname{"0000-00000"};
 
   JobConf conf;
@@ -66,14 +53,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("long_values")
   {
-    clear_file(dirpath / fname);
+    clear_file(testdir / fname);
 
     /// Used for value check
     std::vector<std::array<long, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(dirpath / fname);
+      BinaryFileWriter writer(testdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -90,7 +77,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, long> sorter(dirpath, conf);
+    Sorter<std::string, long> sorter(testdir, conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
@@ -98,14 +85,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("int_values")
   {
-    clear_file(dirpath / fname);
+    clear_file(testdir / fname);
 
     /// Used for value check
     std::vector<std::array<int, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(dirpath / fname);
+      BinaryFileWriter writer(testdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -122,7 +109,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, int> sorter(dirpath, conf);
+    Sorter<std::string, int> sorter(testdir, conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
@@ -130,14 +117,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("float_values")
   {
-    clear_file(dirpath / fname);
+    clear_file(testdir / fname);
 
     /// Used for value check
     std::vector<std::array<float, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(dirpath / fname);
+      BinaryFileWriter writer(testdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -154,7 +141,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, float> sorter(dirpath, conf);
+    Sorter<std::string, float> sorter(testdir, conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
@@ -162,14 +149,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("double_values")
   {
-    clear_file(dirpath / fname);
+    clear_file(testdir / fname);
 
     /// Used for value check
     std::vector<std::array<double, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(dirpath / fname);
+      BinaryFileWriter writer(testdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -186,7 +173,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, double> sorter(dirpath, conf);
+    Sorter<std::string, double> sorter(testdir, conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);

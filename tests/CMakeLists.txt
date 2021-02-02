@@ -25,14 +25,17 @@ endif()
 set(TEST_NAME simplemr-tests)
 
 # set all test source files
-set(SIMPLEMR_TEST_SOURCES
+set(TEST_SOURCES
   main.cc
+  test_queue.cc
   test_sorter.cc
+  test_writer.cc
+  utils.cc
 )
 
 enable_testing()
 
-add_executable(${TEST_NAME} ${SIMPLEMR_TEST_SOURCES})
+add_executable(${TEST_NAME} ${TEST_SOURCES})
 if(TARGET simplemapreduce)
   target_link_libraries(${TEST_NAME} PRIVATE simplemapreduce)
 else()
