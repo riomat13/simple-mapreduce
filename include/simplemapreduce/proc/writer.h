@@ -24,8 +24,8 @@ namespace proc {
 
     virtual void write(std::string &, int&) = 0;
     virtual void write(std::string &, long&) = 0;
-    virtual void write(std::string &, float&) = delete;
-    virtual void write(std::string &, double&) = delete;
+    virtual void write(std::string &, float&) = 0;
+    virtual void write(std::string &, double&) = 0;
   };
 
   /**
@@ -43,6 +43,8 @@ namespace proc {
     /* Write data to file */
     void write(std::string &, int&);
     void write(std::string &, long&);
+    void write(std::string &, float&);
+    void write(std::string &, double&);
 
     // TODO
     // void write(const std::string &, const float&);
@@ -68,10 +70,9 @@ namespace proc {
     /* Save data to Message Queue */
     void write(std::string &, int&);
     void write(std::string &, long&);
-
-    // TODO
-    // void write(std::string &, float&);
-    // void write(std::string &, double&);
+    /// TODO
+    void write(std::string &, float&) {};
+    void write(std::string &, double&) {};
 
    private:
     std::shared_ptr<Queue> mq_ = nullptr;
@@ -91,6 +92,9 @@ namespace proc {
     /* Write data to output file */
     void write(std::string &, int&);
     void write(std::string &, long&);
+    /// TODO
+    void write(std::string &, float&) {};
+    void write(std::string &, double&) {};
   
    private:
     std::ofstream fout_;

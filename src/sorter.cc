@@ -11,24 +11,10 @@ namespace proc {
   template<>
   std::pair<std::string, int> FileLoader<std::string, int>::get_item()
   {
-    /// Load key data size
-    size_t key_size;
-    fin_.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
-
-    if (fin_.eof())
-    {
-      /// Return once reached end
-      return std::make_pair<std::string, int>("", 0);
-    }
-
-    /// Load key data
-    char keydata[key_size];
-    fin_.read(keydata, sizeof(char) * key_size);
-    std::string key(keydata, key_size);
-
-    /// Load value data
-    int value;
-    fin_.read(reinterpret_cast<char *>(&value), sizeof(int));
+    /// Load data
+    std::string key;
+    int value{0};
+    get_item_(key, value);
 
     return std::make_pair<std::string, int>(std::move(key), std::move(value));
   }
@@ -36,74 +22,64 @@ namespace proc {
   template<>
   std::pair<std::string, long> FileLoader<std::string, long>::get_item()
   {
-    /// Load key data size
-    size_t key_size;
-    fin_.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
-
-    if (fin_.eof())
-    {
-      /// Return once reached end
-      return std::make_pair<std::string, long>("", 0);
-    }
-
-    /// Load key data
-    char keydata[key_size];
-    fin_.read(keydata, sizeof(char) * key_size);
-    std::string key(keydata, key_size);
-
-    /// Load value data
-    int value;
-    fin_.read(reinterpret_cast<char *>(&value), sizeof(long));
+    /// Load data
+    std::string key;
+    long value{0};
+    get_item_(key, value);
 
     return std::make_pair<std::string, long>(std::move(key), std::move(value));
+  }
+
+  template<>
+  std::pair<std::string, float> FileLoader<std::string, float>::get_item()
+  {
+    /// Load data
+    std::string key;
+    float value{0.0};
+    get_item_(key, value);
+
+    return std::make_pair<std::string, float>(std::move(key), std::move(value));
+  }
+
+  template<>
+  std::pair<std::string, double> FileLoader<std::string, double>::get_item()
+  {
+    /// Load data
+    std::string key;
+    double value{0.0};
+    get_item_(key, value);
+
+    return std::make_pair<std::string, double>(std::move(key), std::move(value));
   }
 
   /* --------------------------------------------------
    *   Sorter
    * -------------------------------------------------- */
-  // TODO read data from file
-  // void Sorter<std::string, int>::run(std::map<std::string, std::vector<int>> &container)
   template<>
   std::map<std::string, std::vector<int>> Sorter<std::string, int>::run()
   {
-    std::map<std::string, std::vector<int>> container;
-
-    for (auto &loaders: loader_groups_)
-    {
-      for (auto &loader: loaders)
-      {
-        auto data = loader.get_item();
-
-        /// store values to vector of the associated key in map
-        while (!data.first.empty())
-        {
-          container[data.first].push_back(data.second);
-          data = loader.get_item();
-        }
-      }
-    }
+    kvmap container = run_();
     return container;
   }
 
   template<>
   std::map<std::string, std::vector<long>> Sorter<std::string, long>::run()
   {
-    std::map<std::string, std::vector<long>> container;
+    kvmap container = run_();
+    return container;
+  }
 
-    for (auto &loaders: loader_groups_)
-    {
-      for (auto &loader: loaders)
-      {
-        auto data = loader.get_item();
+  template<>
+  std::map<std::string, std::vector<float>> Sorter<std::string, float>::run()
+  {
+    kvmap container = run_();
+    return container;
+  }
 
-        /// store values to vector of the associated key in map
-        while (!data.first.empty())
-        {
-          container[data.first].push_back(data.second);
-          data = loader.get_item();
-        }
-      }
-    }
+  template<>
+  std::map<std::string, std::vector<double>> Sorter<std::string, double>::run()
+  {
+    kvmap container = run_();
     return container;
   }
 

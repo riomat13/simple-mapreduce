@@ -42,6 +42,30 @@ namespace proc {
     fout_.write(reinterpret_cast<char *>(&value), sizeof(long));
   }
 
+  void BinaryFileWriter::write(std::string &key, float &value)
+  {
+    std::lock_guard<std::mutex> lock(mr_mutex_);
+
+    /// Store string size and the chars
+    size_t data_size = key.size();
+    fout_.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
+    fout_.write(key.c_str(), key.size());
+    /// Store provided value
+    fout_.write(reinterpret_cast<char *>(&value), sizeof(float));
+  }
+
+  void BinaryFileWriter::write(std::string &key, double &value)
+  {
+    std::lock_guard<std::mutex> lock(mr_mutex_);
+
+    /// Store string size and the chars
+    size_t data_size = key.size();
+    fout_.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
+    fout_.write(key.c_str(), key.size());
+    /// Store provided value
+    fout_.write(reinterpret_cast<char *>(&value), sizeof(double));
+  }
+
   OutputWriter::OutputWriter(const std::string &path) {
     fout_.open(path);
   };

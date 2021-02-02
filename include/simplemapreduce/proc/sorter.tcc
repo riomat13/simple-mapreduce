@@ -29,6 +29,27 @@ namespace proc {
   }
 
   template <typename K, typename V>
+  void FileLoader<K, V>::get_item_(K &key, V &value)
+  {
+    /// Load key data size
+    size_t key_size;
+    fin_.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
+
+    if (fin_.eof())
+    {
+      return;
+    }
+
+    /// Load key data
+    char keydata[key_size];
+    fin_.read(keydata, sizeof(char) * key_size);
+    key = std::string(keydata, key_size);
+
+    /// Load value data
+    fin_.read(reinterpret_cast<char *>(&value), sizeof(V));
+  }
+
+  template <typename K, typename V>
   Sorter<K, V>::Sorter(const fs::path &dirpath, const JobConf &conf)
       : conf_(conf)
   {
@@ -68,6 +89,27 @@ namespace proc {
   Sorter<K, V>::Sorter(const std::string &dirpath, const JobConf &conf)
   {
     Sorter(fs::path(std::move(dirpath)), conf);
+  }
+
+  template <typename K, typename V>
+  std::map<K, std::vector<V>> Sorter<K, V>::run_()
+  {
+    kvmap container;
+    for (auto &loaders: loader_groups_)
+    {
+      for (auto &loader: loaders)
+      {
+        auto data = loader.get_item();
+
+        /// store values to vector of the associated key in map
+        while (!data.first.empty())
+        {
+          container[data.first].push_back(data.second);
+          data = loader.get_item();
+        }
+      }
+    }
+    return container;
   }
 
 } // namespace proc
