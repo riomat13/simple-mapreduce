@@ -46,7 +46,7 @@ The directory is structured as following.
 ## <a name="2-setup"></a>2 Setup
 ### 2.1 Install dependencies
 
-This needs to install `cmake`, `g++ (>=8)` and `mpi`.
+This needs to install `cmake`, `g++ (>=9)` and `mpi`.
 (In this project, `OPEN_MPI` is used.)
 
 If use `open-mpi`, run the following command,

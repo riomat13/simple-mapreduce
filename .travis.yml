@@ -1,0 +1,42 @@
+language: cpp
+compiler: g++
+sudo: required
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+    - os: linux
+      dist: bionic
+
+addopns:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake
+      - libopenmpi-dev
+      - openmpi-bin
+      - openmpi-common
+
+before_install:
+  - sudo apt-get -qq update
+  - test -n $CXX && unset CXX
+
+install:
+  - sudo apt-get install -y g++-9
+
+script:
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+  - cmake -DSIMPLEMR_BUILD_TEST=ON .
+  - make VERBOSE=1 -j
+  - ctest -VV
+
+branches:
+  only:
+    - dev
+    - master
+
+notifications:
+  email:
+    on_success: never
