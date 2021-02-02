@@ -124,7 +124,7 @@ TEST_CASE("MessageQueue with threads", "[mq][threads]")
 
   unsigned int sum = 0;
 
-  for (unsigned int i = 0; i < 10; ++i)
+  for (unsigned int i = 0; i < 2; ++i)
   {
     threads.emplace_back([&mq](int num){
       /// Each thread pushes a pair 10 times
