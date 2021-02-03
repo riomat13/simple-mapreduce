@@ -33,16 +33,14 @@ namespace mapreduce {
     writer_->write(key, value);
   }
 
-  void Context::write(std::string &, float &) const
+  void Context::write(std::string &key, float &value) const
   {
-    logger.error("Not implemented");
-    MPI_Abort(MPI_COMM_WORLD, 1);
+    writer_->write(key, value);
   }
 
-  void Context::write(std::string &, double &) const
+  void Context::write(std::string &key, double &value) const
   {
-    logger.error("Not implemented");
-    MPI_Abort(MPI_COMM_WORLD, 1);
+    writer_->write(key, value);
   }
 
 } // namespace mapreduce

@@ -27,6 +27,8 @@ set(TEST_NAME simplemr-tests)
 # set all test source files
 set(TEST_SOURCES
   main.cc
+  test_context.cc
+  test_fileformat.cc
   test_queue.cc
   test_sorter.cc
   test_writer.cc

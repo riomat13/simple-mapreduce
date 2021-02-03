@@ -23,7 +23,6 @@ namespace mapreduce {
     FileFormat &operator=(FileFormat &&rhs) = delete;
 
     /** Add directory path containing input files */
-    // TODO: can add multiple directories
     void add_input_path(const std::string &path) { input_paths_.push_back(std::move(path)); }
 
     /**
