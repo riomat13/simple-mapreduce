@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(SimpleMapReduce-tests LANGUAGES CXX)
 
+include(ProcessorCount)
+include(${PROJECT_SOURCE_DIR}/../cmake/utils.cmake)
+
 option(SIMPLEMR_TEST_VERBOSE "Test verbosity" OFF)
+option(SIMPLEMR_TEST_INTEGRATION "Integration testing" ON)
+
+set(LIBNAME simplemapreduce)
 
 # MPI
 find_package(MPI REQUIRED)
@@ -22,10 +28,11 @@ if(NOT MPI_CXX_STANDARD)
   set(MPI_CXX_COMPILER mpic++)
 endif()
 
-set(TEST_NAME simplemr-tests)
+# Unittests
+set(UTEST_NAME simplemr-utests)
 
 # set all test source files
-set(TEST_SOURCES
+set(UTEST_SOURCES
   main.cc
   test_context.cc
   test_fileformat.cc
@@ -38,16 +45,36 @@ set(TEST_SOURCES
 
 enable_testing()
 
-add_executable(${TEST_NAME} ${TEST_SOURCES})
-if(TARGET simplemapreduce)
-  target_link_libraries(${TEST_NAME} PRIVATE simplemapreduce)
-else()
-  target_link_libraries(${TEST_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/../build/libsimplemapreduce.so)
-endif()
-target_include_directories(${TEST_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/../include)
-target_link_libraries(${TEST_NAME} PRIVATE ${MPI_LIBRARIES})
+add_executable(${UTEST_NAME} ${UTEST_SOURCES})
+setup_test(${UTEST_NAME})
+
+# test verbosity
 if(SIMPLEMR_TEST_VERBOSE)
-  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} --success)
+  add_test(NAME ${UTEST_NAME} COMMAND ${UTEST_NAME} --success)
 else()
-  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+  add_test(NAME ${UTEST_NAME} COMMAND ${UTEST_NAME})
+endif()
+
+# Integration tests
+message(STATUS "Integration testing: ${SIMPLEMR_TEST_INTEGRATION}")
+if(SIMPLEMR_TEST_INTEGRATION)
+  ProcessorCount(N_PROC)
+  if(N_PROC LESS 2)
+    # check processor count and fail if not suffice to run integration tests
+    message(SEND_ERROR "Failed: Processor Count: ${N_PROC}")
+  else()
+    message(STATUS "Processor Count: ${N_PROC}")
+  endif()
+
+  set(ITEST_NAME simplemr-itests)
+
+  set(ITEST_SOURCES
+    main.cc
+    test_integration.cc
+    utils.cc
+  )
+
+  add_executable(${ITEST_NAME} ${ITEST_SOURCES})
+  setup_test(${ITEST_NAME})
+  add_test(NAME ${ITEST_NAME} COMMAND ${MPIEXEC} -np 2 ./${ITEST_NAME})
 endif()

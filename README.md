@@ -233,7 +233,7 @@ For testing, following two machines are used.
   - Ubuntu 20.04, Intel core i5-3550, 8GB RAM (Workers)
 
 For baseline, used the first machine, and for MapReduce version, machines are conencted with ethernet cables within the same LAN.
-The script used for baseline is `./baseline.cc`.
+The script used for baseline is `./baseline.cc` and compiled with `g++-9`.
 
 Additionally, made sure other processes were idle or ran few processes which would not affect performance checks.
 
@@ -250,12 +250,9 @@ so it can see benefit only when processing the large dataset both in terms of nu
 
 - Add configurations (mid)
 - Performance test with publicly available dataset (mid) (with details including source link)
-- Test with other compilers (e.g. clang++)
-- Testings(high)
-- Add more types to process (currently only string for keys and int,long for values) (mid)
 - Error handling (high)
 - Check performance by connecting more machines (high)
-- Able to add more mapper layers (mid)
+- Enable to add more mapper layers (mid)
 
 ## <a name="6-references"></a>6 References
 
