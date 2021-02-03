@@ -41,7 +41,7 @@ class TestReducer: public Reducer<std::string, int, std::string, int>
   }
 };
 
-TEST_CASE("Integrating_Test", "[job][mapreduce][integrate]")
+TEST_CASE("Integration_Test", "[job][mapreduce][integrate]")
 {
   fs::path input_dir = testdir / "test_job" / "inputs";
   fs::path output_dir = testdir / "test_job" / "outputs";
