@@ -222,11 +222,25 @@ and `value_type` accepts either `int` or `long`.
 
 ## <a name="4-performance"></a>4 Performance
 
-To check the performance, tested with simple word counting task described in "Execution example" section with small text dataset.
-The dataset is consisted of random texts with 12000 files (2000 original texts with copying), in total 16M words.
+To check the performance, tested with simple word counting task described in "Execution example" section with publicly available dataset.
+The dataset used in this performance testing is "Large Movie Review Dataset"[\[3\]](#ref3) ([link](https://ai.stanford.edu/~amaas/data/sentiment/))
+which consists of 25,000 files for training, 25,000 files for testing and 50,000 unlabeled files.
 
-The data size is in total 93.4 MB.
+The data size is in total 132.0 MB.
 
+### 4.1 Preprocessing
+
+In order to utilize parallel processing, merged several files into a file by following rules:
+
+  - make groups in each group(train/test) and each category(pos/neg/unsup)
+  - group files by the first letter (e.g. `1*.txt` will be group 1)
+
+In short, files in pos groups in train dataset starting with "5" is going to be `train_pos_5.txt`,
+therefore, some files has large size, and some are small such as starting with "0".
+
+Now, in total, there are 50 files (pos/neg/unsup in train and pos/neg in test with 10 files each).
+
+### 4.2 Environment
 For testing, following two machines are used.
 
   - Ubuntu 20.04, Intel Xeon E5-1620, 16GB RAM (Master, Workers)
@@ -237,21 +251,35 @@ The script used for baseline is `./baseline.cc` and compiled with `g++-9`.
 
 Additionally, made sure other processes were idle or ran few processes which would not affect performance checks.
 
-The result was shown in the following table.
+### 4.3 Result
+
+The performance is tested with original dataset (100K files) and preprocessed dataset (50 files, see section 4.1).
+
+The first table shows results from original dataset.
 
 | Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
 |--|--|--|
-|14.065 sec. | 5.275 sec. | 7.700 sec. |
+|23.733 sec. | 8.343 sec. | 9.562 sec. |
 
-If the datasize is small, the overhead of network connection is large,
-so it can see benefit only when processing the large dataset both in terms of number of files and the file sizes.
+and the following one is from preprocessed dataset.
+
+| Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
+|--|--|--|
+|22.295 sec. | 7.708 sec. | 6.166 sec. |
+
+The time in baseline becomes shorter after preprocessed,
+because the task have to open much less files than the original one.
+
+However, it still took relatively long time, whereas MapReduce versions took less time.
+
+When reading 100K files, it involves many network communications which are overhead for this process,
+so that running on 1 PC finished faster.
+
+Whereas with preprocessed files, it has less communications so that it becomes the fastest.
 
 ## <a name="5-todo"></a>5 TODO
 
 - Add configurations (mid)
-- Performance test with publicly available dataset (mid) (with details including source link)
-- Error handling (high)
-- Check performance by connecting more machines (high)
 - Enable to add more mapper layers (mid)
 
 ## <a name="6-references"></a>6 References
@@ -259,3 +287,5 @@ so it can see benefit only when processing the large dataset both in terms of nu
 <a name="ref1"></a>\[1\] Jeffrey Dean, Sanjay Ghemawat; MapReduce: Simplified Data Processing on Large Clusters; 2004
 
 <a name="ref2"></a>\[2\] Open-MPI website [[link](https://www.open-mpi.org/)]
+
+<a name="ref3"></a>\[3\] Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. (2011). Learning Word Vectors for Sentiment Analysis. The 49th Annual Meeting of the Association for Computational Linguistics (ACL 2011)
