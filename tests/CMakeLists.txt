@@ -30,6 +30,7 @@ set(TEST_SOURCES
   test_context.cc
   test_fileformat.cc
   test_queue.cc
+  test_shuffle.cc
   test_sorter.cc
   test_writer.cc
   utils.cc

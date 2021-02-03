@@ -35,10 +35,10 @@ namespace proc {
     ~Shuffle() {};
 
     /// Not use for copy/move and to avoid accidentaly pass objects
-    Shuffle(const Shuffle &rhs) = delete;
-    Shuffle &operator=(const Shuffle &rhs) = delete;
-    Shuffle(Shuffle &&rhs) = delete;
-    Shuffle &operator=(Shuffle &&rhs) = delete;
+    Shuffle(const Shuffle &) = delete;
+    Shuffle &operator=(const Shuffle &) = delete;
+    Shuffle(Shuffle &&) = delete;
+    Shuffle &operator=(Shuffle &&) = delete;
 
     /**
      * Run the shuffle process.
