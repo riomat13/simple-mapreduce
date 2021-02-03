@@ -45,14 +45,9 @@ TEST_CASE("FileFormat", "[file]")
 
     std::vector<std::string> paths = ffmt.get_input_file_paths();
 
-    /// Sort by file paths to make consistent
-    std::sort(targets.begin(), targets.end());
-    std::sort(paths.begin(), paths.end());
-
     /// Check two vectors contains the same paths
     REQUIRE(paths.size() == (dirs.size() * files.size()));
-    REQUIRE(paths.size() == targets.size());
-    REQUIRE(std::equal(paths.begin(), paths.end(), targets.begin()));
+    compare_vector(paths, targets);
 
     fs::remove_all(testdir);
   }
