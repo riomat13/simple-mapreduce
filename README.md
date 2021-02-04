@@ -30,7 +30,7 @@ The directory is structured as following.
 |   ├─ sourcelist.cmake  # put all source file used in the mapreduce task
 |   └─ word_count.cc     # example mapreduce task
 |
-├─ cmake/          # contains file(s) used for build
+├─ cmake/          # contains files used for build
 ├─ include/        # directory containing documents and related items
 ├─ inputs/         # directory to store input files to process
 ├─ outputs/        # directory to store processed output
@@ -55,7 +55,10 @@ If use `open-mpi`, run the following command,
 $ sudo apt install g++ cmake openmpi-bin openmpi-common libopenmpi-dev
 ```
 
+Optionally, you can use `libtbb-dev` on Ubuntu 20.04.
+
 If you use alternatives such as `MPICH`, check their website and install it manually.
+(tested on Ubuntu Docker container locally with `mpich-3.4.1`)
 
 ### 2.2 Network settings
 This project is run with 2 PCs to check performance. The result is described at [section4](#4-performance).
@@ -187,6 +190,10 @@ class SomeReducer : public Reducer<mapped_key_type,
   {
     /// do something
 
+    /// for summation or calculating mean
+    /// RESUCE_SUM() and REDUCE_MEAN() can be used respectively
+    /// See `app/word_count.cc` as an example
+
     /// output the result via context.write(output_key_type, output_value_type)
     context.write(key, value);  // this is for sending data
   }
@@ -246,7 +253,7 @@ For testing, following two machines are used.
   - Ubuntu 20.04, Intel Xeon E5-1620, 16GB RAM (Master, Workers)
   - Ubuntu 20.04, Intel core i5-3550, 8GB RAM (Workers)
 
-For baseline, used the first machine, and for MapReduce version, machines are conencted with ethernet cables within the same LAN.
+For baseline, used the first machine, and for MapReduce version, machines are conencted with ethernet cables through same switch.
 The script used for baseline is `./baseline.cc` and compiled with `g++-9`.
 
 Additionally, made sure other processes were idle or ran few processes which would not affect performance checks.
@@ -279,6 +286,7 @@ Whereas with preprocessed files, it has less communications so that it becomes t
 
 ## <a name="5-todo"></a>5 TODO
 
+- Add combiners(local reduce) (mid)
 - Add configurations (mid)
 - Enable to add more mapper layers (mid)
 

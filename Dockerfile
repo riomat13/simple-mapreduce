@@ -9,7 +9,8 @@ RUN apt-get update && apt-get upgrade -y \
     cmake \
     openmpi-bin \
     libopenmpi-dev \
-    openmpi-common
+    openmpi-common \
+    libtbb-dev
 
 WORKDIR /home/smruser
   
