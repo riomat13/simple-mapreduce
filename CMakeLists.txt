@@ -5,6 +5,10 @@ set(SIMPLEMR_VERSION 0.0.1)
 project(SimpleMapReduce VERSION ${SIMPLEMR_VERSION} LANGUAGES CXX)
 message(STATUS "Build SimpleMapReduce: v${SIMPLEMR_VERSION}")
 
+# library name
+set(libname simplemapreduce)
+
+# MPI setup
 find_package(MPI REQUIRED)
 if(MPI_FOUND)
   include_directories(SYSTEM ${MPI_INCLUDE_PATH})
@@ -45,20 +49,28 @@ option(SIMPLEMR_BUILD_APP "Build executable (./app)" OFF)
 #   Shared Library
 # ------------------------------------------------------------
 # grouping main task and package source files
-add_library(simplemapreduce SHARED "")
+add_library(${libname} SHARED "")
 include(${CMAKE_SOURCE_DIR}/cmake/sourcelist.cmake)
-target_include_directories(simplemapreduce
+target_include_directories(${libname}
   PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
 )
 
-target_compile_options(simplemapreduce
+# check tbb availability
+find_package(TBB QUIET)
+if(TBB_FOUND)
+  message(STATUS "Build with TBB")
+  target_compile_definitions(${libname} PRIVATE HAS_TBB)
+  target_link_libraries(${libname} PRIVATE tbb)
+endif()
+
+target_compile_options(${libname}
   PUBLIC
     $<$<CONFIG:Release>:-O3>
     $<$<CONFIG:Debug>:-O0 -g -Wall -Wextra>
     $<$<CONFIG:RelWithDebInfo>:-O3 -g>
 )
-target_compile_definitions(simplemapreduce
+target_compile_definitions(${libname}
   PUBLIC
     $<$<NOT:$<CONFIG:Debug>>:NDEBUG>
 )

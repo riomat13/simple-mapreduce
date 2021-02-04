@@ -14,4 +14,7 @@
 /// Set directory
 #include "simplemapreduce/ops/fileformat.h"
 
+/// Helper functions/macros
+#include "simplemapreduce/ops/func.h"
+
 #endif

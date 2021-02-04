@@ -87,15 +87,12 @@ void WordCountReducer::reduce(const std::string &key,
                               const std::vector<long> &values,
                               const mapreduce::Context &context)
 {
-  long count = 0;
+  std::string keyitem(key);
 
   /// Aggregate word count
-  /// (for shortcut, `count = values.size()` is suffice and faster
-  ///  since just `1` is assigned as value,
-  ///  but to show as an example of aggregation, leave the for-loop)
-  for (auto &val: values)
-    count += val;
+  /// values.size() should be faster since it is O(1),
+  /// but for reduce operation, use summation instead.
+  long count = REDUCE_SUM(values);
 
-  std::string keyitem(key);
   context.write(keyitem, count);
 }
