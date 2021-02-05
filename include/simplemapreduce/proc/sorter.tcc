@@ -50,8 +50,7 @@ namespace proc {
   }
 
   template <typename K, typename V>
-  Sorter<K, V>::Sorter(const fs::path &dirpath, const JobConf &conf)
-      : conf_(conf)
+  Sorter<K, V>::Sorter(const JobConf &conf) : conf_(conf)
   {
     /// Initialize file loader container
     loader_groups_ = std::vector<std::vector<FileLoader<K, V>>>(
@@ -59,7 +58,7 @@ namespace proc {
     );
 
     /// Parse directory to find files to be processed by this node
-    for (auto &path: fs::directory_iterator(dirpath))
+    for (auto &path: fs::directory_iterator(conf_.tmpdir))
     {
       /// Safe-guard. This should not be captured.
       if (!path.is_regular_file())
@@ -83,12 +82,6 @@ namespace proc {
       if ((file_id % conf.worker_size) == conf.worker_rank)
         loader_groups_[loader_index].emplace_back(path.path().string());
     }
-  }
-
-  template <typename K, typename V>
-  Sorter<K, V>::Sorter(const std::string &dirpath, const JobConf &conf)
-  {
-    Sorter(fs::path(std::move(dirpath)), conf);
   }
 
   template <typename K, typename V>

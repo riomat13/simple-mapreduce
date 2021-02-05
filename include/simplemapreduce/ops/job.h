@@ -187,9 +187,6 @@ namespace mapreduce {
     /// Worker flag to check if running
     unsigned int is_running{0};
 
-    /// Intermediate tmp directory name
-    fs::path tmpdir = "./_tmp";
-
     /// Job parameters
     JobConf conf_{};
 

@@ -307,4 +307,6 @@ TEST_CASE("OutputWriter", "[writer]")
       REQUIRE(v == value);
     }
   }
+
+  fs::remove_all(testdir);
 }

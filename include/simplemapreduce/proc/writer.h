@@ -48,10 +48,6 @@ namespace proc {
     void write(std::string&, float&);
     void write(std::string&, double&);
 
-    // TODO
-    // void write(const std::string &, const float&);
-    // void write(const std::string &, const double&);
-
     /* Return current set path */
     const std::string &get_path() { return path_; }
 

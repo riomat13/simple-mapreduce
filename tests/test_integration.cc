@@ -22,9 +22,9 @@ using namespace mapreduce;
 class TestMapper: public Mapper<std::string, long, std::string, int>
 {
  public:
-  void map(const std::string &input, const long&, const Context &context)
+  void map(const std::string &ikey, const long&, const Context &context)
   {
-    std::string key(input);
+    std::string key(ikey);
     int value = 1;
     context.write(key, value);
   }
@@ -46,61 +46,64 @@ TEST_CASE("Integration_Test", "[job][mapreduce][integrate]")
   fs::path input_dir = testdir / "test_job" / "inputs";
   fs::path output_dir = testdir / "test_job" / "outputs";
 
-  /// Setup MapReduce Job
   FileFormat ffmt;
-  Job<TestMapper, TestReducer> job;
-
   ffmt.add_input_path(input_dir);
   ffmt.set_output_path(output_dir);
-  job.set_file_format(ffmt);
 
-  /// Skip all warning/info/debug logs
-  job.set_config("log_level", 4);
-
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  /// Test only on root node
-  if (rank == 0)
+  SECTION("Job")
   {
-    /// Setup input files
-    fs::create_directories(input_dir);
+    /// Setup MapReduce Job
+    Job<TestMapper, TestReducer> job;
+    job.set_file_format(ffmt);
+    job.set_config("log_level", 4);
 
-    unsigned int count = 3;
-    std::vector<std::string> targets{"test", "example", "mapreduce"};
-    std::vector<std::string> res;
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    /// Write input data
-    for (unsigned int i = 0; i < count; ++i)
+    /// Test only on root node
+    if (rank == 0)
     {
-      std::ofstream ofs(input_dir / std::to_string(i));
-      ofs << targets[i];
-      ofs.close();
-    }
+      /// Setup input files
+      fs::create_directories(input_dir);
 
-    job.run();
+      unsigned int count = 3;
+      std::vector<std::string> targets{"test", "example", "mapreduce"};
+      std::vector<std::string> res;
 
-    /// Parse output data
-    for (auto &path: fs::directory_iterator(output_dir))
-    {
-      std::ifstream ifs(path.path());
-      std::string key, line;
-      int value;
-      while (std::getline(ifs, line))
+      /// Write input data
+      for (unsigned int i = 0; i < count; ++i)
       {
-        std::istringstream iss(line);
-        iss >> key >> value;
-        REQUIRE(value == 1);
-        res.push_back(std::move(key));
+        std::ofstream ofs(input_dir / std::to_string(i));
+        ofs << targets[i];
+        ofs.close();
       }
+
+      job.run();
+
+      /// Parse output data
+      for (auto &path: fs::directory_iterator(output_dir))
+      {
+        std::ifstream ifs(path.path());
+        std::string key, line;
+        int value;
+        while (std::getline(ifs, line))
+        {
+          std::istringstream iss(line);
+          iss >> key >> value;
+          REQUIRE(value == 1);
+          res.push_back(std::move(key));
+        }
+      }
+
+      /// Check the result
+      compare_vector(res, targets);
+
+      fs::remove_all(testdir);
+    } else {
+      /// For child nodes
+      job.run();
     }
-
-    /// Check the result
-    compare_vector(res, targets);
-
-    fs::remove_all(testdir);
-  } else {
-    /// For child nodes
-    job.run();
   }
+
+  fs::remove_all(testdir);
 }

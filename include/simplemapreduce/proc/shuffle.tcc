@@ -11,15 +11,11 @@ namespace mapreduce {
 namespace proc {
 
   template <typename K, typename V>
-  Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue<K, V>> mq,
-                         const std::string &outdir,
-                         const JobConf &conf)
+  Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue<K, V>> mq, const JobConf &conf)
       : conf_(conf), mq_(std::move(mq))
   {
     std::ostringstream oss_rank;
     oss_rank << std::setw(4) << std::setfill('0') << conf.worker_rank;
-
-    fs::path dirpath = outdir;
 
     for (int i = 0; i < conf.n_groups; ++i)
     {
@@ -29,7 +25,7 @@ namespace proc {
       fs::path filename = oss_rank.str() + "-" + oss_id.str();
 
       /// Set writer with the file defined above
-      fouts_.push_back(std::make_unique<BinaryFileWriter>((dirpath / filename).string()));
+      fouts_.push_back(std::make_unique<BinaryFileWriter>((conf_.tmpdir / filename).string()));
     }
   }
 

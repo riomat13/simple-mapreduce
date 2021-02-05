@@ -28,14 +28,12 @@ namespace proc {
      * Shuffle constructor
      * 
      *  @param MessageQueue<K, V>* Shared data cotainer to process
-     *  @param const string&       Directory path to store intermediate state files
      *  @param const JobConf&      Configuration set in Job class
      */
-    Shuffle(std::shared_ptr<MessageQueue<K, V>>, const std::string&, const JobConf&);
+    Shuffle(std::shared_ptr<MessageQueue<K, V>>, const JobConf&);
     ~Shuffle() {};
 
     /// Not use for copy/move and to avoid accidentaly pass objects
-    Shuffle(const Shuffle &) = delete;
     Shuffle &operator=(const Shuffle &) = delete;
     Shuffle(Shuffle &&) = delete;
     Shuffle &operator=(Shuffle &&) = delete;
@@ -49,7 +47,7 @@ namespace proc {
 
    private:
     /// Job configuration
-    JobConf conf_;
+    const JobConf &conf_;
 
     /// Hash function to group the intermediate states
     int hash(const std::string&);

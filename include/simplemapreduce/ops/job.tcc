@@ -56,6 +56,7 @@ namespace mapreduce {
 
     /// Initialize mapper instance and the context
     mapper_ = std::make_unique<Mapper>(Mapper());
+    mapper_->set_conf(conf_);
     auto mq_ = mapper_->get_mq();
 
     /// Initialize reducer instance and the context
@@ -116,13 +117,13 @@ namespace mapreduce {
   void Job<Mapper, Reducer>::setup_tmp_dir()
   {
     /// Clear all directory if exists
-    if (fs::exists(tmpdir))
+    if (fs::exists(conf_.tmpdir))
     {
-      for (const auto &p: fs::directory_iterator(tmpdir))
+      for (const auto &p: fs::directory_iterator(conf_.tmpdir))
         fs::remove_all(p);
     } else {
       /// create a new one if not exist
-      fs::create_directory(tmpdir);
+      fs::create_directory(conf_.tmpdir);
     }
   }
 
@@ -303,7 +304,7 @@ namespace mapreduce {
   template <class Mapper, class Reducer>
   void Job<Mapper, Reducer>::run_map_tasks()
   {
-    auto mapper_context = mapper_->create_context();
+    auto mapper_context = mapper_->get_context();
 
     while (true)
     {
@@ -337,7 +338,7 @@ namespace mapreduce {
 
       /// Read data from text file
       /// Start map task asynchronously
-      mapper_->map(std::move(input), 1, *(mapper_->create_context()));
+      mapper_->map(std::move(input), 1, *(mapper_->get_context()));
 
       /// Notify the map task is finished
       MPI_Send("\1", 1, MPI_CHAR, 0, TaskType::map_end, MPI_COMM_WORLD);
@@ -353,7 +354,7 @@ namespace mapreduce {
   template <class Mapper, class Reducer>
   void Job<Mapper, Reducer>::run_shuffle_tasks()
   {
-    auto shuffler = mapper_->create_shuffler(tmpdir, conf_);
+    auto shuffler = mapper_->get_shuffle();
     shuffler->run();
   }
 
@@ -361,7 +362,7 @@ namespace mapreduce {
   void Job<Mapper, Reducer>::run_reduce_tasks()
   {
     /// Clean up the target output directory
-    auto sorter = mapper_->create_sorter(tmpdir, conf_);
+    auto sorter = mapper_->get_sorter();
 
     /// Grouping by the keys and store in map<key_type, vector<value_type>>
     auto container = sorter->run();
@@ -387,7 +388,7 @@ namespace mapreduce {
 
       start_master_node(); 
 
-      fs::remove_all(tmpdir);
+      fs::remove_all(conf_.tmpdir);
       logger.info("[Master] Finished task");
     } else {
       run_child_tasks();

@@ -40,27 +40,27 @@ void check_tuple_items(const Arrays &arr, const Map &map, const K &keywords)
 
 TEST_CASE("test_grouping_items", "[sorter]")
 {
-  /// Tmp file to store data
-  fs::create_directory(testdir);
-  fs::path fname{"0000-00000"};
-
   JobConf conf;
   conf.n_groups = 1;
   conf.worker_rank = 0;
   conf.worker_size = 1;
+  conf.tmpdir = testdir / "test_sorter";
+
+  fs::create_directories(conf.tmpdir);
+  fs::path fname{"0000-00000"};
 
   std::vector<std::string> keywords{"test", "example", "sort"};
 
   SECTION("long_values")
   {
-    clear_file(testdir / fname);
+    clear_file(conf.tmpdir / fname);
 
     /// Used for value check
     std::vector<std::array<long, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(testdir / fname);
+      BinaryFileWriter writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -77,7 +77,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, long> sorter(testdir, conf);
+    Sorter<std::string, long> sorter(conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
@@ -85,14 +85,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("int_values")
   {
-    clear_file(testdir / fname);
+    clear_file(conf.tmpdir / fname);
 
     /// Used for value check
     std::vector<std::array<int, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(testdir / fname);
+      BinaryFileWriter writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -109,7 +109,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, int> sorter(testdir, conf);
+    Sorter<std::string, int> sorter(conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
@@ -117,14 +117,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("float_values")
   {
-    clear_file(testdir / fname);
+    clear_file(conf.tmpdir / fname);
 
     /// Used for value check
     std::vector<std::array<float, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(testdir / fname);
+      BinaryFileWriter writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -141,7 +141,7 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, float> sorter(testdir, conf);
+    Sorter<std::string, float> sorter(conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
@@ -149,14 +149,14 @@ TEST_CASE("test_grouping_items", "[sorter]")
 
   SECTION("double_values")
   {
-    clear_file(testdir / fname);
+    clear_file(conf.tmpdir / fname);
 
     /// Used for value check
     std::vector<std::array<double, 3>> values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(testdir / fname);
+      BinaryFileWriter writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keywords.size(); ++i)
       {
@@ -173,9 +173,11 @@ TEST_CASE("test_grouping_items", "[sorter]")
     }
 
     /// Run sort task and group by the keys
-    Sorter<std::string, double> sorter(testdir, conf);
+    Sorter<std::string, double> sorter(conf);
     auto res = sorter.run();
 
     check_tuple_items(values, res, keywords);
   }
+
+  fs::remove_all(testdir);
 }

@@ -80,11 +80,9 @@ namespace proc {
      * Constructor of Sorter class.
      * This is grouping items by keywords and pass to reducer.
      * 
-     * @param dirpath&  directory pass which stores target files to process
      * @param conf&     configuration of the job executing this sorter
      */
-    Sorter(const std::string &dirpath, const JobConf &conf);
-    Sorter(const fs::path &dirpath, const JobConf &conf);
+    Sorter(const JobConf &conf);
 
     /**
      * Execute sorting.

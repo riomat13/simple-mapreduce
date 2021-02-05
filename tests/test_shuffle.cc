@@ -77,15 +77,15 @@ void read_all_data(std::vector<fs::path> &files, std::vector<std::pair<std::stri
 
 TEST_CASE("Shuffle", "[shuffle]")
 {
-  fs::path outdir(testdir / "test_shuffle");
-  fs::create_directories(outdir);
+  JobConf conf;
+  conf.tmpdir = testdir / "test_shuffle";
+  fs::create_directories(conf.tmpdir);
 
   SECTION("string_int")
   {
     typedef MessageQueue<std::string, int> MQ;
     typedef std::pair<std::string, int> KV;
 
-    JobConf conf;
     conf.worker_rank = 0;
     conf.worker_size = 2;
     conf.n_groups = 5;  // this will be equivalent to a number of output files
@@ -95,7 +95,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     {
       std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, int> shuffle(mq, outdir.string(), conf);
+      Shuffle<std::string, int> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
       for (auto &data: dataset)
@@ -107,7 +107,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(outdir, bin_files);
+    extract_files(conf.tmpdir, bin_files);
 
     REQUIRE(bin_files.size() == conf.n_groups);
 
@@ -123,7 +123,6 @@ TEST_CASE("Shuffle", "[shuffle]")
     typedef MessageQueue<std::string, long> MQ;
     typedef std::pair<std::string, long> KV;
 
-    JobConf conf;
     conf.worker_rank = 1;
     conf.worker_size = 2;
     conf.n_groups = 4;  // this will be equivalent to a number of output files
@@ -133,7 +132,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     {
       std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, long> shuffle(mq, outdir.string(), conf);
+      Shuffle<std::string, long> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
       for (auto &data: dataset)
@@ -145,7 +144,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(outdir, bin_files);
+    extract_files(conf.tmpdir, bin_files);
 
     REQUIRE(bin_files.size() == conf.n_groups);
 
@@ -161,7 +160,6 @@ TEST_CASE("Shuffle", "[shuffle]")
     typedef MessageQueue<std::string, float> MQ;
     typedef std::pair<std::string, float> KV;
 
-    JobConf conf;
     conf.worker_rank = 3;
     conf.worker_size = 5;
     conf.n_groups = 3;  // this will be equivalent to a number of output files
@@ -171,7 +169,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     {
       std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, float> shuffle(mq, outdir.string(), conf);
+      Shuffle<std::string, float> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
       for (auto &data: dataset)
@@ -183,7 +181,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(outdir, bin_files);
+    extract_files(conf.tmpdir, bin_files);
 
     REQUIRE(bin_files.size() == conf.n_groups);
 
@@ -199,7 +197,6 @@ TEST_CASE("Shuffle", "[shuffle]")
     typedef MessageQueue<std::string, float> MQ;
     typedef std::pair<std::string, float> KV;
 
-    JobConf conf;
     conf.worker_rank = 0;
     conf.worker_size = 3;
     conf.n_groups = 2;  // this will be equivalent to a number of output files
@@ -209,7 +206,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     {
       std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, float> shuffle(mq, outdir.string(), conf);
+      Shuffle<std::string, float> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
       for (auto &data: dataset)
@@ -221,7 +218,7 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(outdir, bin_files);
+    extract_files(conf.tmpdir, bin_files);
 
     REQUIRE(bin_files.size() == conf.n_groups);
 
