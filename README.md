@@ -168,34 +168,43 @@ The structure is following:
 
 using namespace mapreduce;
 
-class SomeMapper : public Mapper<key_type, value_type>
+class SomeMapper : public Mapper<in_key_type,
+                                 in_value_type,
+                                 out_key_type,
+                                 out_value_type>
 {
  public:
-  void map(const std::string &input, const Context &context)
+  void map(const in_key_type &key, const in_value_type &value, const Context &context)
   {
+    out_key_type out_key;
+    out_value_type out_value;
+
     /// do something
 
-    /// output mapping via context.write(key_type, value_type)
-    context.write(key, value);  // this is for sending data
+    /// output mapping via context.write(out_key_type, out_value_type)
+    context.write(out_key, out_value);  // this is for sending data
   }
 
-class SomeReducer : public Reducer<mapped_key_type,
-                                   mapped_value_type,
-                                   output_key_type,
-                                   output_value_type>
+class SomeReducer : public Reducer<in_key_type,
+                                   in_value_type,
+                                   out_key_type,
+                                   out_value_type>
 {
  public:
-  void reduce(const std::string &key, const std::vector<long> &value,
+  void reduce(const in_key_type &key, const std::vector<int_value_type> &value,
               const Context &context)
   {
+    out_key_type out_key;
+    out_value_type out_value;
+
     /// do something
 
     /// for summation or calculating mean
     /// RESUCE_SUM() and REDUCE_MEAN() can be used respectively
     /// See `app/word_count.cc` as an example
 
-    /// output the result via context.write(output_key_type, output_value_type)
-    context.write(key, value);  // this is for sending data
+    /// output the result via context.write(out_key_type, out_value_type)
+    context.write(out_key, out_value);  // this is for sending data
   }
 }
 

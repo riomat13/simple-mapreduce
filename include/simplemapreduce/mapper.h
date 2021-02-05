@@ -20,13 +20,15 @@ using namespace mapreduce::proc;
 
 namespace mapreduce {
 
-  template <typename /* Output key data type */   K,
-            typename /* Output value data type */ V>
+  template <typename /* Input key data type */    IKeyType,
+            typename /* input value data type */  IValueType,
+            typename /* Output key data type */   OKeyType,
+            typename /* Output value data type */ OValueType>
   class Mapper
   {
    public:
 
-    typedef MessageQueue<K, V> MQ;
+    typedef MessageQueue<OKeyType, OValueType> MQ;
 
     Mapper() { mq_ = std::make_shared<MQ>(MQ()); }
     ~Mapper() {}
@@ -34,9 +36,11 @@ namespace mapreduce {
     /**
      * Mapper function
      * 
-     *  @param input
+     *  @param key&      Key data. If this is the first mapper, the input is file content
+     *  @param value&    Input value data. If this is the first mapper, the value is 1.
+     *  @param context&  Output data writer
      */
-    virtual void map(const std::string &input, const Context &context) = 0;
+    virtual void map(const IKeyType&, const IValueType&, const Context &) = 0;
 
     /**
      * Run before executing mapper.
@@ -68,8 +72,8 @@ namespace mapreduce {
      *  @param fs::path&
      *  @param std::string&
      */
-    std::unique_ptr<Shuffle<K, V>> create_shuffler(fs::path&, JobConf&);
-    std::unique_ptr<Shuffle<K, V>> create_shuffler(std::string&, JobConf&);
+    std::unique_ptr<Shuffle<OKeyType, OValueType>> create_shuffler(fs::path&, JobConf&);
+    std::unique_ptr<Shuffle<OKeyType, OValueType>> create_shuffler(std::string&, JobConf&);
 
     /**
      * Create a Sorter object for mapper
@@ -81,8 +85,8 @@ namespace mapreduce {
      *  @param fs::path&
      *  @param std::string&
      */
-    std::unique_ptr<Sorter<K, V>> create_sorter(fs::path&, JobConf&);
-    std::unique_ptr<Sorter<K, V>> create_sorter(std::string&, JobConf&);
+    std::unique_ptr<Sorter<OKeyType, OValueType>> create_sorter(fs::path&, JobConf&);
+    std::unique_ptr<Sorter<OKeyType, OValueType>> create_sorter(std::string&, JobConf&);
 
     /// MessageQueue to store data processed by mapper
     std::shared_ptr<MQ> mq_ = nullptr;

@@ -19,10 +19,10 @@ namespace fs = std::filesystem;
 
 using namespace mapreduce;
 
-class TestMapper: public Mapper<std::string, int>
+class TestMapper: public Mapper<std::string, long, std::string, int>
 {
  public:
-  void map(const std::string &input, const Context &context)
+  void map(const std::string &input, const long&, const Context &context)
   {
     std::string key(input);
     int value = 1;

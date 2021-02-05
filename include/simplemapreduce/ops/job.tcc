@@ -337,7 +337,7 @@ namespace mapreduce {
 
       /// Read data from text file
       /// Start map task asynchronously
-      mapper_->map(std::move(input), *(mapper_->create_context()));
+      mapper_->map(std::move(input), 1, *(mapper_->create_context()));
 
       /// Notify the map task is finished
       MPI_Send("\1", 1, MPI_CHAR, 0, TaskType::map_end, MPI_COMM_WORLD);

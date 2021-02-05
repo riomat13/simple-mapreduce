@@ -16,10 +16,10 @@
 // key words.
 //
 
-class WordCountMapper : public mapreduce::Mapper<std::string, long>
+class WordCountMapper : public mapreduce::Mapper<std::string, long, std::string, long>
 {
  public:
-  void map(const std::string &, const mapreduce::Context &);
+  void map(const std::string&, const long&, const mapreduce::Context&);
 };
 
 class WordCountReducer
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 /* --------------------------------------------------
  *   Implementation
  * -------------------------------------------------- */
-void WordCountMapper::map(const std::string &input, const mapreduce::Context &context)
+void WordCountMapper::map(const std::string &input, const long &, const mapreduce::Context &context)
 {
   std::string line;
   std::istringstream iss(input);
