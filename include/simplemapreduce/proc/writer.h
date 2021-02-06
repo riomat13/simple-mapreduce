@@ -82,6 +82,11 @@ namespace proc {
   class OutputWriter : public Writer
   {
    public:
+    /**
+     * Constructor
+     *
+     *  @param path& target file path to write data
+     */
     OutputWriter(const fs::path&);
     OutputWriter(const std::string&);
     ~OutputWriter();

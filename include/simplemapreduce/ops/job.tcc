@@ -61,6 +61,7 @@ namespace mapreduce {
 
     /// Initialize reducer instance and the context
     reducer_ = std::make_unique<Reducer>(Reducer());
+    reducer_->set_conf(conf_);
   }
 
   template <class Mapper, class Reducer>
@@ -199,7 +200,7 @@ namespace mapreduce {
   {
     logger.debug("[Master] Starting Map tasks");
 
-    /// Flag to check if a target node is currently used
+    /// Extract all files in input directories
     std::vector<std::string> paths = file_fmt_.get_input_file_paths();
 
     /// Temporary data container to receive data from child node
@@ -362,12 +363,12 @@ namespace mapreduce {
   void Job<Mapper, Reducer>::run_reduce_tasks()
   {
     /// Clean up the target output directory
-    auto sorter = mapper_->get_sorter();
+    auto sorter = reducer_->get_sorter();
 
     /// Grouping by the keys and store in map<key_type, vector<value_type>>
     auto container = sorter->run();
 
-    auto reduce_context = reducer_->create_context(get_output_file_path());
+    auto reduce_context = reducer_->get_context(get_output_file_path());
 
     for (auto it = container.begin(); it != container.end(); ++it)
     {

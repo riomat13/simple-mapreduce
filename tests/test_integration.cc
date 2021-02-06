@@ -80,6 +80,9 @@ TEST_CASE("Integration_Test", "[job][mapreduce][integrate]")
 
       job.run();
 
+      /// Check if output directory is created
+      REQUIRE(fs::is_directory(output_dir));
+
       /// Parse output data
       for (auto &path: fs::directory_iterator(output_dir))
       {

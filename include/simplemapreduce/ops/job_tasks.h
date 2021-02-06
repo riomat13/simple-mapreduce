@@ -13,8 +13,23 @@ using namespace mapreduce::proc;
 
 namespace mapreduce {
 
+class JobTask
+{
+ public:
+  /**
+   * Set configuration to create Shuffle and Sorter.
+   */
+  void set_conf(const JobConf &conf)
+  {
+    conf_ = conf;
+  }
+
+ protected:
+  JobConf conf_;
+};
+
 template <typename K, typename V>
-class MapperJob
+class MapperJob : public JobTask
 {
  public:
   typedef MessageQueue<K, V> MQ;
@@ -22,14 +37,6 @@ class MapperJob
   MapperJob()
   {
     mq_ = std::make_shared<MQ>(MQ());
-  }
-
-  /**
-   * Set configuration to create Shuffle and Sorter.
-   */
-  void set_conf(const JobConf &conf)
-  {
-    conf_ = conf;
   }
 
   /**
@@ -49,19 +56,9 @@ class MapperJob
     return std::make_unique<Shuffle<K, V>>(mq_, conf_);
   };
 
-  /**
-   * Get const Sorter instance.
-   */
-  std::unique_ptr<Sorter<K, V>> get_sorter()
-  { 
-    return std::make_unique<Sorter<K, V>>(conf_);
-  }
-  
  private:
   /// Used to create tasks with Mapper state
   template <class M, class R> friend class Job;
-
-  JobConf conf_;
 
   /**
    * Create a MessageQueue object for mapper
@@ -72,6 +69,36 @@ class MapperJob
   std::shared_ptr<MQ> mq_ = nullptr;
 
   std::unique_ptr<Shuffle<K, V>> shuffle_ = nullptr;
+};
+
+template <typename K, typename V>
+class ReduceJob : public JobTask
+{
+ public:
+
+  /**
+   * Create output data writer.
+   *
+   *  @param path& output file path
+   */
+  std::unique_ptr<Context> get_context(const std::string &path)
+  {
+    std::unique_ptr<OutputWriter> writer = std::make_unique<OutputWriter>(path);
+    return std::make_unique<Context>(std::move(writer));
+  }
+
+  /**
+   * Get const Sorter instance.
+   */
+  std::unique_ptr<Sorter<K, V>> get_sorter()
+  {
+    return std::make_unique<Sorter<K, V>>(conf_);
+  }
+
+ private:
+  /// Used to create tasks with Mapper state
+  template <class M, class R> friend class Job;
+
   std::unique_ptr<Sorter<K, V>> sorter_ = nullptr;
 };
 
