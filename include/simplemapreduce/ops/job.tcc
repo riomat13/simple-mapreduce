@@ -255,8 +255,8 @@ namespace mapreduce {
 
     /// Check all process have been finished
     char tmp;
-    for (int i = 1; i < conf_.mpi_size; ++i)
-      MPI_Irecv(&tmp, 1, MPI_CHAR, i, TaskType::reduce_end, MPI_COMM_WORLD, mpi_reqs.data());
+    for (int i = 0; i < conf_.worker_size; ++i)
+      MPI_Irecv(&tmp, 1, MPI_CHAR, i+1, TaskType::reduce_end, MPI_COMM_WORLD, &mpi_reqs[i]);
 
     /// Block until received all signals to finish tasks
     MPI_Waitall(mpi_reqs.size(), mpi_reqs.data(), mpi_worker_statuses.data());
