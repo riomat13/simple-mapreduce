@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,51 +21,45 @@ namespace proc {
    * Helper class to load data from intermediate state files
    */
   template <typename K, typename V>
-  class FileLoader
+  class FileDataLoader
   {
    public:
-    FileLoader(const std::string &path);
-    FileLoader(const fs::path &path);
-    ~FileLoader() { fin_.close(); };
+
+    FileDataLoader(const JobConf &conf);
+    // FileDataLoader(std::vector<fs::path> &path);
+    ~FileDataLoader()
+    {
+      if (fin_.is_open())
+        fin_.close();
+    }
 
     /// Copy is not allowed
-    FileLoader(const FileLoader &) = delete;
-    FileLoader &operator=(const FileLoader &) = delete;
+    FileDataLoader(const FileDataLoader &) = delete;
+    FileDataLoader &operator=(const FileDataLoader &) = delete;
 
-    FileLoader(FileLoader &&);
-    FileLoader &operator=(FileLoader &&) = delete;
+    FileDataLoader(FileDataLoader &&) = delete;
+    FileDataLoader &operator=(FileDataLoader &&) = delete;
 
     /**
      * Return key value pair item until read all data from a file.
      * Return nullptr when reached eof.
      */
     std::pair<K, V> get_item();
-
-    /**
-     * Get path this loader is opening.
-     */
-    fs::path &get_path() { return fpath_; }
    
    private:
 
     /**
-     * Helper function for get_item().
-     * This will read an one item pair (key, value),
-     * and assign to the references respectively.
-     * If reaches eof and no more data to read,
-     * return without modification.
-     * 
-     *  @param K& key
-     *  @param V& value
+     * Read key/value data from files.
      */
-     void get_item_(K &, V &);
+    void extract_target_files();
 
-    /// File read stream
+    /// Intermediate file directory
+    std::vector<fs::path> fpaths_;
+
     std::ifstream fin_;
 
-    /// File path being read
-    fs::path fpath_;
-
+    /// Job configuration
+    const JobConf &conf_;
   };
 
   /**
@@ -105,7 +100,7 @@ namespace proc {
     kvmap run_();
 
     /// File data loader
-    std::vector<std::vector<FileLoader<K, V>>> loader_groups_;
+    std::unique_ptr<FileDataLoader<K, V>> loader_ = nullptr;
 
     /// Configuration set by Job
     const JobConf &conf_;

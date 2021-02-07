@@ -1,71 +1,24 @@
-#include "simplemapreduce/util/log.h"
-
-using namespace mapreduce::util;
-
 namespace mapreduce {
 namespace proc {
 
-  /// Convert string to path and store as member variable
   template <typename K, typename V>
-  FileLoader<K, V>::FileLoader(const std::string &path)
-      : fpath_(fs::path(std::move(path)))
+  FileDataLoader<K, V>::FileDataLoader(const JobConf &conf) : conf_(conf)
   {
-    fin_.open(path, std::ios::binary);
+    extract_target_files();
+    fin_.open(fpaths_.back(), std::ios::binary);
+    fpaths_.pop_back();
   };
 
   template <typename K, typename V>
-  FileLoader<K, V>::FileLoader(const fs::path &path)
-      : fpath_(std::move(path))
+  void FileDataLoader<K, V>::extract_target_files()
   {
-    fin_.open(path, std::ios::binary);
-  };
-
-  /// Move constructor for passing to vector
-  template <typename K, typename V>
-  FileLoader<K, V>::FileLoader(FileLoader &&rhs)
-  {
-    this->fin_ = std::move(rhs.fin_);
-    this->fpath_ = std::move(rhs.fpath_);
-  }
-
-  template <typename K, typename V>
-  void FileLoader<K, V>::get_item_(K &key, V &value)
-  {
-    /// Load key data size
-    size_t key_size;
-    fin_.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
-
-    if (fin_.eof())
+    for (auto &p: fs::directory_iterator(conf_.tmpdir))
     {
-      return;
-    }
-
-    /// Load key data
-    char keydata[key_size];
-    fin_.read(keydata, sizeof(char) * key_size);
-    key = std::string(keydata, key_size);
-
-    /// Load value data
-    fin_.read(reinterpret_cast<char *>(&value), sizeof(V));
-  }
-
-  template <typename K, typename V>
-  Sorter<K, V>::Sorter(const JobConf &conf) : conf_(conf)
-  {
-    /// Initialize file loader container
-    loader_groups_ = std::vector<std::vector<FileLoader<K, V>>>(
-      (conf.n_groups + conf.worker_size - conf.worker_rank - 1) / conf.worker_size
-    );
-
-    /// Parse directory to find files to be processed by this node
-    for (auto &path: fs::directory_iterator(conf_.tmpdir))
-    {
-      /// Safe-guard. This should not be captured.
-      if (!path.is_regular_file())
+      if (!p.is_regular_file())
         continue;
 
       /// Get file id from file name
-      std::string fname = path.path().filename().string();
+      std::string fname = p.path().string();
 
       size_t idx = fname.find_last_of("-");
       
@@ -76,32 +29,68 @@ namespace proc {
       /// Get file id from file name "{worker_id}-{file_id}"
       int file_id = std::stoi(fname.substr(idx+1));
 
-      /// Find an index which the file will be assigned to store
-      int loader_index = file_id / conf.worker_size;
-
-      if ((file_id % conf.worker_size) == conf.worker_rank)
-        loader_groups_[loader_index].emplace_back(path.path().string());
+      if ((file_id % conf_.worker_size) == conf_.worker_rank)
+        fpaths_.push_back(std::move(p.path()));
     }
+  }
+
+  template <typename K, typename V>
+  std::pair<K, V> FileDataLoader<K, V>::get_item()
+  {
+    size_t key_size;
+    K key;
+    V value;
+
+    while (true)
+    {
+      /// Load key data size
+      fin_.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
+
+      if (fin_.eof())
+      {
+        fin_.close();
+        if (fpaths_.empty())
+          return std::make_pair(key, value);
+
+        fin_.open(fpaths_.back(), std::ios::binary);
+        fpaths_.pop_back();
+        continue;
+      }
+
+      break;
+    }
+
+    /// Load key data
+    char keydata[key_size];
+    fin_.read(keydata, sizeof(char) * key_size);
+    key = std::string(keydata, key_size);
+
+    /// Load value data
+    fin_.read(reinterpret_cast<char *>(&value), sizeof(V));
+
+    return std::make_pair(std::move(key), std::move(value));
+  }
+
+  template <typename K, typename V>
+  Sorter<K, V>::Sorter(const JobConf &conf)
+      : conf_(conf)
+  {
+    loader_ = std::make_unique<FileDataLoader<K, V>>(conf_);
   }
 
   template <typename K, typename V>
   std::map<K, std::vector<V>> Sorter<K, V>::run_()
   {
     kvmap container;
-    for (auto &loaders: loader_groups_)
-    {
-      for (auto &loader: loaders)
-      {
-        auto data = loader.get_item();
+    auto data = loader_->get_item();
 
-        /// store values to vector of the associated key in map
-        while (!data.first.empty())
-        {
-          container[data.first].push_back(data.second);
-          data = loader.get_item();
-        }
-      }
+    /// store values to vector of the associated key in map
+    while (!data.first.empty())
+    {
+      container[data.first].push_back(data.second);
+      data = loader_->get_item();
     }
+
     return container;
   }
 
