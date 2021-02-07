@@ -1,12 +1,18 @@
 #ifndef TESTS_UTILS_H_
 #define TESTS_UTILS_H_
 
+#include <algorithm>
 #include <filesystem>
+#include <map>
 #include <vector>
 
 #include "catch.hpp"
 
+#include "simplemapreduce/proc/loader.h"
+
 namespace fs = std::filesystem;
+
+using namespace mapreduce::proc;
 
 /// Directory to store all temporary files for testing
 extern fs::path testdir;
@@ -29,17 +35,59 @@ void clear_file(const fs::path &path);
 void extract_files(const fs::path&, std::vector<fs::path> &);
 
 /**
- * Compare two vectors.
- * This will sort both vectors and change the states,
- * so that if want to keep the order, pass by value.
+ * Compare map with key and values.
+ * Assumed all values in each containes are the same.
+ * Example: {"key1": {1, 2, 3}, "key2": {1, 2, 3}, ...}
+ *
+ *  @param input&   target map to evaluate
+ *  @param keys&    vectors storing keys
+ *  @param values&  vector of vectors storing values associated with keys
+ *  @param bool     return true if all items are matched without considering order
  */
-template <typename T>
-void compare_vector(std::vector<T> &a, std::vector<T> &b)
+template <class K, class V>
+bool check_map_items(std::map<K, std::vector<V>> &input,
+                     std::vector<K> &keys,
+                     std::vector<std::vector<V>> &values)
 {
-  REQUIRE(a.size() == b.size());
-  std::sort(a.begin(), a.end());
-  std::sort(b.begin(), b.end());
-  REQUIRE(std::equal(a.begin(), a.end(), b.begin()));
+  /// Check map holds same number of the keywords
+  if(input.size() != keys.size())
+    return false;
+
+  /// Compare each values in a keyword with mapped values
+  for (size_t i = 0; i < keys.size(); ++i)
+  {
+    auto item = input.find(keys[i]);
+
+    /// Check if two vectors containes the same items
+    if (item->second.size() != values[i].size()
+        || !std::is_permutation(item->second.begin(), item->second.end(), values[i].begin()))
+      return false;
+  }
+  return true;
 }
+
+template <typename K, typename V>
+class TestDataLoader : public DataLoader<K, V>
+{
+ public:
+  typedef std::pair<K, V> KV;
+
+  TestDataLoader(std::vector<KV> &input) : kv_items_(std::move(input))
+  {
+  };
+
+  KV get_item()
+  {
+    if (kv_items_.empty())
+      return std::make_pair(K(), V());
+
+    KV item = std::move(kv_items_.back());
+    kv_items_.pop_back();
+    return item;
+  }
+
+ private:
+  std::vector<KV> kv_items_;
+};
 
 #endif

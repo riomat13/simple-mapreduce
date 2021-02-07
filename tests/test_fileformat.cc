@@ -47,7 +47,7 @@ TEST_CASE("FileFormat", "[file]")
 
     /// Check two vectors contains the same paths
     REQUIRE(paths.size() == (dirs.size() * files.size()));
-    compare_vector(paths, targets);
+    REQUIRE_THAT(paths, Catch::Matchers::UnorderedEquals(targets));
 
     fs::remove_all(testdir);
   }

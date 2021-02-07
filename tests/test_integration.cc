@@ -99,7 +99,7 @@ TEST_CASE("Integration_Test", "[job][mapreduce][integrate]")
       }
 
       /// Check the result
-      compare_vector(res, targets);
+      REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
 
       fs::remove_all(testdir);
     } else {

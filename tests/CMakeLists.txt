@@ -37,6 +37,7 @@ set(UTEST_SOURCES
   test_context.cc
   test_fileformat.cc
   test_func.cc
+  test_loader.cc
   test_queue.cc
   test_shuffle.cc
   test_sorter.cc

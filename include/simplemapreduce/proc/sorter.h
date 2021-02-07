@@ -1,8 +1,6 @@
 #ifndef SIMPLEMAPREDUCE_PROC_SORTER_H_
 #define SIMPLEMAPREDUCE_PROC_SORTER_H_
 
-#include <filesystem>
-#include <fstream>
 #include <map>
 #include <memory>
 #include <string>
@@ -10,57 +8,11 @@
 #include <vector>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/proc/loader.h"
 #include "simplemapreduce/ops/conf.h"
-
-namespace fs = std::filesystem;
 
 namespace mapreduce {
 namespace proc {
-
-  /**
-   * Helper class to load data from intermediate state files
-   */
-  template <typename K, typename V>
-  class FileDataLoader
-  {
-   public:
-
-    FileDataLoader(const JobConf &conf);
-    // FileDataLoader(std::vector<fs::path> &path);
-    ~FileDataLoader()
-    {
-      if (fin_.is_open())
-        fin_.close();
-    }
-
-    /// Copy is not allowed
-    FileDataLoader(const FileDataLoader &) = delete;
-    FileDataLoader &operator=(const FileDataLoader &) = delete;
-
-    FileDataLoader(FileDataLoader &&) = delete;
-    FileDataLoader &operator=(FileDataLoader &&) = delete;
-
-    /**
-     * Return key value pair item until read all data from a file.
-     * Return nullptr when reached eof.
-     */
-    std::pair<K, V> get_item();
-   
-   private:
-
-    /**
-     * Read key/value data from files.
-     */
-    void extract_target_files();
-
-    /// Intermediate file directory
-    std::vector<fs::path> fpaths_;
-
-    std::ifstream fin_;
-
-    /// Job configuration
-    const JobConf &conf_;
-  };
 
   /**
    * Sort operating class
@@ -69,15 +21,15 @@ namespace proc {
   class Sorter
   {
    public:
-    typedef std::map<K, std::vector<V>> kvmap;
+    typedef std::map<K, std::vector<V>> KVMap;
 
     /**
      * Constructor of Sorter class.
      * This is grouping items by keywords and pass to reducer.
      * 
-     * @param conf&     configuration of the job executing this sorter
+     *  @param loader DataLoader unique pointer
      */
-    Sorter(const JobConf &conf);
+    Sorter(std::unique_ptr<DataLoader<K, V>> loader) : loader_(std::move(loader)) {}
 
     /**
      * Execute sorting.
@@ -86,24 +38,12 @@ namespace proc {
      * 
      *  @return map<K, std::vector<V>>&  map of vectors grouped by sorting process
      */
-    kvmap run();
+    KVMap run();
 
    private:
 
-    /**
-     * Helper function for run().
-     * This will store data to a map.
-     * The map will be returned to the caller by the run() function.
-     * 
-     *  @return map<K, std::vector<V>>&  target map to store data
-     */
-    kvmap run_();
-
     /// File data loader
-    std::unique_ptr<FileDataLoader<K, V>> loader_ = nullptr;
-
-    /// Configuration set by Job
-    const JobConf &conf_;
+    std::unique_ptr<DataLoader<K, V>> loader_;
   };
 
 } // namespace proc

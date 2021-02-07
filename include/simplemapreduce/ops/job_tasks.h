@@ -5,6 +5,7 @@
 
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/job.h"
+#include "simplemapreduce/proc/loader.h"
 #include "simplemapreduce/proc/shuffle.h"
 #include "simplemapreduce/proc/sorter.h"
 #include "simplemapreduce/proc/writer.h"
@@ -92,7 +93,8 @@ class ReduceJob : public JobTask
    */
   std::unique_ptr<Sorter<K, V>> get_sorter()
   {
-    return std::make_unique<Sorter<K, V>>(conf_);
+    std::unique_ptr<DataLoader<K, V>> loader = std::make_unique<BinaryFileDataLoader<K, V>>(conf_);
+    return std::make_unique<Sorter<K, V>>(std::move(loader));
   }
 
  private:

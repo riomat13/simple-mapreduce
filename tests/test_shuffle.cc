@@ -63,7 +63,7 @@ class BinFileReader
  * Read data from given binary files.
  * 
  *  @param files&       target files to read
- *  @param container&   vector to store key/value pair read from files
+ *  @param container&   vector to store key-value pair read from files
  */
 template <typename T>
 void read_all_data(std::vector<fs::path> &files, std::vector<std::pair<std::string, T>> &container)
@@ -90,7 +90,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     conf.worker_size = 2;
     conf.n_groups = 5;  // this will be equivalent to a number of output files
 
-    /// Target key/value dataset
+    /// Target key-value dataset
     std::vector<KV> dataset{{"test", 10}, {"test", -1234}, {"example", 5000}, {"example", -76543}};
 
     {
@@ -115,7 +115,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     read_all_data(bin_files, kv_items);
 
     /// Check original data and stored data are the same
-    compare_vector(kv_items, dataset);
+    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
   SECTION("string_long")
@@ -127,7 +127,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     conf.worker_size = 2;
     conf.n_groups = 4;  // this will be equivalent to a number of output files
 
-    /// Target key/value dataset
+    /// Target key-value dataset
     std::vector<KV> dataset{{"test", 1987654321}, {"test", -1234567890}, {"example", 50005000}, {"example", -76543}};
 
     {
@@ -152,7 +152,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     read_all_data(bin_files, kv_items);
 
     /// Check original data and stored data are the same
-    compare_vector(kv_items, dataset);
+    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
   SECTION("string_float")
@@ -164,7 +164,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     conf.worker_size = 5;
     conf.n_groups = 3;  // this will be equivalent to a number of output files
 
-    /// Target key/value dataset
+    /// Target key-value dataset
     std::vector<KV> dataset{{"test", 1.2345}, {"test", -5.4321}, {"example", 102.5987}, {"example", -980.7628}};
 
     {
@@ -189,7 +189,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     read_all_data(bin_files, kv_items);
 
     /// Check original data and stored data are the same
-    compare_vector(kv_items, dataset);
+    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
   SECTION("string_double")
@@ -201,7 +201,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     conf.worker_size = 3;
     conf.n_groups = 2;  // this will be equivalent to a number of output files
 
-    /// Target key/value dataset
+    /// Target key-value dataset
     std::vector<KV> dataset{{"test", 1.23456789012345}, {"test", -5.43210987654321}, {"example", 50987.5987}, {"example", -22902.1023072}};
 
     {
@@ -226,7 +226,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     read_all_data(bin_files, kv_items);
 
     /// Check original data and stored data are the same
-    compare_vector(kv_items, dataset);
+    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
   fs::remove_all(testdir);
