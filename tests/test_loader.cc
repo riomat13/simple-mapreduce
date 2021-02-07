@@ -9,10 +9,14 @@
 #include "catch.hpp"
 
 #include "utils.h"
+#include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/proc/writer.h"
+#include "simplemapreduce/util/validator.h"
 
+using namespace mapreduce::data;
 using namespace mapreduce::proc;
+using namespace mapreduce::util;
 
 TEST_CASE("DataLoader", "[data_loader]")
 {
@@ -200,4 +204,71 @@ TEST_CASE("FileDataLoader", "[data_loader][binary]")
   }
 
   fs::remove_all(testdir);
+}
+
+TEST_CASE("MQDataLoader", "[data_loader][mq]")
+{
+  SECTION("string_int")
+  {
+    typedef std::pair<std::string, int> KV;
+    typedef MessageQueue<std::string, int> MQ;
+
+    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
+
+    std::vector<KV> targets{
+      {"test", 10},
+      {"example", -5},
+      {"test", 20}
+    };
+
+    for (auto &kv: targets)
+      mq->send(std::pair(kv));
+
+    mq->end();
+
+    std::unique_ptr<DataLoader<std::string, int>> loader =
+        std::make_unique<MQDataLoader<std::string, int>>(mq);
+
+    /// Get all data from loader
+    std::vector<KV> res;
+    KV data = loader->get_item();
+    while (is_valid_data(data.first))
+    {
+      res.push_back(std::move(data));
+      data = loader->get_item();
+    }
+
+    /// Check if original data and data got from loader are the same
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
+  }
+
+  SECTION("string_long")
+  {
+    typedef std::pair<std::string, long> KV;
+    typedef MessageQueue<std::string, long> MQ;
+
+    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
+
+    std::vector<KV> targets{
+      {"test", 1357902468},
+      {"example", -54019283},
+    };
+
+    for (auto &kv: targets)
+      mq->send(std::pair(kv));
+
+    mq->end();
+
+    std::unique_ptr<DataLoader<std::string, long>> loader =
+        std::make_unique<MQDataLoader<std::string, long>>(mq);
+
+    /// Get all data from loader
+    std::vector<KV> res;
+    KV data;
+    while (is_valid_data<std::string>((data = loader->get_item()).first))
+      res.push_back(std::move(data));
+
+    /// Check if original data and data got from loader are the same
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
+  }
 }

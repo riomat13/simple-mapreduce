@@ -3,14 +3,17 @@
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <utility>
 #include <vector>
 
+#include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/conf.h"
 
 namespace fs = std::filesystem;
 
 using namespace mapreduce;
+using namespace mapreduce::data;
 
 namespace mapreduce {
 namespace proc {
@@ -41,16 +44,15 @@ namespace proc {
         fin_.close();
     }
 
-    /// Copy is not allowed
+    /// Copy/Move are not allowed
     BinaryFileDataLoader(const BinaryFileDataLoader &) = delete;
     BinaryFileDataLoader &operator=(const BinaryFileDataLoader &) = delete;
-
     BinaryFileDataLoader(BinaryFileDataLoader &&) = delete;
     BinaryFileDataLoader &operator=(BinaryFileDataLoader &&) = delete;
 
     /**
      * Return key-value pair item until read all data from a file.
-     * Return nullptr when reached eof.
+     * Once finished reading, return with invalid key.
      */
     std::pair<K, V> get_item();
    
@@ -68,6 +70,28 @@ namespace proc {
 
     /// Job configuration
     const JobConf &conf_;
+  };
+
+  template <typename K, typename V>
+  class MQDataLoader : public DataLoader<K, V>
+  {
+   public:
+    MQDataLoader(std::shared_ptr<MessageQueue<K, V>> mq) : mq_(mq) {}
+
+    /// Copy/Move are not allowed
+    MQDataLoader(const MQDataLoader &) = delete;
+    MQDataLoader &operator=(const MQDataLoader &) = delete;
+    MQDataLoader(MQDataLoader &&) = delete;
+    MQDataLoader &operator=(MQDataLoader &&) = delete;
+
+    /**
+     * Return key-value pair item from MessageQueue.
+     * Once fetched all data, return with invalid key.
+     */
+    std::pair<K, V> get_item();
+
+   private:
+    std::shared_ptr<MessageQueue<K, V>> mq_;
   };
 
 } // namespace proc

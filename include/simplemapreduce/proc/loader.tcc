@@ -71,5 +71,13 @@ namespace proc {
     return std::make_pair(std::move(key), std::move(value));
   }
 
+  template <typename K, typename V>
+  std::pair<K, V> MQDataLoader<K, V>::get_item()
+  {
+    /// Fetch data from MessageQueue
+    /// A key of last element will be invalid. (e.g. empty for string)
+    return mq_->receive();
+  }
+
 } // namespace proc
 } // namespace mapreduce
