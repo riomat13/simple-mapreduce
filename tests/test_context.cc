@@ -13,7 +13,7 @@ using namespace mapreduce;
 using namespace mapreduce::proc;
 
 template <typename K, typename V>
-class TestWriter : public Writer
+class TestWriter : public Writer<K, V>
 {
  public:
   typedef std::pair<K, V> KV;
@@ -53,7 +53,7 @@ TEST_CASE("Context", "[context]")
     std::vector<KV> vec;
     std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
 
-    Context context(std::move(writer));
+    Context<std::string, int> context(std::move(writer));
     std::string key{"test"};
 
     std::vector<int> values{1022, 345, -950, 0, 5578};
@@ -80,7 +80,7 @@ TEST_CASE("Context", "[context]")
     std::vector<KV> vec;
     std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
 
-    Context context(std::move(writer));
+    Context<std::string, long> context(std::move(writer));
     std::string key{"test"};
 
     std::vector<long> values{1234567890, -1234567890, 0, 3531509, -6911024};
@@ -107,7 +107,7 @@ TEST_CASE("Context", "[context]")
     std::vector<KV> vec;
     std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
 
-    Context context(std::move(writer));
+    Context<std::string, float> context(std::move(writer));
     std::string key{"test"};
 
     std::vector<float> values{1022.844, 345.2, -950.45, 0, 5578.029};
@@ -134,7 +134,7 @@ TEST_CASE("Context", "[context]")
     std::vector<KV> vec;
     std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
 
-    Context context(std::move(writer));
+    Context<std::string, double> context(std::move(writer));
     std::string key{"test"};
 
     std::vector<double> values{0.123456789012345, -0.123456789012345, 140.98710222, 35315.0000913, -6911024.2345};

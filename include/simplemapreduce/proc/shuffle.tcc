@@ -25,7 +25,7 @@ namespace proc {
       fs::path filename = oss_rank.str() + "-" + oss_id.str();
 
       /// Set writer with the file defined above
-      fouts_.push_back(std::make_unique<BinaryFileWriter>((conf_.tmpdir / filename).string()));
+      fouts_.push_back(std::make_unique<BinaryFileWriter<K, V>>((conf_.tmpdir / filename).string()));
     }
   }
 

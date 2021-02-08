@@ -174,7 +174,7 @@ class SomeMapper : public Mapper<in_key_type,
                                  out_value_type>
 {
  public:
-  void map(const in_key_type &key, const in_value_type &value, const Context &context)
+  void map(const in_key_type &key, const in_value_type &value, const Context<out_key_type, out_value_type> &context)
   {
     out_key_type out_key;
     out_value_type out_value;
@@ -191,8 +191,8 @@ class SomeReducer : public Reducer<in_key_type,
                                    out_value_type>
 {
  public:
-  void reduce(const in_key_type &key, const std::vector<int_value_type> &value,
-              const Context &context)
+  void reduce(const in_key_type &key, const std::vector<in_value_type> &value,
+              const Context<out_key_type, out_value_type> &context)
   {
     out_key_type out_key;
     out_value_type out_value;
@@ -297,7 +297,6 @@ Whereas with preprocessed files, it has less communications so that it becomes t
 
 - Add combiners(local reduce) (mid)
 - Add configurations (mid)
-- Enable to add more mapper layers (mid)
 
 ## <a name="6-references"></a>6 References
 

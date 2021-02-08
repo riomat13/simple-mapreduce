@@ -93,7 +93,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
   {
     int val = 1;
     {
-      BinaryFileWriter writer(testdir / fpath);
+      BinaryFileWriter<std::string, int> writer(testdir / fpath);
       std::string kw(key);
       writer.write(kw, val);
     }
@@ -108,7 +108,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
   {
     long val = 1234567890;
     {
-      BinaryFileWriter writer(testdir / fpath);
+      BinaryFileWriter<std::string, long> writer(testdir / fpath);
       std::string kw(key);
       writer.write(kw, val);
     }
@@ -123,7 +123,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
   {
     float val = 0.1;
     {
-      BinaryFileWriter writer(testdir / fpath);
+      BinaryFileWriter<std::string, float> writer(testdir / fpath);
       std::string kw(key);
       writer.write(kw, val);
     }
@@ -138,7 +138,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
   {
     double val = 1.23456789;
     {
-      BinaryFileWriter writer(testdir / fpath);
+      BinaryFileWriter<std::string, double> writer(testdir / fpath);
       std::string kw(key);
       writer.write(kw, val);
     }
@@ -221,7 +221,7 @@ TEST_CASE("OutputWriter", "[writer]")
     int value = 1;
 
     {
-      OutputWriter writer(testdir / fname);
+      OutputWriter<std::string, int> writer(testdir / fname);
       std::string key_(key);
       writer.write(key_, value);
     }
@@ -244,7 +244,7 @@ TEST_CASE("OutputWriter", "[writer]")
     long value = 1234567890;
 
     {
-      OutputWriter writer(testdir / fname);
+      OutputWriter<std::string, long> writer(testdir / fname);
       std::string key_(key);
       writer.write(key_, value);
     }
@@ -267,7 +267,7 @@ TEST_CASE("OutputWriter", "[writer]")
     float value = 0.9;
 
     {
-      OutputWriter writer(testdir / fname);
+      OutputWriter<std::string, float> writer(testdir / fname);
       std::string key_(key);
       writer.write(key_, value);
     }
@@ -290,7 +290,7 @@ TEST_CASE("OutputWriter", "[writer]")
     double value = 10.123456789012345;
 
     {
-      OutputWriter writer(testdir / fname);
+      OutputWriter<std::string, double> writer(testdir / fname);
       std::string key_(key);
       writer.write(key_, value);
     }

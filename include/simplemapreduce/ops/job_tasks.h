@@ -43,10 +43,10 @@ class MapperJob : public JobTask
   /**
    * Get const Context data writer.
    */
-  std::unique_ptr<Context> get_context()
+  std::unique_ptr<Context<K, V>> get_context()
   {
     std::unique_ptr<MQWriter<K, V>> writer = std::make_unique<MQWriter<K, V>>(mq_);
-    return std::make_unique<Context>(std::move(writer));
+    return std::make_unique<Context<K, V>>(std::move(writer));
   }
 
   /**
@@ -82,10 +82,10 @@ class ReduceJob : public JobTask
    *
    *  @param path& output file path
    */
-  std::unique_ptr<Context> get_context(const std::string &path)
+  std::unique_ptr<Context<K, V>> get_context(const std::string &path)
   {
-    std::unique_ptr<OutputWriter> writer = std::make_unique<OutputWriter>(path);
-    return std::make_unique<Context>(std::move(writer));
+    std::unique_ptr<OutputWriter<K, V>> writer = std::make_unique<OutputWriter<K, V>>(path);
+    return std::make_unique<Context<K, V>>(std::move(writer));
   }
 
   /**

@@ -56,7 +56,7 @@ namespace proc {
     std::shared_ptr<MessageQueue<K, V>> mq_ = nullptr;
 
     /// BinaryFileWriter for each grouping after shuffled
-    std::vector<std::unique_ptr<BinaryFileWriter>> fouts_;
+    std::vector<std::unique_ptr<BinaryFileWriter<K, V>>> fouts_;
   };
 
 } // namespace proc

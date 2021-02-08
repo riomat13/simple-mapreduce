@@ -15,10 +15,11 @@ namespace mapreduce {
   /**
    * Write key and value items to send through network
    */
+  template <typename K, typename V>
   class Context
   {
    public:
-    Context(std::unique_ptr<Writer> writer) : writer_(std::move(writer)) {}
+    Context(std::unique_ptr<Writer<K, V>> writer) : writer_(std::move(writer)) {}
 
     Context(const Context&) = delete;
     Context &operator=(const Context&) = delete;
@@ -32,16 +33,14 @@ namespace mapreduce {
      *  @param key&   key item to be written
      *  @param value& value item to be written
      */
-    /// TODO: add patterns
-    void write(std::string &key, int &value) const ;
-    void write(std::string &key, long &value) const ;
-    void write(std::string &key, float &value) const ;
-    void write(std::string &key, double &value) const ;
+    void write(K &key, V &value) const ;
 
    private:
-    std::unique_ptr<Writer> writer_ = nullptr;
+    std::unique_ptr<Writer<K, V>> writer_ = nullptr;
   };
 
 } // namespace mapreduce
+
+#include "simplemapreduce/ops/context.tcc"
 
 #endif

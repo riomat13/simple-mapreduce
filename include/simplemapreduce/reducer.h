@@ -29,13 +29,13 @@ namespace mapreduce {
      *  @param value[]  Input mapped value
      *  @param context& Context used for sending data
      */
-    virtual void reduce(const IKeyType&, const std::vector<IValueType>&, const Context&) = 0;
+    virtual void reduce(const IKeyType&, const std::vector<IValueType>&, const Context<OKeyType, OValueType>&) = 0;
 
     /**
      * Run before executing reduce
      * Override this if need to configure. 
      */
-    void setup(Context &context) {};
+    void setup(Context<OKeyType, OValueType>&context) {};
 
    private:
     /// Used to create tasks with Mapper state

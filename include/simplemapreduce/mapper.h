@@ -31,13 +31,13 @@ class Mapper : private MapperJob<OKeyType, OValueType>
    *  @param value&    Input value data. If this is the first mapper, the value is 1.
    *  @param context&  Output data writer
    */
-  virtual void map(const IKeyType&, const IValueType&, const Context &) = 0;
+  virtual void map(const IKeyType&, const IValueType&, const Context<OKeyType, OValueType>&) = 0;
 
   /**
    * Run before executing mapper.
    * Override this if need to configure.
    */
-  void setup(Context &context) {};
+  void setup(Context<OKeyType, OValueType>&context) {};
 
  private:
   /// Used to create tasks with Mapper state

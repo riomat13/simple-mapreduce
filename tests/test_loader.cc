@@ -59,7 +59,7 @@ TEST_CASE("FileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(conf.tmpdir / fname);
+      BinaryFileWriter<std::string, int> writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keys.size(); ++i)
       {
@@ -98,7 +98,7 @@ TEST_CASE("FileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(conf.tmpdir / fname);
+      BinaryFileWriter<std::string, long> writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keys.size(); ++i)
       {
@@ -136,7 +136,7 @@ TEST_CASE("FileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(conf.tmpdir / fname);
+      BinaryFileWriter<std::string, float> writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keys.size(); ++i)
       {
@@ -174,7 +174,7 @@ TEST_CASE("FileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter writer(conf.tmpdir / fname);
+      BinaryFileWriter<std::string, double> writer(conf.tmpdir / fname);
 
       for (size_t i = 0; i < keys.size(); ++i)
       {

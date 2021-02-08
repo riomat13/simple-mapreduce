@@ -22,7 +22,7 @@ using namespace mapreduce;
 class TestMapper: public Mapper<std::string, long, std::string, int>
 {
  public:
-  void map(const std::string &ikey, const long&, const Context &context)
+  void map(const std::string &ikey, const long&, const Context<std::string, int> &context)
   {
     std::string key(ikey);
     int value = 1;
@@ -33,7 +33,7 @@ class TestMapper: public Mapper<std::string, long, std::string, int>
 class TestReducer: public Reducer<std::string, int, std::string, int>
 {
  public:
-  void reduce(const std::string& ikey, const std::vector<int> &ivalues, const Context &context)
+  void reduce(const std::string& ikey, const std::vector<int> &ivalues, const Context<std::string, int> &context)
   {
     std::string key(ikey);
     int value = ivalues.size();

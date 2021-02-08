@@ -17,16 +17,32 @@ using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
+  /**
+   * Read data from binary.
+   *
+   *  @param filestream&  target file stream to write data
+   *  @param data&        data to be stored the read data
+   */
+  template <typename T>
+  void write_binary(std::ofstream&, T&);
+
+  /**
+   * Format value to output.
+   *
+   *  @param filestream&  target file stream to write data
+   *  @param data& data to be stored the read data
+   */
+  template <typename T>
+  void write_output(std::ofstream&, T&);
+
   /** Base class to write data used by context. */
+  template <typename K, typename V>
   class Writer
   {
    public:
     virtual ~Writer() = default;
 
-    virtual void write(std::string&, int&) = 0;
-    virtual void write(std::string&, long&) = 0;
-    virtual void write(std::string&, float&) = 0;
-    virtual void write(std::string&, double&) = 0;
+    virtual void write(K&, V&) = 0;
   };
 
   /**
@@ -35,7 +51,8 @@ namespace proc {
    * 
    * This is for RAII to handle long opened file descriptor.
    */
-  class BinaryFileWriter : public Writer
+  template <typename K, typename V>
+  class BinaryFileWriter : public Writer<K, V>
   {
    public:
     BinaryFileWriter(const fs::path &path);
@@ -43,10 +60,7 @@ namespace proc {
     ~BinaryFileWriter();
 
     /* Write data to file */
-    void write(std::string&, int&);
-    void write(std::string&, long&);
-    void write(std::string&, float&);
-    void write(std::string&, double&);
+    void write(K&, V&);
 
     /* Return current set path */
     const std::string &get_path() { return path_; }
@@ -57,7 +71,7 @@ namespace proc {
   };
 
   template <typename K, typename V>
-  class MQWriter : public Writer
+  class MQWriter : public Writer<K, V>
   {
    public:
     typedef MessageQueue<K, V> Queue;
@@ -66,10 +80,7 @@ namespace proc {
     ~MQWriter() {};
 
     /* Save data to Message Queue */
-    void write(std::string&, int&);
-    void write(std::string&, long&);
-    void write(std::string&, float&);
-    void write(std::string&, double&);
+    void write(K&, V&);
 
    private:
     std::shared_ptr<Queue> mq_ = nullptr;
@@ -79,7 +90,8 @@ namespace proc {
    * Wrapper class to write output result to a file.
    * This is for RAII to handle long opened file descriptor.
    */
-  class OutputWriter : public Writer
+  template <typename K, typename V>
+  class OutputWriter : public Writer<K, V>
   {
    public:
     /**
@@ -92,10 +104,7 @@ namespace proc {
     ~OutputWriter();
 
     /* Write data to output file */
-    void write(std::string&, int&);
-    void write(std::string&, long&);
-    void write(std::string&, float&);
-    void write(std::string&, double&);
+    void write(K&, V&);
   
    private:
     std::ofstream fout_;
