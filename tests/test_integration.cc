@@ -43,8 +43,8 @@ class TestReducer: public Reducer<std::string, int, std::string, int>
 
 TEST_CASE("Integration_Test", "[job][mapreduce][integrate]")
 {
-  fs::path input_dir = testdir / "test_job" / "inputs";
-  fs::path output_dir = testdir / "test_job" / "outputs";
+  fs::path input_dir = tmpdir / "test_job" / "inputs";
+  fs::path output_dir = tmpdir / "test_job" / "outputs";
 
   FileFormat ffmt;
   ffmt.add_input_path(input_dir);
@@ -101,12 +101,12 @@ TEST_CASE("Integration_Test", "[job][mapreduce][integrate]")
       /// Check the result
       REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
 
-      fs::remove_all(testdir);
+      fs::remove_all(tmpdir);
     } else {
       /// For child nodes
       job.run();
     }
   }
 
-  fs::remove_all(testdir);
+  fs::remove_all(tmpdir);
 }

@@ -6,6 +6,7 @@
 #include <string>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/job.h"
 #include "simplemapreduce/ops/job_tasks.h"
@@ -42,8 +43,18 @@ class Mapper : private MapperJob<OKeyType, OValueType>
  private:
   /// Used to create tasks with Mapper state
   template <class M, class R> friend class Job;
+
+  /**
+   * Run map task
+   *
+   *  @param key&    Mapper input key data
+   *  @param value&  Mapper input value data
+   */
+  void run(ByteData &key, ByteData &value);
 };
 
 } // namespace mapreduce
+
+#include "simplemapreduce/mapper.tcc"
 
 #endif

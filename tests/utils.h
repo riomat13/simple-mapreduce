@@ -8,14 +8,16 @@
 
 #include "catch.hpp"
 
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/proc/loader.h"
 
 namespace fs = std::filesystem;
 
+using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
 /// Directory to store all temporary files for testing
-extern fs::path testdir;
+extern fs::path tmpdir;
 
 /**
  * Clear all content in a file with given path.
@@ -66,28 +68,27 @@ bool check_map_items(std::map<K, std::vector<V>> &input,
   return true;
 }
 
-template <typename K, typename V>
-class TestDataLoader : public DataLoader<K, V>
+class TestDataLoader : public DataLoader
 {
  public:
-  typedef std::pair<K, V> KV;
-
-  TestDataLoader(std::vector<KV> &input) : kv_items_(std::move(input))
+  TestDataLoader(std::vector<BytePair> &input) : kv_items_(std::move(input))
   {
   };
 
-  KV get_item()
+  BytePair get_item()
   {
+    /// Return empty once consumed all elements
     if (kv_items_.empty())
-      return std::make_pair(K(), V());
+      return std::make_pair(ByteData(), ByteData());
 
-    KV item = std::move(kv_items_.back());
+    /// Take item one by one
+    BytePair item = std::move(kv_items_.back());
     kv_items_.pop_back();
     return item;
   }
 
  private:
-  std::vector<KV> kv_items_;
+  std::vector<BytePair> kv_items_;
 };
 
 #endif

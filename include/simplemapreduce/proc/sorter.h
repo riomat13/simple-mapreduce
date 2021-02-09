@@ -8,47 +8,46 @@
 #include <vector>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/proc/loader.h"
 #include "simplemapreduce/ops/conf.h"
 
+using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
+/**
+ * Sort operating class
+ */
+class Sorter
+{
+ public:
+  typedef std::map<ByteData, std::vector<ByteData>> KVMap;
+
   /**
-   * Sort operating class
+   * Constructor of Sorter class.
+   * This is grouping items by keywords and pass to reducer.
+   * 
+   *  @param loader DataLoader unique pointer
    */
-  template <typename K, typename V>
-  class Sorter
-  {
-   public:
-    typedef std::map<K, std::vector<V>> KVMap;
+  Sorter(std::unique_ptr<DataLoader> loader) : loader_(std::move(loader)) {}
 
-    /**
-     * Constructor of Sorter class.
-     * This is grouping items by keywords and pass to reducer.
-     * 
-     *  @param loader DataLoader unique pointer
-     */
-    Sorter(std::unique_ptr<DataLoader<K, V>> loader) : loader_(std::move(loader)) {}
+  /**
+   * Execute sorting.
+   * Each execution handles each file groped ID.
+   * This will create a new map with values grouped by the given key.
+   * 
+   *  @return map<K, std::vector<V>>&  map of vectors grouped by sorting process
+   */
+  KVMap run();
 
-    /**
-     * Execute sorting.
-     * Each execution handles each file groped ID.
-     * This will create a new map with values grouped by the given key.
-     * 
-     *  @return map<K, std::vector<V>>&  map of vectors grouped by sorting process
-     */
-    KVMap run();
+ private:
 
-   private:
-
-    /// File data loader
-    std::unique_ptr<DataLoader<K, V>> loader_;
-  };
+  /// File data loader
+  std::unique_ptr<DataLoader> loader_;
+};
 
 } // namespace proc
 } // namespace mapreduce
-
-#include "simplemapreduce/proc/sorter.tcc"
 
 #endif

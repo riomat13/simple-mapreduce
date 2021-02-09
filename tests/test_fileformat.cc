@@ -19,7 +19,8 @@ TEST_CASE("FileFormat", "[file]")
 
   SECTION("input_file_paths")
   {
-    fs::create_directory(testdir);
+    fs::path testdir = tmpdir / "test_fileformat";
+    fs::create_directories(testdir);
 
     std::vector<fs::path> dirs{fs::path{"testdir1"}, fs::path{"testdir2"}};
     std::vector<fs::path> files{fs::path{"text1"}, fs::path{"text2"}, fs::path{"text3"}};

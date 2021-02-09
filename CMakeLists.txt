@@ -5,6 +5,8 @@ set(SIMPLEMR_VERSION 0.0.1)
 project(SimpleMapReduce VERSION ${SIMPLEMR_VERSION} LANGUAGES CXX)
 message(STATUS "Build SimpleMapReduce: v${SIMPLEMR_VERSION}")
 
+set(BUILD_LIBRARY ON)
+
 # library name
 set(libname simplemapreduce)
 

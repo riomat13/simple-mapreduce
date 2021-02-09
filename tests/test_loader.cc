@@ -9,230 +9,235 @@
 #include "catch.hpp"
 
 #include "utils.h"
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/proc/writer.h"
-#include "simplemapreduce/util/validator.h"
 
 using namespace mapreduce::data;
 using namespace mapreduce::proc;
-using namespace mapreduce::util;
+
+typedef MessageQueue MQ;
 
 TEST_CASE("DataLoader", "[data_loader]")
 {
-  typedef std::pair<std::string, int> KV;
-
   /// Target key-value pairs
-  std::vector<KV> targets{{"test", 1}, {"test", 2}, {"sample", -5}};
+  std::vector<BytePair> targets{
+    {ByteData("test"), ByteData(1)},
+    {ByteData("test"), ByteData(2)},
+    {ByteData("sample"), ByteData(-5)}
+  };
 
-  std::vector<KV> items = targets;
-  std::unique_ptr<DataLoader<std::string, int>> loader =
-      std::make_unique<TestDataLoader<std::string, int>>(items);
+  std::vector<BytePair> items = targets;
+  std::unique_ptr<DataLoader> loader =
+      std::make_unique<TestDataLoader>(items);
 
-  std::vector<KV> res;
-  KV data;
+  std::vector<BytePair> res;
+  BytePair data;
   while (!(data = loader->get_item()).first.empty())
     res.push_back(std::move(data));
 
   REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
 }
 
-TEST_CASE("FileDataLoader", "[data_loader][binary]")
+TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 {
   JobConf conf;
   conf.n_groups = 1;
   conf.worker_rank = 0;
   conf.worker_size = 1;
-  conf.tmpdir = testdir / "test_sorter";
+  conf.tmpdir = tmpdir / "test_loader";
 
   fs::create_directories(conf.tmpdir);
   fs::path fname{"0000-00000"};
+
+  clear_file(conf.tmpdir / fname);
 
   std::vector<std::string> keys{"test", "example", "sort"};
 
   SECTION("int_values")
   {
-    clear_file(conf.tmpdir / fname);
-
     /// Used for value check
-    std::vector<std::vector<int>> values;
+    std::vector<ByteData> target_keys;
+    std::vector<std::vector<ByteData>> target_values;
 
     /// Write binary data to a target file
     {
       BinaryFileWriter<std::string, int> writer(conf.tmpdir / fname);
 
-      for (size_t i = 0; i < keys.size(); ++i)
+      for (auto &key: keys)
       {
-        int val1 = i + 1;
-        int val2 = i + 4321;
-        int val3 = i - 1234;
-        writer.write(keys[i], val1);
-        writer.write(keys[i], val2);
-        writer.write(keys[i], val3);
+        int val1 = 1;
+        int val2 = 4321;
+        int val3 = 1234;
+        writer.write(ByteData(std::string(key)), ByteData(val1));
+        writer.write(ByteData(std::string(key)), ByteData(val2));
+        writer.write(ByteData(std::string(key)), ByteData(val3));
 
-        std::vector<int> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
+        std::vector<ByteData> vals{ByteData(val1), ByteData(val2), ByteData(val3)};
+        target_values.push_back(std::move(vals));
       }
     }
 
-    /// Run sort task and group by the keys
-    std::unique_ptr<DataLoader<std::string, int>> loader =
+    std::unique_ptr<DataLoader> loader =
         std::make_unique<BinaryFileDataLoader<std::string, int>>(conf);
 
-    std::map<std::string, std::vector<int>> res;
-
-    std::pair<std::string, int> data;
+    std::map<ByteData, std::vector<ByteData>> res;
+    BytePair data;
 
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    REQUIRE(check_map_items(res, keys, values));
+    for (auto &key: keys)
+      target_keys.emplace_back(key);
+
+    REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
   SECTION("long_values")
   {
-    clear_file(conf.tmpdir / fname);
-
     /// Used for value check
-    std::vector<std::vector<long>> values;
+    std::vector<ByteData> target_keys;
+    std::vector<std::vector<ByteData>> target_values;
 
     /// Write binary data to a target file
     {
       BinaryFileWriter<std::string, long> writer(conf.tmpdir / fname);
 
-      for (size_t i = 0; i < keys.size(); ++i)
+      for (auto &key: keys)
       {
-        long val1 = i + 1;
-        long val2 = i + 1234567890;
-        long val3 = i - 1234567890;
-        writer.write(keys[i], val1);
-        writer.write(keys[i], val2);
-        writer.write(keys[i], val3);
+        long val1 = 1;
+        long val2 = 123456789l;
+        long val3 = 123456789l;
+        writer.write(ByteData(std::string(key)), ByteData(val1));
+        writer.write(ByteData(std::string(key)), ByteData(val2));
+        writer.write(ByteData(std::string(key)), ByteData(val3));
 
-        std::vector<long> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
+        std::vector<ByteData> vals{ByteData(val1), ByteData(val2), ByteData(val3)};
+        target_values.push_back(std::move(vals));
       }
     }
 
-    std::unique_ptr<DataLoader<std::string, long>> loader =
+    std::unique_ptr<DataLoader> loader =
         std::make_unique<BinaryFileDataLoader<std::string, long>>(conf);
 
-    std::map<std::string, std::vector<long>> res;
-
-    std::pair<std::string, long> data;
+    std::map<ByteData, std::vector<ByteData>> res;
+    BytePair data;
 
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    REQUIRE(check_map_items(res, keys, values));
+    for (auto &key: keys)
+      target_keys.emplace_back(key);
+    REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
   SECTION("float_values")
   {
-    clear_file(conf.tmpdir / fname);
-
     /// Used for value check
-    std::vector<std::vector<float>> values;
+    std::vector<ByteData> target_keys;
+    std::vector<std::vector<ByteData>> target_values;
 
     /// Write binary data to a target file
     {
       BinaryFileWriter<std::string, float> writer(conf.tmpdir / fname);
 
-      for (size_t i = 0; i < keys.size(); ++i)
+      for (auto &key: keys)
       {
-        float val1 = i + 0.1;
-        float val2 = i + 10.987;
-        float val3 = i - 0.1234;
-        writer.write(keys[i], val1);
-        writer.write(keys[i], val2);
-        writer.write(keys[i], val3);
+        float val1 = 0.1;
+        float val2 = 10.987;
+        float val3 = 0.1234;
+        writer.write(ByteData(std::string(key)), ByteData(val1));
+        writer.write(ByteData(std::string(key)), ByteData(val2));
+        writer.write(ByteData(std::string(key)), ByteData(val3));
 
-        std::vector<float> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
+        std::vector<ByteData> vals{ByteData(val1), ByteData(val2), ByteData(val3)};
+        target_values.push_back(std::move(vals));
       }
     }
 
-    std::unique_ptr<DataLoader<std::string, float>> loader =
+    std::unique_ptr<DataLoader> loader =
         std::make_unique<BinaryFileDataLoader<std::string, float>>(conf);
 
-    std::map<std::string, std::vector<float>> res;
-
-    std::pair<std::string, float> data;
+    std::map<ByteData, std::vector<ByteData>> res;
+    BytePair data;
 
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    REQUIRE(check_map_items(res, keys, values));
+    for (auto &key: keys)
+      target_keys.emplace_back(key);
+
+    REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
   SECTION("double_values")
   {
-    clear_file(conf.tmpdir / fname);
-
     /// Used for value check
-    std::vector<std::vector<double>> values;
+    std::vector<ByteData> target_keys;
+    std::vector<std::vector<ByteData>> target_values;
 
     /// Write binary data to a target file
     {
       BinaryFileWriter<std::string, double> writer(conf.tmpdir / fname);
 
-      for (size_t i = 0; i < keys.size(); ++i)
+      for (auto &key: keys)
       {
-        double val1 = i + 0.5;
-        double val2 = i + 1.23456789;
-        double val3 = i - 9.87654321;
-        writer.write(keys[i], val1);
-        writer.write(keys[i], val2);
-        writer.write(keys[i], val3);
+        double val1 = 0.5;
+        double val2 = 1.23456789;
+        double val3 = 9.87654321;
+        writer.write(ByteData(std::string(key)), ByteData(val1));
+        writer.write(ByteData(std::string(key)), ByteData(val2));
+        writer.write(ByteData(std::string(key)), ByteData(val3));
 
-        std::vector<double> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
+        std::vector<ByteData> vals{ByteData(val1), ByteData(val2), ByteData(val3)};
+        target_values.push_back(std::move(vals));
       }
     }
 
-    std::unique_ptr<DataLoader<std::string, double>> loader =
+    std::unique_ptr<DataLoader> loader =
         std::make_unique<BinaryFileDataLoader<std::string, double>>(conf);
 
-    std::map<std::string, std::vector<double>> res;
-
-    std::pair<std::string, double> data;
+    std::map<ByteData, std::vector<ByteData>> res;
+    BytePair data;
 
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    REQUIRE(check_map_items(res, keys, values));
+    for (auto &key: keys)
+      target_keys.emplace_back(key);
+
+    REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  fs::remove_all(testdir);
+  fs::remove_all(tmpdir);
 }
 
 TEST_CASE("MQDataLoader", "[data_loader][mq]")
 {
-  SECTION("string_int")
+  std::shared_ptr<MQ> mq = std::make_shared<MQ>();
+  std::unique_ptr<DataLoader> loader =
+      std::make_unique<MQDataLoader>(mq);
+
+  SECTION("string/int")
   {
-    typedef std::pair<std::string, int> KV;
-    typedef MessageQueue<std::string, int> MQ;
-
-    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-
-    std::vector<KV> targets{
-      {"test", 10},
-      {"example", -5},
-      {"test", 20}
+    std::vector<BytePair> targets{
+      {ByteData("test"), ByteData(10)},
+      {ByteData("example"), ByteData(-5)},
+      {ByteData("test"), ByteData(20)}
     };
 
     for (auto &kv: targets)
-      mq->send(std::pair(kv));
-
+    {
+      ByteData key(kv.first), value(kv.second);
+      mq->send(std::make_pair(key, value));
+    }
     mq->end();
 
-    std::unique_ptr<DataLoader<std::string, int>> loader =
-        std::make_unique<MQDataLoader<std::string, int>>(mq);
-
     /// Get all data from loader
-    std::vector<KV> res;
-    KV data = loader->get_item();
-    while (is_valid_data(data.first))
+    std::vector<BytePair> res;
+    BytePair data = loader->get_item();
+    while (!(data.first.empty()))
     {
       res.push_back(std::move(data));
       data = loader->get_item();
@@ -242,30 +247,21 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
   }
 
-  SECTION("string_long")
+  SECTION("string/long")
   {
-    typedef std::pair<std::string, long> KV;
-    typedef MessageQueue<std::string, long> MQ;
-
-    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-
-    std::vector<KV> targets{
-      {"test", 1357902468},
-      {"example", -54019283},
+    std::vector<BytePair> targets{
+      {ByteData("test"), ByteData(1357902468l)},
+      {ByteData("example"), ByteData(-54019283l)},
     };
 
     for (auto &kv: targets)
       mq->send(std::pair(kv));
-
     mq->end();
 
-    std::unique_ptr<DataLoader<std::string, long>> loader =
-        std::make_unique<MQDataLoader<std::string, long>>(mq);
-
     /// Get all data from loader
-    std::vector<KV> res;
-    KV data;
-    while (is_valid_data<std::string>((data = loader->get_item()).first))
+    std::vector<BytePair> res;
+    BytePair data;
+    while (!(data = loader->get_item()).first.empty())
       res.push_back(std::move(data));
 
     /// Check if original data and data got from loader are the same

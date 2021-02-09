@@ -7,8 +7,6 @@ include(${PROJECT_SOURCE_DIR}/../cmake/utils.cmake)
 option(SIMPLEMR_TEST_VERBOSE "Test verbosity" OFF)
 option(SIMPLEMR_TEST_INTEGRATION "Integration testing" ON)
 
-set(LIBNAME simplemapreduce)
-
 # MPI
 find_package(MPI REQUIRED)
 if(MPI_FOUND)
@@ -24,16 +22,27 @@ if(NOT MPI_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_CXX_EXTENSIONS OFF)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -g")
   set(MPI_CXX_COMPILER mpic++)
 endif()
 
 # Unittests
 set(UTEST_NAME simplemr-utests)
 
+set(LIB_SOURCES
+  ${PROJECT_SOURCE_DIR}/../src/bytes.cc
+  ${PROJECT_SOURCE_DIR}/../src/fileformat.cc
+  ${PROJECT_SOURCE_DIR}/../src/loader.cc
+  ${PROJECT_SOURCE_DIR}/../src/log.cc
+  ${PROJECT_SOURCE_DIR}/../src/queue.cc
+  ${PROJECT_SOURCE_DIR}/../src/sorter.cc
+  ${PROJECT_SOURCE_DIR}/../src/writer.cc
+)
+
 # set all test source files
 set(UTEST_SOURCES
   main.cc
+  test_bytes.cc
   test_context.cc
   test_fileformat.cc
   test_func.cc
@@ -47,7 +56,7 @@ set(UTEST_SOURCES
 
 enable_testing()
 
-add_executable(${UTEST_NAME} ${UTEST_SOURCES})
+add_executable(${UTEST_NAME} ${LIB_SOURCES} ${UTEST_SOURCES})
 setup_test(${UTEST_NAME})
 
 # test verbosity
@@ -76,7 +85,7 @@ if(SIMPLEMR_TEST_INTEGRATION)
     utils.cc
   )
 
-  add_executable(${ITEST_NAME} ${ITEST_SOURCES})
+  add_executable(${ITEST_NAME} ${LIB_SOURCES} ${ITEST_SOURCES})
   setup_test(${ITEST_NAME})
   add_test(NAME ${ITEST_NAME} COMMAND ${MPIEXEC} -np 2 ./${ITEST_NAME})
 endif()

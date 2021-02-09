@@ -9,34 +9,31 @@
 #include <thread>
 #include <utility>
 
+#include "simplemapreduce/data/bytes.h"
+
 namespace mapreduce {
 namespace data {
 
-  /**
-   * FIFO queue to store shared text data
-   */
-  template <typename K, typename V>
-  class MessageQueue
-  {
-   public:
-    MessageQueue() {};
-    MessageQueue(const MessageQueue<K, V> &);
+/**
+ * FIFO queue to store shared text data
+ */
+class MessageQueue
+{
+ public:
+  MessageQueue() {};
+  MessageQueue(const MessageQueue &);
 
-    std::pair<K, V> receive();
-    void send(std::pair<K, V>&&);
-    void end();
+  BytePair receive();
+  void send(BytePair&&);
+  void end();
 
-   private:
-    std::deque<std::pair<K, V>> queue_;
-    std::mutex mq_mutex_;
-    std::condition_variable cond_;
-    unsigned int n_threads = std::thread::hardware_concurrency();
-
-  };
+ private:
+  std::deque<BytePair> queue_;
+  std::mutex mq_mutex_;
+  std::condition_variable cond_;
+};
 
 } // namespace data
 } // namespace mapreduce
-
-#include "simplemapreduce/data/queue.tcc"
 
 #endif

@@ -7,51 +7,35 @@
 
 #include "catch.hpp"
 
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/proc/writer.h"
 
 using namespace mapreduce;
+using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
-template <typename K, typename V>
-class TestWriter : public Writer<K, V>
+class TestWriter : public Writer
 {
  public:
-  typedef std::pair<K, V> KV;
-
-  TestWriter(std::vector<KV> &v) : vec_(v) {}
+  TestWriter(std::vector<BytePair> &v) : vec_(v) {}
   ~TestWriter() {}
 
-  void write(std::string &key, int &value)
-  {
-    vec_.emplace_back(key, value);
-  }
-  void write(std::string &key, long &value)
-  {
-    vec_.emplace_back(key, value);
-  }
-  void write(std::string &key, float &value)
-  {
-    vec_.emplace_back(key, value);
-  }
-  void write(std::string &key, double &value)
+  void write(const ByteData &key, const ByteData &value)
   {
     vec_.emplace_back(key, value);
   }
 
  private:
-  std::vector<KV> &vec_;
+  std::vector<BytePair> &vec_;
 };
 
 
 TEST_CASE("Context", "[context]")
 {
-  SECTION("string_int")
+  SECTION("string/int")
   {
-    typedef std::pair<std::string, int> KV;
-    typedef TestWriter<std::string, int> TWriter;
-
-    std::vector<KV> vec;
-    std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
+    std::vector<BytePair> vec;
+    std::unique_ptr<TestWriter> writer = std::make_unique<TestWriter>(vec);
 
     Context<std::string, int> context(std::move(writer));
     std::string key{"test"};
@@ -67,23 +51,20 @@ TEST_CASE("Context", "[context]")
     unsigned int idx = 0;
     for (auto &pair: vec)
     {
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == values[idx++]);
+      REQUIRE(pair.first.get_data<std::string>() == key);
+      REQUIRE(pair.second.get_data<int>() == values[idx++]);
     }
   }
 
-  SECTION("string_long")
+  SECTION("string/long")
   {
-    typedef std::pair<std::string, long> KV;
-    typedef TestWriter<std::string, long> TWriter;
-
-    std::vector<KV> vec;
-    std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
+    std::vector<BytePair> vec;
+    std::unique_ptr<TestWriter> writer = std::make_unique<TestWriter>(vec);
 
     Context<std::string, long> context(std::move(writer));
     std::string key{"test"};
 
-    std::vector<long> values{1234567890, -1234567890, 0, 3531509, -6911024};
+    std::vector<long> values{123456789l, -123456789l, 0l, 3531509l, -6911024l};
 
     for (auto &value: values)
       context.write(key, value);
@@ -94,18 +75,15 @@ TEST_CASE("Context", "[context]")
     unsigned int idx = 0;
     for (auto &pair: vec)
     {
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == values[idx++]);
+      REQUIRE(pair.first.get_data<std::string>() == key);
+      REQUIRE(pair.second.get_data<long>() == values[idx++]);
     }
   }
 
-  SECTION("string_float")
+  SECTION("string/float")
   {
-    typedef std::pair<std::string, float> KV;
-    typedef TestWriter<std::string, float> TWriter;
-
-    std::vector<KV> vec;
-    std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
+    std::vector<BytePair> vec;
+    std::unique_ptr<TestWriter> writer = std::make_unique<TestWriter>(vec);
 
     Context<std::string, float> context(std::move(writer));
     std::string key{"test"};
@@ -121,18 +99,15 @@ TEST_CASE("Context", "[context]")
     unsigned int idx = 0;
     for (auto &pair: vec)
     {
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == values[idx++]);
+      REQUIRE(pair.first.get_data<std::string>() == key);
+      REQUIRE(pair.second.get_data<float>() == values[idx++]);
     }
   }
 
-  SECTION("string_double")
+  SECTION("string/double")
   {
-    typedef std::pair<std::string, double> KV;
-    typedef TestWriter<std::string, double> TWriter;
-
-    std::vector<KV> vec;
-    std::unique_ptr<TWriter> writer = std::make_unique<TWriter>(vec);
+    std::vector<BytePair> vec;
+    std::unique_ptr<TestWriter> writer = std::make_unique<TestWriter>(vec);
 
     Context<std::string, double> context(std::move(writer));
     std::string key{"test"};
@@ -148,8 +123,8 @@ TEST_CASE("Context", "[context]")
     unsigned int idx = 0;
     for (auto &pair: vec)
     {
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == values[idx++]);
+      REQUIRE(pair.first.get_data<std::string>() == key);
+      REQUIRE(pair.second.get_data<double>() == values[idx++]);
     }
   }
 }

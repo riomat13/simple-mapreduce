@@ -33,11 +33,10 @@ template <typename K, typename V>
 class MapperJob : public JobTask
 {
  public:
-  typedef MessageQueue<K, V> MQ;
 
   MapperJob()
   {
-    mq_ = std::make_shared<MQ>(MQ());
+    mq_ = std::make_shared<MessageQueue>(MessageQueue());
   }
 
   /**
@@ -45,7 +44,7 @@ class MapperJob : public JobTask
    */
   std::unique_ptr<Context<K, V>> get_context()
   {
-    std::unique_ptr<MQWriter<K, V>> writer = std::make_unique<MQWriter<K, V>>(mq_);
+    std::unique_ptr<MQWriter> writer = std::make_unique<MQWriter>(mq_);
     return std::make_unique<Context<K, V>>(std::move(writer));
   }
 
@@ -64,10 +63,10 @@ class MapperJob : public JobTask
   /**
    * Create a MessageQueue object for mapper
    */
-  std::shared_ptr<MQ> get_mq() { return mq_; };
+  std::shared_ptr<MessageQueue> get_mq() { return mq_; };
 
   /// MessageQueue to store data processed by mapper
-  std::shared_ptr<MQ> mq_ = nullptr;
+  std::shared_ptr<MessageQueue> mq_ = nullptr;
 
   std::unique_ptr<Shuffle<K, V>> shuffle_ = nullptr;
 };
@@ -91,17 +90,17 @@ class ReduceJob : public JobTask
   /**
    * Get const Sorter instance.
    */
-  std::unique_ptr<Sorter<K, V>> get_sorter()
+  std::unique_ptr<Sorter> get_sorter()
   {
-    std::unique_ptr<DataLoader<K, V>> loader = std::make_unique<BinaryFileDataLoader<K, V>>(conf_);
-    return std::make_unique<Sorter<K, V>>(std::move(loader));
+    std::unique_ptr<DataLoader> loader = std::make_unique<BinaryFileDataLoader<K, V>>(conf_);
+    return std::make_unique<Sorter>(std::move(loader));
   }
 
  private:
   /// Used to create tasks with Mapper state
   template <class M, class R> friend class Job;
 
-  std::unique_ptr<Sorter<K, V>> sorter_ = nullptr;
+  std::unique_ptr<Sorter> sorter_ = nullptr;
 };
 
 }  // namespace mapreduce

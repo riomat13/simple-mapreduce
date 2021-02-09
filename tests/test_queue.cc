@@ -7,120 +7,69 @@
 
 #include "catch.hpp"
 
+#include "simplemapreduce/data/bytes.h"
+
 using namespace mapreduce::data;
 
 TEST_CASE("MessageQueue", "[mq]")
 {
-  SECTION("string_int")
+  SECTION("string/int")
   {
-    typedef std::pair<std::string, int> KV;
-
     size_t count = 3;
-    MessageQueue<std::string, int> mq;
+    MessageQueue mq;
 
-    std::string key{"test"};
-    int value = 1;
+    std::string target_key{"test"};
+    ByteData key(target_key);
+    int target_value{1};
+    ByteData value(target_value);
 
     for (size_t i = 0; i < count; ++i)
-      mq.send(KV(std::string(key), value));
+      mq.send(BytePair(key, value));
 
     mq.end();
 
     for (size_t i = 0; i < count; ++i)
     {
-      KV pair = mq.receive();
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == value);
+      BytePair pair = mq.receive();
+      REQUIRE(pair.first.get_data<std::string>() == target_key);
+      REQUIRE(pair.second.get_data<int>() == target_value);
     }
 
-    KV pair = mq.receive();
+    BytePair pair = mq.receive();
     REQUIRE(pair.first.empty());
   }
 
-  SECTION("string_long")
+  SECTION("string/double")
   {
-    typedef std::pair<std::string, long> KV;
-
-    size_t count = 4;
-    MessageQueue<std::string, long> mq;
-
-    std::string key{"test"};
-    long value = 1234567890;
-
-    for (size_t i = 0; i < count; ++i)
-      mq.send(KV(std::string(key), value));
-
-    mq.end();
-
-    for (size_t i = 0; i < count; ++i)
-    {
-      KV pair = mq.receive();
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == value);
-    }
-
-    KV pair = mq.receive();
-    REQUIRE(pair.first.empty());
-  }
-
-  SECTION("string_float")
-  {
-    typedef std::pair<std::string, float> KV;
-
-    size_t count = 5;
-    MessageQueue<std::string, float> mq;
-
-    std::string key{"test"};
-    float value = 1.23;
-
-    for (size_t i = 0; i < count; ++i)
-      mq.send(KV(std::string(key), value));
-
-    mq.end();
-
-    for (size_t i = 0; i < count; ++i)
-    {
-      KV pair = mq.receive();
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == value);
-    }
-
-    KV pair = mq.receive();
-    REQUIRE(pair.first.empty());
-  }
-
-  SECTION("string_double")
-  {
-    typedef std::pair<std::string, double> KV;
-
     size_t count = 3;
-    MessageQueue<std::string, double> mq;
+    MessageQueue mq;
 
-    std::string key{"test"};
-    double value = 0.123456789;
+    std::string target_key{"test"};
+    ByteData key(target_key);
+    double target_value{0.123456789};
+    ByteData value(target_value);
 
     for (size_t i = 0; i < count; ++i)
-      mq.send(KV(std::string(key), value));
+      mq.send(BytePair(key, value));
 
     mq.end();
 
     for (size_t i = 0; i < count; ++i)
     {
-      KV pair = mq.receive();
-      REQUIRE(pair.first == key);
-      REQUIRE(pair.second == value);
+      BytePair pair = mq.receive();
+      REQUIRE(pair.first.get_data<std::string>() == target_key);
+      REQUIRE(pair.second.get_data<double>() == target_value);
     }
 
-    KV pair = mq.receive();
+    BytePair pair = mq.receive();
     REQUIRE(pair.first.empty());
   }
 }
 
 TEST_CASE("MessageQueue with threads", "[mq][threads]")
 {
-  typedef std::pair<std::string, long> KV;
   std::vector<std::thread> threads;
-  MessageQueue<std::string, long> mq;
+  MessageQueue mq;
 
   unsigned int sum = 0;
 
@@ -129,7 +78,11 @@ TEST_CASE("MessageQueue with threads", "[mq][threads]")
     threads.emplace_back([&mq](int num){
       /// Each thread pushes a pair 10 times
       for (unsigned int i = 0; i < 10; ++i)
-        mq.send(KV("test", num + 1));
+      {
+        ByteData key("test");
+        ByteData value(long(num+1));
+        mq.send(std::make_pair(key, value));
+      }
     }, i);
 
     /// Target values to be pushed in total
@@ -144,12 +97,12 @@ TEST_CASE("MessageQueue with threads", "[mq][threads]")
   unsigned int res = 0;
   while (true)
   {
-    KV pair = mq.receive();
+    BytePair pair = mq.receive();
     if (pair.first.empty())
       break;
 
     /// Accumulate all values in message queue
-    res += pair.second;
+    res += pair.second.get_data<long>();
   }
 
   REQUIRE(res == sum);
