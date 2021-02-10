@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(simplemr-task LANGUAGES CXX)
 
+set(SIMPLEMR_BUILD_APP_TYPE "wordcount" CACHE INTERNAL "App name to build")
+
 # MPI
 find_package(MPI REQUIRED)
 if(MPI_FOUND)
@@ -25,8 +27,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/..)
 
 # create executable
 add_executable(run_task "")
-include(sourcelist.cmake)
-target_include_directories(run_task PRIVATE ../include)
+
+# set selected app as executable
+if(SIMPLEMR_BUILD_APP_TYPE STREQUAL "custom")
+  include(sourcelist.cmake)
+elseif(SIMPLEMR_BUILD_APP_TYPE STREQUAL "wordcount")
+  target_sources(run_task PRIVATE ${PROJECT_SOURCE_DIR}/wordcount/main.cc)
+elseif(SIMPLEMR_BUILD_APP_TYPE STREQUAL "movielens")
+  target_sources(run_task PRIVATE ${PROJECT_SOURCE_DIR}/movielens/main.cc)
+else()
+  message(SEND_ERROR "Invalid app name: ${SIMPLEMR_BUILD_APP_TYPE}")
+endif()
+
+message(STATUS "App name: ${SIMPLEMR_BUILD_APP_TYPE}")
+unset(SIMPLEMR_BUILD_APP_TYPE)
+
+target_include_directories(run_task PRIVATE ${PROJECT_SOURCE_DIR}/../include)
 if(TARGET simplemapreduce)
   target_link_libraries(run_task PRIVATE simplemapreduce)
 else()
