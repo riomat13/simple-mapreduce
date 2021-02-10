@@ -37,40 +37,24 @@ void BinaryFileDataLoader<K, V>::extract_target_files()
 template <typename K, typename V>
 BytePair BinaryFileDataLoader<K, V>::get_item()
 {
-  /// TODO: update to be generic
-  size_t key_size;
-
+  /// Load key data
+  ByteData key;
   while (true)
   {
-    /// Load key data size
-    fin_.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
-
+    key = load_byte_data<K>(fin_);
     if (fin_.eof())
     {
       fin_.close();
       if (fpaths_.empty())
-        return std::make_pair(ByteData(), ByteData());
+        return std::make_pair(std::move(key), ByteData());
 
       fin_.open(fpaths_.back(), std::ios::binary);
       fpaths_.pop_back();
       continue;
     }
-
     break;
   }
-
-  /// Load key data
-  char keydata[key_size];
-  fin_.read(keydata, sizeof(char) * key_size);
-  ByteData key;
-  key.set_bytes<K>(&keydata[0], key_size);
-
-  /// Load value data
-  V valuedata;
-  fin_.read(reinterpret_cast<char *>(&valuedata), sizeof(V));
-  ByteData value(valuedata);
-
-  return std::make_pair(std::move(key), std::move(value));
+  return std::make_pair(std::move(key), std::move(load_byte_data<V>(fin_)));
 }
 
 } // namespace proc

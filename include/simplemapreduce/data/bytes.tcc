@@ -29,13 +29,21 @@ void ByteData::set_data_(T *data, const size_t &size)
   size_ = size;
 }
 
-template<typename T>
+template <typename T>
 T ByteData::get_data_() const
 {
   T data;
   /// Only used on the same machine so no need to consider endianness
   std::memcpy(&data, data_.data(), sizeof(T) * size_);
   return data;
+}
+
+template <typename T>
+void ByteData::push_back_(T &data)
+{
+  char *buff = reinterpret_cast<char *>(&data);
+  data_.insert(data_.end(), buff, buff + sizeof(T));
+  ++size_;
 }
 
 } // namespace data

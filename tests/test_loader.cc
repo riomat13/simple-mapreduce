@@ -1,5 +1,6 @@
 #include "simplemapreduce/proc/loader.h"
 
+#include <fstream>
 #include <map>
 #include <memory>
 #include <string>
@@ -18,6 +19,123 @@ using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
 typedef MessageQueue MQ;
+
+TEST_CASE("load_data", "[binary][read][file]")
+{
+  fs::path dirpath{tmpdir / "test_loader"};
+  fs::create_directories(dirpath);
+  fs::path fpath{dirpath / "tmp_bin"};
+
+  SECTION("int")
+  {
+    std::vector<int> targets{1, 3, 7};
+    std::vector<int> res;
+
+    /// Write bytes data to a file
+    {
+      std::ofstream ofs(fpath, std::ios::binary);
+      for (auto &val: targets)
+        write_binary<int>(ofs, val);
+      ofs.close();
+    }
+
+    /// Read from the file
+    {
+      std::ifstream ifs(fpath, std::ios::binary);
+      ByteData data;
+      while (!(data = load_byte_data<int>(ifs)).empty())
+      {
+        res.push_back(data.get_data<int>());
+      }
+      ifs.close();
+    }
+
+    REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
+  }
+
+  SECTION("long")
+  {
+    std::vector<long> targets{987654321, 33201958, -7};
+    std::vector<long> res;
+
+    /// Write bytes data to a file
+    {
+      std::ofstream ofs(fpath, std::ios::binary);
+      for (auto &val: targets)
+        write_binary<long>(ofs, val);
+      ofs.close();
+    }
+
+    /// Read from the file
+    {
+      std::ifstream ifs(fpath, std::ios::binary);
+      ByteData data;
+      while (!(data = load_byte_data<long>(ifs)).empty())
+      {
+        res.push_back(data.get_data<long>());
+      }
+      ifs.close();
+    }
+
+    REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
+  }
+
+  SECTION("float")
+  {
+    std::vector<float> targets{987.4321, 33.0195, -1.237};
+    std::vector<float> res;
+
+    /// Write bytes data to a file
+    {
+      std::ofstream ofs(fpath, std::ios::binary);
+      for (auto &val: targets)
+        write_binary<float>(ofs, val);
+      ofs.close();
+    }
+
+    /// Read from the file
+    {
+      std::ifstream ifs(fpath, std::ios::binary);
+      ByteData data;
+      while (!(data = load_byte_data<float>(ifs)).empty())
+      {
+        res.push_back(data.get_data<float>());
+      }
+      ifs.close();
+    }
+
+    REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
+  }
+
+  SECTION("double")
+  {
+    std::vector<double> targets{987.432123456, -3553.220195, -3410.237077};
+    std::vector<double> res;
+
+    /// Write bytes data to a file
+    {
+      std::ofstream ofs(fpath, std::ios::binary);
+      for (auto &val: targets)
+        write_binary<double>(ofs, val);
+      ofs.close();
+    }
+
+    /// Read from the file
+    {
+      std::ifstream ifs(fpath, std::ios::binary);
+      ByteData data;
+      while (!(data = load_byte_data<double>(ifs)).empty())
+      {
+        res.push_back(data.get_data<double>());
+      }
+      ifs.close();
+    }
+
+    REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
+  }
+
+  fs::remove_all(tmpdir);
+}
 
 TEST_CASE("DataLoader", "[data_loader]")
 {
@@ -53,10 +171,10 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
   clear_file(conf.tmpdir / fname);
 
-  std::vector<std::string> keys{"test", "example", "sort"};
-
-  SECTION("int_values")
+  SECTION("string/int")
   {
+    std::vector<std::string> keys{"test", "example", "sort"};
+
     /// Used for value check
     std::vector<ByteData> target_keys;
     std::vector<std::vector<ByteData>> target_values;
@@ -94,24 +212,26 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  SECTION("long_values")
+  SECTION("int/long")
   {
+    std::vector<int> keys{123, 234, 345};
+
     /// Used for value check
     std::vector<ByteData> target_keys;
     std::vector<std::vector<ByteData>> target_values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter<std::string, long> writer(conf.tmpdir / fname);
+      BinaryFileWriter<int, long> writer(conf.tmpdir / fname);
 
       for (auto &key: keys)
       {
         long val1 = 1;
         long val2 = 123456789l;
         long val3 = 123456789l;
-        writer.write(ByteData(std::string(key)), ByteData(val1));
-        writer.write(ByteData(std::string(key)), ByteData(val2));
-        writer.write(ByteData(std::string(key)), ByteData(val3));
+        writer.write(ByteData(key), ByteData(val1));
+        writer.write(ByteData(key), ByteData(val2));
+        writer.write(ByteData(key), ByteData(val3));
 
         std::vector<ByteData> vals{ByteData(val1), ByteData(val2), ByteData(val3)};
         target_values.push_back(std::move(vals));
@@ -119,7 +239,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     }
 
     std::unique_ptr<DataLoader> loader =
-        std::make_unique<BinaryFileDataLoader<std::string, long>>(conf);
+        std::make_unique<BinaryFileDataLoader<int, long>>(conf);
 
     std::map<ByteData, std::vector<ByteData>> res;
     BytePair data;
@@ -132,8 +252,10 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  SECTION("float_values")
+  SECTION("string/float")
   {
+    std::vector<std::string> keys{"test", "example", "sort"};
+
     /// Used for value check
     std::vector<ByteData> target_keys;
     std::vector<std::vector<ByteData>> target_values;
@@ -171,24 +293,26 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  SECTION("double_values")
+  SECTION("long/double")
   {
+    std::vector<long> keys{123, 234, 345};
+
     /// Used for value check
     std::vector<ByteData> target_keys;
     std::vector<std::vector<ByteData>> target_values;
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter<std::string, double> writer(conf.tmpdir / fname);
+      BinaryFileWriter<long, double> writer(conf.tmpdir / fname);
 
       for (auto &key: keys)
       {
         double val1 = 0.5;
         double val2 = 1.23456789;
         double val3 = 9.87654321;
-        writer.write(ByteData(std::string(key)), ByteData(val1));
-        writer.write(ByteData(std::string(key)), ByteData(val2));
-        writer.write(ByteData(std::string(key)), ByteData(val3));
+        writer.write(ByteData(key), ByteData(val1));
+        writer.write(ByteData(key), ByteData(val2));
+        writer.write(ByteData(key), ByteData(val3));
 
         std::vector<ByteData> vals{ByteData(val1), ByteData(val2), ByteData(val3)};
         target_values.push_back(std::move(vals));
@@ -196,7 +320,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     }
 
     std::unique_ptr<DataLoader> loader =
-        std::make_unique<BinaryFileDataLoader<std::string, double>>(conf);
+        std::make_unique<BinaryFileDataLoader<long, double>>(conf);
 
     std::map<ByteData, std::vector<ByteData>> res;
     BytePair data;

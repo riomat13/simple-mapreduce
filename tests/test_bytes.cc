@@ -97,3 +97,28 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
   }
 }
+
+TEST_CASE("ByteData Modification", "[byte][data]")
+{
+  SECTION("int array")
+  {
+    std::vector<int> target{1, 10, 15, 25, -10};
+    ByteData bdata;
+    for (auto &val: target)
+      bdata.push_back(val);
+
+    std::vector<int> res = bdata.get_data<std::vector<int>>();
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
+  }
+
+  SECTION("float array")
+  {
+    std::vector<float> target{1.4, -30.5, 22, 5.4};
+    ByteData bdata;
+    for (auto &val: target)
+      bdata.push_back(val);
+
+    std::vector<float> res = bdata.get_data<std::vector<float>>();
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
+  }
+}

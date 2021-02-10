@@ -66,13 +66,15 @@ template<> double ByteData::get_data() const { return get_data_<double>(); }
 template<> std::string ByteData::get_data() const { return std::string(data_.begin(), data_.end()); }
 
 /// Array
-template<> std::vector<int> ByteData::get_data() const
+template<>
+std::vector<int> ByteData::get_data() const
 {
   std::vector<int> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(int));
   return out;
 }
-template<> std::vector<long> ByteData::get_data() const
+template<>
+std::vector<long> ByteData::get_data() const
 {
   std::vector<long> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(long));
@@ -84,12 +86,18 @@ template<> std::vector<float> ByteData::get_data() const
   std::memcpy(out.data(), data_.data(), size_ * sizeof(float));
   return out;
 }
-template<> std::vector<double> ByteData::get_data() const
+template<>
+std::vector<double> ByteData::get_data() const
 {
   std::vector<double> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(double));
   return out;
 }
+
+template<> void ByteData::push_back(int &value) { push_back_<int>(value); }
+template<> void ByteData::push_back(long &value) { push_back_<long>(value); }
+template<> void ByteData::push_back(float &value) { push_back_<float>(value); }
+template<> void ByteData::push_back(double &value) { push_back_<double>(value); }
 
 } // namespace data
 } // namespace mapreduce

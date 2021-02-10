@@ -19,6 +19,14 @@ using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
+/**
+ * Load data from binary file.
+ *
+ *  @param fin&   input binary file stream
+ */
+template <typename T>
+ByteData load_byte_data(std::ifstream &fin);
+
 class DataLoader
 {
  public:

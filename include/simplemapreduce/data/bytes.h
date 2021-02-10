@@ -61,6 +61,15 @@ class ByteData
   /** Whether the data is empty */
   bool empty() { return data_.empty(); }
 
+  /**
+   * Append new value to the container as array.
+   * The data can be retrieved as vector.
+   *
+   *  @param data&  new data to append back
+   */
+  template <typename T>
+  void push_back(T &data);
+
  private:
   /**
    * Helper function to set data
@@ -82,6 +91,12 @@ class ByteData
    */
   template <typename T>
   T get_data_() const;
+
+  /**
+   * Helper function to append byte data
+   */
+  template <typename T>
+  void push_back_(T &data);
 
   std::vector<char> data_;
 
