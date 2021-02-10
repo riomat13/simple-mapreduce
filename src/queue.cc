@@ -5,49 +5,40 @@
 namespace mapreduce {
 namespace data {
 
-  template <>
-  void MessageQueue<std::string, int>::end()
-  {
-    std::lock_guard<std::mutex> lock{mq_mutex_};
+MessageQueue::MessageQueue(const MessageQueue &rhs)
+{
+  this->queue_ = std::move(rhs.queue_);
+}
 
-    /// Send empty data to tell the end of the process
-    /// by sending default values
-    queue_.emplace_back("", 0);
-    cond_.notify_one();
-  }
+BytePair MessageQueue::receive()
+{
+  std::unique_lock<std::mutex> lock{mq_mutex_};
+  cond_.wait(lock, [this] { return !queue_.empty(); });
 
-  template <>
-  void MessageQueue<std::string, long>::end()
-  {
-    std::lock_guard<std::mutex> lock{mq_mutex_};
+  BytePair data = std::move(queue_.front());
+  queue_.pop_front();
 
-    /// Send empty data to tell the end of the process
-    /// by sending default values
-    queue_.emplace_back("", 0);
-    cond_.notify_one();
-  }
+  return data;
+}
 
-  template <>
-  void MessageQueue<std::string, float>::end()
-  {
-    std::lock_guard<std::mutex> lock{mq_mutex_};
+void MessageQueue::send(BytePair &&data)
+{
+  std::lock_guard<std::mutex> lock{mq_mutex_};
 
-    /// Send empty data to tell the end of the process
-    /// by sending default values
-    queue_.emplace_back("", 0);
-    cond_.notify_one();
-  }
+  /// Data is stored with format encoded by context
+  queue_.push_back(std::move(data));
+  cond_.notify_one();
+}
 
-  template <>
-  void MessageQueue<std::string, double>::end()
-  {
-    std::lock_guard<std::mutex> lock{mq_mutex_};
+void MessageQueue::end()
+{
+  std::lock_guard<std::mutex> lock{mq_mutex_};
 
-    /// Send empty data to tell the end of the process
-    /// by sending default values
-    queue_.emplace_back("", 0);
-    cond_.notify_one();
-  }
+  /// Send empty data to tell the end of the process
+  /// by sending default values
+  queue_.emplace_back(ByteData(), ByteData());
+  cond_.notify_one();
+}
 
 } // namespace data
 } // namespace mapreduce

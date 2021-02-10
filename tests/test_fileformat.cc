@@ -19,7 +19,8 @@ TEST_CASE("FileFormat", "[file]")
 
   SECTION("input_file_paths")
   {
-    fs::create_directory(testdir);
+    fs::path testdir = tmpdir / "test_fileformat";
+    fs::create_directories(testdir);
 
     std::vector<fs::path> dirs{fs::path{"testdir1"}, fs::path{"testdir2"}};
     std::vector<fs::path> files{fs::path{"text1"}, fs::path{"text2"}, fs::path{"text3"}};
@@ -47,7 +48,7 @@ TEST_CASE("FileFormat", "[file]")
 
     /// Check two vectors contains the same paths
     REQUIRE(paths.size() == (dirs.size() * files.size()));
-    compare_vector(paths, targets);
+    REQUIRE_THAT(paths, Catch::Matchers::UnorderedEquals(targets));
 
     fs::remove_all(testdir);
   }

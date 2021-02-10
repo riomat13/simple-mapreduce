@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-fs::path testdir = fs::temp_directory_path() / "test_smr";
+fs::path tmpdir = fs::temp_directory_path() / "test_smr";
 
 void clear_file(const fs::path &path)
 {

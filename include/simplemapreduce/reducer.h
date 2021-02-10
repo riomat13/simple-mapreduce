@@ -9,45 +9,45 @@
 #include "simplemapreduce/commons.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/job.h"
+#include "simplemapreduce/ops/job_tasks.h"
 
 namespace mapreduce {
 
-  // no longer uses OKey and OValue. Remove?
-  template <typename /* Input key datatype    */ IKey,
-            typename /* Input value datatype  */ IValue,
-            typename /* Output key datatype   */ OKey,
-            typename /* Output value datatype */ OValue>
-  class Reducer
-  {
-   public:
+template <typename /* Input key datatype    */ IKeyType,
+          typename /* Input value datatype  */ IValueType,
+          typename /* Output key datatype   */ OKeyType,
+          typename /* Output value datatype */ OValueType>
+class Reducer : private ReduceJob<IKeyType, IValueType>
+{
+ public:
 
-    /**
-     * Reducer function
-     * 
-     *  @param key      Input mapped key
-     *  @param value[]  Input mapped value
-     *  @param context& Context used for sending data
-     */
-    virtual void reduce(const IKey&, const std::vector<IValue>&, const Context&) = 0;
+  /**
+   * Reducer function
+   *
+   *  @param key      Input mapped key
+   *  @param value[]  Input mapped value
+   *  @param context& Context used for sending data
+   */
+  virtual void reduce(const IKeyType&, const std::vector<IValueType>&, const Context<OKeyType, OValueType>&) = 0;
 
-    /**
-     * Run before executing reduce
-     * Override this if need to configure. 
-     */
-    void setup(Context &context) {};
+  /**
+   * Run before executing reduce
+   * Override this if need to configure.
+   */
+  void setup(Context<OKeyType, OValueType>&context) {};
 
-   private:
+ private:
+  /// Used to create tasks with Mapper state
+  template <class M, class R> friend class Job;
 
-    /// Used to create tasks with Mapper state
-    template <class M, class R> friend class Job;
-
-    /**
-     * Create a Context object for output.
-     * 
-     *  @param path& Output file path
-     */
-    std::unique_ptr<Context> create_context(const std::string &);
-  };
+  /**
+   * Run reduce task
+   *
+   *  @param container&   Reducer input key data
+   *  @param outpath&     Output directory path
+   */
+  void run(std::map<IKeyType, std::vector<IValueType>> &container, const fs::path &outpath);
+};
 
 } // namespace mapreduce
 

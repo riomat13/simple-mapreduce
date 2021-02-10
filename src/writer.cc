@@ -6,135 +6,78 @@
 #include <thread>
 #include <utility>
 
-#include "simplemapreduce/commons.h"
-
-
 typedef std::numeric_limits<float> lim_float;
 typedef std::numeric_limits<double> lim_double;
 namespace mapreduce {
 namespace proc {
 
-  BinaryFileWriter::BinaryFileWriter(const fs::path &path) : path_(std::move(path)) {
-    fout_.open(path_, std::ios::binary | std::ios::trunc);
-  };
+template <>
+void write_binary(std::ofstream &fout, const std::string &data)
+{
+  /// Store string size and the chars
+  size_t data_size = data.size();
+  fout.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
+  fout.write(data.c_str(), data_size);
+}
 
-  BinaryFileWriter::BinaryFileWriter(const std::string &path) : path_(std::move(path)) {
-    fout_.open(path_, std::ios::binary | std::ios::trunc);
-  };
+template <>
+void write_binary(std::ofstream &fout, const int &data)
+{
+  fout.write(reinterpret_cast<char *>(const_cast<int *>(&data)), sizeof(int));
+}
 
-  BinaryFileWriter::~BinaryFileWriter()
-  {
-    fout_.close();
-  }
+template <>
+void write_binary(std::ofstream &fout, const long &data)
+{
+  fout.write(reinterpret_cast<char *>(const_cast<long *>(&data)), sizeof(long));
+}
 
-  void BinaryFileWriter::write(std::string &key, int &value)
-  {
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+template <>
+void write_binary(std::ofstream &fout, const float &data)
+{
+  fout.write(reinterpret_cast<char *>(const_cast<float *>(&data)), sizeof(float));
+}
 
-    /// Store string size and the chars
-    size_t data_size = key.size();
-    fout_.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
-    fout_.write(key.c_str(), key.size());
-    /// Store provided value
-    fout_.write(reinterpret_cast<char *>(&value), sizeof(int));
-  }
+template <>
+void write_binary(std::ofstream &fout, const double &data)
+{
+  fout.write(reinterpret_cast<char *>(const_cast<double *>(&data)), sizeof(double));
+}
 
-  void BinaryFileWriter::write(std::string &key, long &value)
-  {
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+template <>
+void write_output(std::ofstream &fout, std::string &data)
+{
+  fout << std::left << std::setw(10) << data;
+}
 
-    /// Store string size and the chars
-    size_t data_size = key.size();
-    fout_.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
-    fout_.write(key.c_str(), key.size());
-    /// Store provided value
-    fout_.write(reinterpret_cast<char *>(&value), sizeof(long));
-  }
+template <>
+void write_output(std::ofstream &fout, int &data)
+{
+  fout << std::right << std::setw(6) << data;
+}
 
-  void BinaryFileWriter::write(std::string &key, float &value)
-  {
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+template <>
+void write_output(std::ofstream &fout, long &data)
+{
+  fout << std::right << std::setw(10) << data;
+}
 
-    /// Store string size and the chars
-    size_t data_size = key.size();
-    fout_.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
-    fout_.write(key.c_str(), key.size());
-    /// Store provided value
-    fout_.write(reinterpret_cast<char *>(&value), sizeof(float));
-  }
+template <>
+void write_output(std::ofstream &fout, float &data)
+{
+  fout << std::right << std::fixed << std::setprecision(lim_float::max_digits10) << data;
+}
 
-  void BinaryFileWriter::write(std::string &key, double &value)
-  {
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+template <>
+void write_output(std::ofstream &fout, double &data)
+{
+  fout << std::right << std::fixed << std::setprecision(lim_double::max_digits10) << data;
+}
 
-    /// Store string size and the chars
-    size_t data_size = key.size();
-    fout_.write(reinterpret_cast<char *>(&data_size), sizeof(size_t));
-    fout_.write(key.c_str(), key.size());
-    /// Store provided value
-    fout_.write(reinterpret_cast<char *>(&value), sizeof(double));
-  }
-
-  template <>
-  void MQWriter<std::string, int>::write(std::string &key, int &value)
-  {
-    mq_->send(std::make_pair<std::string, int>(std::move(key), std::move(value)));
-  }
-
-  template <>
-  void MQWriter<std::string, long>::write(std::string &key, long &value)
-  {
-    mq_->send(std::make_pair<std::string, long>(std::move(key), std::move(value)));
-  }
-
-  template <>
-  void MQWriter<std::string, float>::write(std::string &key, float &value)
-  {
-    mq_->send(std::make_pair<std::string, float>(std::move(key), std::move(value)));
-  }
-
-  template <>
-  void MQWriter<std::string, double>::write(std::string &key, double &value)
-  {
-    mq_->send(std::make_pair<std::string, double>(std::move(key), std::move(value)));
-  }
-
-  OutputWriter::OutputWriter(const fs::path &path) {
-    fout_.open(path, std::ios::out | std::ios::ate);
-  };
-
-  OutputWriter::OutputWriter(const std::string &path) {
-    fout_.open(path, std::ios::out | std::ios::ate);
-  };
-
-  OutputWriter::~OutputWriter()
-  {
-    fout_.close();
-  }
-
-  void OutputWriter::write(std::string &key, int &value)
-  {
-    fout_ << std::left << std::setw(10) << key << " "
-      << std::right << std::setw(6) << value << "\n";
-  }
-
-  void OutputWriter::write(std::string &key, long &value)
-  {
-    fout_ << std::left << std::setw(10) << key << " "
-      << std::right << std::setw(10) << value << "\n";
-  }
-
-  void OutputWriter::write(std::string &key, float &value)
-  {
-    fout_ << std::left << std::setw(10) << key << "\t"
-      << std::fixed << std::setprecision(lim_float::max_digits10) << value << "\n";
-  }
-
-  void OutputWriter::write(std::string &key, double &value)
-  {
-    fout_ << std::left << std::setw(10) << key << "\t"
-      << std::fixed << std::setprecision(lim_double::max_digits10) << value << "\n";
-  }
+void MQWriter::write(const ByteData &key, const ByteData &value)
+{
+  mq_->send(std::make_pair(std::move(key), std::move(value)));
+}
 
 } // namespace proc
 } // namespace mapreduce

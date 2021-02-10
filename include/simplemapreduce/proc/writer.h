@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
 
 namespace fs = std::filesystem;
@@ -17,88 +18,102 @@ using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
-  /** Base class to write data used by context. */
-  class Writer
-  {
-   public:
-    virtual ~Writer() = default;
+/**
+ * Read data from binary.
+ *
+ *  @param filestream&  target file stream to write data
+ *  @param data&        data to be stored the read data
+ */
+template <typename T>
+void write_binary(std::ofstream&, const T&);
 
-    virtual void write(std::string&, int&) = 0;
-    virtual void write(std::string&, long&) = 0;
-    virtual void write(std::string&, float&) = 0;
-    virtual void write(std::string&, double&) = 0;
-  };
+/**
+ * Format value to output.
+ *
+ *  @param filestream&  target file stream to write data
+ *  @param data&        data to be stored the read data
+ */
+template <typename T>
+void write_output(std::ofstream&, T&);
 
+/** Base class to write data used by context. */
+class Writer
+{
+ public:
+  virtual ~Writer() = default;
+
+  virtual void write(const ByteData&, const ByteData&) = 0;
+};
+
+/**
+ * Wrapper class to write intermediate result to a file.
+ * This is used to write intermediate state after map process is applied.
+ * 
+ * This is for RAII to handle long opened file descriptor.
+ */
+template <typename K, typename V>
+class BinaryFileWriter : public Writer
+{
+ public:
   /**
-   * Wrapper class to write intermediate result to a file.
-   * This is used to write intermediate state after map process is applied.
-   * 
-   * This is for RAII to handle long opened file descriptor.
+   * Constructor Binary data writing class.
+   *
+   *  @param path&  file path to write the data
    */
-  class BinaryFileWriter : public Writer
-  {
-   public:
-    BinaryFileWriter(const fs::path &path);
-    BinaryFileWriter(const std::string &path);
-    ~BinaryFileWriter();
+  BinaryFileWriter(const fs::path &path);
+  BinaryFileWriter(const std::string &path);
+  ~BinaryFileWriter();
 
-    /* Write data to file */
-    void write(std::string&, int&);
-    void write(std::string&, long&);
-    void write(std::string&, float&);
-    void write(std::string&, double&);
+  /* Write data to file */
+  void write(const ByteData&, const ByteData&);
 
-    // TODO
-    // void write(const std::string &, const float&);
-    // void write(const std::string &, const double&);
+  /* Return current set path */
+  const std::string &get_path() { return path_; }
 
-    /* Return current set path */
-    const std::string &get_path() { return path_; }
+ private:
+  /// Target file path to write data
+  std::string path_;
+  /// File stream to write the binary data
+  std::ofstream fout_;
+};
 
-   private:
-    std::string path_;
-    std::ofstream fout_;
-  };
+class MQWriter : public Writer
+{
+ public:
 
-  template <typename K, typename V>
-  class MQWriter : public Writer
-  {
-   public:
-    typedef MessageQueue<K, V> Queue;
+  MQWriter(std::shared_ptr<MessageQueue> mq) : mq_(mq) {};
+  ~MQWriter() {};
 
-    MQWriter(std::shared_ptr<Queue> mq) : mq_(mq) {};
-    ~MQWriter() {};
+  /* Save data to Message Queue */
+  void write(const ByteData&, const ByteData&);
 
-    /* Save data to Message Queue */
-    void write(std::string&, int&);
-    void write(std::string&, long&);
-    void write(std::string&, float&);
-    void write(std::string&, double&);
+ private:
+  std::shared_ptr<MessageQueue> mq_ = nullptr;
+};
 
-   private:
-    std::shared_ptr<Queue> mq_ = nullptr;
-  };
-
+/**
+ * Wrapper class to write output result to a file.
+ * This is for RAII to handle long opened file descriptor.
+ */
+template <typename K, typename V>
+class OutputWriter : public Writer
+{
+ public:
   /**
-   * Wrapper class to write output result to a file.
-   * This is for RAII to handle long opened file descriptor.
+   * Constructor
+   *
+   *  @param path& target file path to write data
    */
-  class OutputWriter : public Writer
-  {
-   public:
-    OutputWriter(const fs::path&);
-    OutputWriter(const std::string&);
-    ~OutputWriter();
+  OutputWriter(const fs::path&);
+  OutputWriter(const std::string&);
+  ~OutputWriter();
 
-    /* Write data to output file */
-    void write(std::string&, int&);
-    void write(std::string&, long&);
-    void write(std::string&, float&);
-    void write(std::string&, double&);
-  
-   private:
-    std::ofstream fout_;
-  };
+  /* Write data to output file */
+  void write(const ByteData&, const ByteData&);
+
+ private:
+  std::ofstream fout_;
+};
 
 } // namespace proc
 } // namespace mapreduce

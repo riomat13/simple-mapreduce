@@ -17,49 +17,47 @@ using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
+/**
+ * Shuffle process handler object.
+ */
+template <typename K, typename V>
+class Shuffle
+{
+ public:
   /**
-   * Shuffle process handler object.
+   * Shuffle constructor
+   * 
+   *  @param MessageQueue<K, V>* Shared data cotainer to process
+   *  @param const JobConf&      Configuration set in Job class
    */
-  template <typename K, typename V>
-  class Shuffle
-  {
-   public:
-    /**
-     * Shuffle constructor
-     * 
-     *  @param MessageQueue<K, V>* Shared data cotainer to process
-     *  @param const string&       Directory path to store intermediate state files
-     *  @param const JobConf&      Configuration set in Job class
-     */
-    Shuffle(std::shared_ptr<MessageQueue<K, V>>, const std::string&, const JobConf&);
-    ~Shuffle() {};
+  Shuffle(std::shared_ptr<MessageQueue>, const JobConf&);
+  ~Shuffle() {};
 
-    /// Not use for copy/move and to avoid accidentaly pass objects
-    Shuffle(const Shuffle &) = delete;
-    Shuffle &operator=(const Shuffle &) = delete;
-    Shuffle(Shuffle &&) = delete;
-    Shuffle &operator=(Shuffle &&) = delete;
+  /// Not use for copy/move and to avoid accidentaly pass objects
+  Shuffle &operator=(const Shuffle &) = delete;
+  Shuffle(Shuffle &&) = delete;
+  Shuffle &operator=(Shuffle &&) = delete;
 
-    /**
-     * Run the shuffle process.
-     * The data is taken from MessageQueue,
-     * then shuffle and write to intermediate file.
-     */
-    void run();
+  /**
+   * Run the shuffle process.
+   * The data is taken from MessageQueue,
+   * then shuffle and write to intermediate file.
+   */
+  void run();
 
-   private:
-    /// Job configuration
-    JobConf conf_;
+ private:
+  /// Job configuration
+  const JobConf &conf_;
 
-    /// Hash function to group the intermediate states
-    int hash(const std::string&);
+  /// Hash function to group the intermediate states
+  int hash(const K&);
 
-    /// Message Queue to get data to process
-    std::shared_ptr<MessageQueue<K, V>> mq_ = nullptr;
+  /// Message Queue to get data to process
+  std::shared_ptr<MessageQueue> mq_ = nullptr;
 
-    /// BinaryFileWriter for each grouping after shuffled
-    std::vector<std::unique_ptr<BinaryFileWriter>> fouts_;
-  };
+  /// BinaryFileWriter for each grouping after shuffled
+  std::vector<std::unique_ptr<BinaryFileWriter<K, V>>> fouts_;
+};
 
 } // namespace proc
 } // namespace mapreduce

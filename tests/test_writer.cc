@@ -10,6 +10,7 @@
 #include "catch.hpp"
 
 #include "utils.h"
+#include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
 
 namespace fs = std::filesystem;
@@ -44,7 +45,6 @@ class FileIStream : public BaseFileIStream
   {
     ifs.open(path);
   }
-
 };
 
 /**
@@ -84,18 +84,18 @@ std::pair<std::string, V> read_binary(const fs::path &path)
 
 TEST_CASE("BinaryFileWriter", "[writer]")
 {
-  fs::create_directory(testdir);
+  fs::path testdir = tmpdir / "writer";
+  fs::create_directories(testdir);
   fs::path fpath{"binout"};
 
   std::string key{"test"};
 
-  SECTION("write_string_int")
+  SECTION("write_string/int")
   {
     int val = 1;
     {
-      BinaryFileWriter writer(testdir / fpath);
-      std::string kw(key);
-      writer.write(kw, val);
+      BinaryFileWriter<std::string, int> writer(testdir / fpath);
+      writer.write(ByteData(key), ByteData(val));
     }
 
     /// Check read key and value pair matchs items writtin by the writer
@@ -104,13 +104,13 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     REQUIRE(res.second == val);
   }
 
-  SECTION("write_string_long")
+  SECTION("write_string/long")
   {
-    long val = 1234567890;
+    long val = 123456789l;
     {
-      BinaryFileWriter writer(testdir / fpath);
-      std::string kw(key);
-      writer.write(kw, val);
+      BinaryFileWriter<std::string, long> writer(testdir / fpath);
+      ByteData key_(key), value_(val);
+      writer.write(key_, value_);
     }
 
     /// Check read key and value pair matchs items writtin by the writer
@@ -119,13 +119,13 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     REQUIRE(res.second == val);
   }
 
-  SECTION("write_string_float")
+  SECTION("write_string/float")
   {
     float val = 0.1;
     {
-      BinaryFileWriter writer(testdir / fpath);
-      std::string kw(key);
-      writer.write(kw, val);
+      BinaryFileWriter<std::string, float> writer(testdir / fpath);
+      ByteData key_(key), value_(val);
+      writer.write(key_, value_);
     }
 
     /// Check read key and value pair matchs items writtin by the writer
@@ -134,13 +134,13 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     REQUIRE(res.second == val);
   }
 
-  SECTION("write_string_double")
+  SECTION("write_string/double")
   {
     double val = 1.23456789;
     {
-      BinaryFileWriter writer(testdir / fpath);
-      std::string kw(key);
-      writer.write(kw, val);
+      BinaryFileWriter<std::string, double> writer(testdir / fpath);
+      ByteData key_(key), value_(val);
+      writer.write(key_, value_);
     }
 
     /// Check read key and value pair matchs items writtin by the writer
@@ -148,82 +148,84 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     REQUIRE(res.first == key);
     REQUIRE(res.second == val);
   }
+
+  fs::remove_all(testdir);
 }
 
-template <typename Writer, typename MQ, typename KW, typename ValueType>
-void mqwriter_test(Writer &writer, MQ &mq, KW &keywords, ValueType &value)
+template <typename Writer, typename MQ, typename K, typename V>
+bool mqwriter_test(Writer &writer, MQ &mq,
+                   std::vector<K> &keys, std::vector<V> &values)
 {
   /// Use copy string since the string is moved by the implementation
-  for(auto kw: keywords)
-    writer.write(kw, value);
-
-  for(auto &kw: keywords)
+  for(auto &kw: keys)
   {
-    auto item = mq->receive();
-    REQUIRE(item.first == kw);
-    REQUIRE(item.second == value);
+    for (auto &val: values)
+    {
+      ByteData key(kw), value(val);
+      writer.write(key, value);
+    }
   }
+
+  for(auto &kw: keys)
+  {
+    for (auto &val: values)
+    {
+      BytePair item = mq->receive();
+      if (item.first.get_data<K>() != kw || item.second.get_data<V>() != val)
+        return false;
+    }
+  }
+  return true;
 }
 
 TEST_CASE("MQWriter", "[writer]")
 {
-  std::vector<std::string> keywords{"test", "example", "mq", "writer"};
+  typedef MessageQueue MQ;
+  std::vector<std::string> keys{"test", "example", "mq", "writer"};
 
-  SECTION("write_string_int")
+  std::shared_ptr<MQ> mq = std::make_shared<MQ>();
+  MQWriter writer(mq);
+
+  SECTION("write_string/int")
   {
-    typedef MessageQueue<std::string, int> MQ;
-    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-    MQWriter<std::string, int> writer(mq);
-
-    int val = 1;
-    mqwriter_test(writer, mq, keywords, val);
+    std::vector<int> values{1, 2, 4};
+    REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 
-  SECTION("write_string_long")
+  SECTION("write_string/long")
   {
-    typedef MessageQueue<std::string, long> MQ;
-    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-    MQWriter<std::string, long> writer(mq);
-
-    long val = 1;
-    mqwriter_test(writer, mq, keywords, val);
+    std::vector<long> values{123019, -223910, 45555};
+    REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 
-  SECTION("write_string_float")
+  SECTION("write_string/float")
   {
-    typedef MessageQueue<std::string, float> MQ;
-    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-    MQWriter<std::string, float> writer(mq);
-
-    float val = 1.0;
-    mqwriter_test(writer, mq, keywords, val);
+    std::vector<float> values{-1.12, 10.595, 3.14};
+    REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 
-  SECTION("write_string_double")
+  SECTION("write_string/double")
   {
-    typedef MessageQueue<std::string, double> MQ;
-    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-    MQWriter<std::string, double> writer(mq);
-
-    double val = 1.0;
-    mqwriter_test(writer, mq, keywords, val);
+    std::vector<double> values{-1.12, 10.595, 3.14};
+    REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 }
 
 TEST_CASE("OutputWriter", "[writer]")
 {
-  fs::create_directory(testdir);
+  fs::path testdir = tmpdir / "writer";
+  fs::create_directories(testdir);
   std::string fname{"tmpout"};
   std::string key{"test"};
 
-  SECTION("write_string_int")
+  SECTION("write_string/int")
   {
     int value = 1;
 
     {
-      OutputWriter writer(testdir / fname);
-      std::string key_(key);
-      writer.write(key_, value);
+      OutputWriter<std::string, int> writer(testdir / fname);
+      ByteData key_(key), value_(value);
+      writer.write(key_, value_);
     }
 
     FileIStream fis(testdir / fname);
@@ -239,14 +241,14 @@ TEST_CASE("OutputWriter", "[writer]")
     }
   }
 
-  SECTION("write_string_long")
+  SECTION("write_string/long")
   {
-    long value = 1234567890;
+    long value = 123456789l;
 
     {
-      OutputWriter writer(testdir / fname);
-      std::string key_(key);
-      writer.write(key_, value);
+      OutputWriter<std::string, long> writer(testdir / fname);
+      ByteData key_(key), value_(value);
+      writer.write(key_, value_);
     }
 
     FileIStream fis(testdir / fname);
@@ -262,14 +264,14 @@ TEST_CASE("OutputWriter", "[writer]")
     }
   }
 
-  SECTION("write_string_float")
+  SECTION("write_string/float")
   {
     float value = 0.9;
 
     {
-      OutputWriter writer(testdir / fname);
-      std::string key_(key);
-      writer.write(key_, value);
+      OutputWriter<std::string, float> writer(testdir / fname);
+      ByteData key_(key), value_(value);
+      writer.write(key_, value_);
     }
 
     FileIStream fis(testdir / fname);
@@ -285,14 +287,14 @@ TEST_CASE("OutputWriter", "[writer]")
     }
   }
 
-  SECTION("write_string_double")
+  SECTION("write_string/double")
   {
     double value = 10.123456789012345;
 
     {
-      OutputWriter writer(testdir / fname);
-      std::string key_(key);
-      writer.write(key_, value);
+      OutputWriter<std::string, double> writer(testdir / fname);
+      ByteData key_(key), value_(value);
+      writer.write(key_, value_);
     }
 
     FileIStream fis(testdir / fname);
@@ -307,4 +309,6 @@ TEST_CASE("OutputWriter", "[writer]")
       REQUIRE(v == value);
     }
   }
+
+  fs::remove_all(testdir);
 }

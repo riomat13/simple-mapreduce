@@ -1,6 +1,10 @@
 #ifndef SIMPLEMAPREDUCE_OPS_CONF_H_
 #define SIMPLEMAPREDUCE_OPS_CONF_H_
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 namespace mapreduce {
 
   /**
@@ -8,6 +12,7 @@ namespace mapreduce {
    */
   struct JobConf {
     /* # of groups to split tasks */ int n_groups{10};
+    /* Temporary directory path */   fs::path tmpdir{"./_tmp"};
     /* # of nodes */                 int mpi_size;
     /* Current rank in mpi */        int mpi_rank;
     /* # of worker to run tasks */   int worker_size;

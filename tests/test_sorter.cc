@@ -1,181 +1,79 @@
 #include "simplemapreduce/proc/sorter.h"
 
-#include <array>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "catch.hpp"
 
 #include "utils.h"
-#include "simplemapreduce/ops/conf.h"
-#include "simplemapreduce/proc/writer.h"
+#include "simplemapreduce/data/bytes.h"
+#include "simplemapreduce/proc/loader.h"
 
-using namespace mapreduce;
+using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
-/**
- * Compare written items and items read from files.
- * 
- *  @param arr&       array of vectors storing target values
- *  @param map&       map stored sorted data
- *  @param keywords&  keywords vector to get corresponding values from map
- */
-template <class Arrays, class Map, class K>
-void check_tuple_items(const Arrays &arr, const Map &map, const K &keywords)
+template <typename K, typename V>
+void test_grouping_items(std::vector<K> &keys, std::vector<std::vector<V>> &values)
 {
-  /// Check map holds same number of the keywords
-  REQUIRE(map.size() == keywords.size());
+  /// Create input value key-value pairs
+  std::vector<BytePair> inputs;
+  for (unsigned int i = 0; i < keys.size(); ++i)
+    for (auto &val: values[i])
+      inputs.emplace_back(ByteData(K(keys[i])), ByteData(V(val)));
 
-  /// Compare each values in a keyword with mapped values
-  for (size_t i = 0; i < keywords.size(); ++i)
+  std::unique_ptr<DataLoader> loader =
+      std::make_unique<TestDataLoader>(inputs);
+
+  /// Run sort task and group by the keys
+  Sorter<K, V> sorter(std::move(loader));
+  auto out = sorter.run();
+
+  std::map<K, std::vector<V>> res;
+  for (auto it = out.begin(); it != out.end(); ++it)
   {
-    auto item = map.find(keywords[i]);
-    REQUIRE(item->second.size() == arr[i].size());
-
-    for (size_t idx = 0; idx < arr.size(); ++idx)
-      REQUIRE(item->second[idx] == arr[i][idx]);
+    res.insert(std::pair<K, std::vector<V>>(it->first, it->second));
   }
+
+  REQUIRE(check_map_items<K, V>(res, keys, values));
 }
 
-TEST_CASE("test_grouping_items", "[sorter]")
+TEST_CASE("test_grouping_items_by_key", "[sorter]")
 {
-  /// Tmp file to store data
-  fs::create_directory(testdir);
-  fs::path fname{"0000-00000"};
-
-  JobConf conf;
-  conf.n_groups = 1;
-  conf.worker_rank = 0;
-  conf.worker_size = 1;
-
-  std::vector<std::string> keywords{"test", "example", "sort"};
-
-  SECTION("long_values")
+  SECTION("string/int")
   {
-    clear_file(testdir / fname);
+    std::vector<std::string> keys{"test", "example", "sort"};
+    std::vector<std::vector<int>> values{
+      {1, -1, 5, 123, -6092},
+      {4500, -53, 22},
+      {-9, -444, -10207}
+    };
 
-    /// Used for value check
-    std::vector<std::array<long, 3>> values;
-
-    /// Write binary data to a target file
-    {
-      BinaryFileWriter writer(testdir / fname);
-
-      for (size_t i = 0; i < keywords.size(); ++i)
-      {
-        long val1 = i + 1;
-        long val2 = i + 1234567890;
-        long val3 = i - 1234567890;
-        writer.write(keywords[i], val1);
-        writer.write(keywords[i], val2);
-        writer.write(keywords[i], val3);
-
-        std::array<long, 3> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
-      }
-    }
-
-    /// Run sort task and group by the keys
-    Sorter<std::string, long> sorter(testdir, conf);
-    auto res = sorter.run();
-
-    check_tuple_items(values, res, keywords);
+    test_grouping_items<std::string, int>(keys, values);
   }
 
-  SECTION("int_values")
+  SECTION("int/long")
   {
-    clear_file(testdir / fname);
+    std::vector<int> keys{1, 10, 100};
+    std::vector<std::vector<long>> values{
+      {1234567890, -987654321, 543209},
+      {301948990, -10240, 2},
+      {-1000, 403982117, -5}
+    };
 
-    /// Used for value check
-    std::vector<std::array<int, 3>> values;
-
-    /// Write binary data to a target file
-    {
-      BinaryFileWriter writer(testdir / fname);
-
-      for (size_t i = 0; i < keywords.size(); ++i)
-      {
-        int val1 = i + 1;
-        int val2 = i + 4321;
-        int val3 = i - 1234;
-        writer.write(keywords[i], val1);
-        writer.write(keywords[i], val2);
-        writer.write(keywords[i], val3);
-
-        std::array<int, 3> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
-      }
-    }
-
-    /// Run sort task and group by the keys
-    Sorter<std::string, int> sorter(testdir, conf);
-    auto res = sorter.run();
-
-    check_tuple_items(values, res, keywords);
+    test_grouping_items<int, long>(keys, values);
   }
 
-  SECTION("float_values")
+  SECTION("string/double")
   {
-    clear_file(testdir / fname);
+    std::vector<std::string> keys{"test", "example", "sort"};
+    std::vector<std::vector<double>> values{
+      {-1.23456789012345, 94504.3300856, 217.8123001115},
+      {-40876.401839942, 3901.3044313, -5.091, 625504.126981},
+      {4222.9801726, 555.6600123985}
+    };
 
-    /// Used for value check
-    std::vector<std::array<float, 3>> values;
-
-    /// Write binary data to a target file
-    {
-      BinaryFileWriter writer(testdir / fname);
-
-      for (size_t i = 0; i < keywords.size(); ++i)
-      {
-        float val1 = i + 0.1;
-        float val2 = i + 10.987;
-        float val3 = i - 0.1234;
-        writer.write(keywords[i], val1);
-        writer.write(keywords[i], val2);
-        writer.write(keywords[i], val3);
-
-        std::array<float, 3> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
-      }
-    }
-
-    /// Run sort task and group by the keys
-    Sorter<std::string, float> sorter(testdir, conf);
-    auto res = sorter.run();
-
-    check_tuple_items(values, res, keywords);
-  }
-
-  SECTION("double_values")
-  {
-    clear_file(testdir / fname);
-
-    /// Used for value check
-    std::vector<std::array<double, 3>> values;
-
-    /// Write binary data to a target file
-    {
-      BinaryFileWriter writer(testdir / fname);
-
-      for (size_t i = 0; i < keywords.size(); ++i)
-      {
-        double val1 = i + 0.5;
-        double val2 = i + 1.23456789;
-        double val3 = i - 9.87654321;
-        writer.write(keywords[i], val1);
-        writer.write(keywords[i], val2);
-        writer.write(keywords[i], val3);
-
-        std::array<double, 3> vals{val1, val2, val3};
-        values.push_back(std::move(vals));
-      }
-    }
-
-    /// Run sort task and group by the keys
-    Sorter<std::string, double> sorter(testdir, conf);
-    auto res = sorter.run();
-
-    check_tuple_items(values, res, keywords);
+    test_grouping_items<std::string, double>(keys, values);
   }
 }

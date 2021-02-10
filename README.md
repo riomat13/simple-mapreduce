@@ -159,7 +159,18 @@ $ ./run_docker -i ./inputs -o ./outputs --rmi
 
 (Note: currently running on a single container)
 
-### 3.4 Custom task
+### 3.4 Another example
+In order to run another example(calculating movie rating mean),
+run the following commands,
+
+```sh
+$ cd app
+$ mkdir -p build && cd build
+$ cmake -DSIMPLEMR_BUILD_APP_TYPE=movielens ..
+$ make -j
+```
+
+### 3.5 Custom task
 
 The structure is following:
 ```cpp
@@ -168,34 +179,43 @@ The structure is following:
 
 using namespace mapreduce;
 
-class SomeMapper : public Mapper<key_type, value_type>
+class SomeMapper : public Mapper<in_key_type,
+                                 in_value_type,
+                                 out_key_type,
+                                 out_value_type>
 {
  public:
-  void map(const std::string &input, const Context &context)
+  void map(const in_key_type &key, const in_value_type &value, const Context<out_key_type, out_value_type> &context)
   {
+    out_key_type out_key;
+    out_value_type out_value;
+
     /// do something
 
-    /// output mapping via context.write(key_type, value_type)
-    context.write(key, value);  // this is for sending data
+    /// output mapping via context.write(out_key_type, out_value_type)
+    context.write(out_key, out_value);  // this is for sending data
   }
 
-class SomeReducer : public Reducer<mapped_key_type,
-                                   mapped_value_type,
-                                   output_key_type,
-                                   output_value_type>
+class SomeReducer : public Reducer<in_key_type,
+                                   in_value_type,
+                                   out_key_type,
+                                   out_value_type>
 {
  public:
-  void reduce(const std::string &key, const std::vector<long> &value,
-              const Context &context)
+  void reduce(const in_key_type &key, const std::vector<in_value_type> &value,
+              const Context<out_key_type, out_value_type> &context)
   {
+    out_key_type out_key;
+    out_value_type out_value;
+
     /// do something
 
     /// for summation or calculating mean
     /// RESUCE_SUM() and REDUCE_MEAN() can be used respectively
     /// See `app/word_count.cc` as an example
 
-    /// output the result via context.write(output_key_type, output_value_type)
-    context.write(key, value);  // this is for sending data
+    /// output the result via context.write(out_key_type, out_value_type)
+    context.write(out_key, out_value);  // this is for sending data
   }
 }
 
@@ -214,18 +234,25 @@ int main(int &, char *[])
 }
 ```
 
-Put every scripts in `./app` directory. 
-Then, update `app/sourcelist.cmake` like the following:
+Note that currently `string`, `int`, `long`, `float` and `double` can be used as key and value data type.
+
+Put every scripts in `./app` directory,
+and update `app/sourcelist.cmake` like the following:
 ```
 # list all related source/header files
 target_sources(main PRIVATE
-  ${PROJECT_SOURCE_DIR}/app/custom_mr.cpp
+  ${PROJECT_SOURCE_DIR}/main.cc
               :
 )
 ```
 
-Note that currently `key_type` only accepts `std::string`
-and `value_type` accepts either `int` or `long`.
+Then, run the following commands on terminal.
+```sh
+$ cd app
+$ mkdir -p build && cd build
+$ cmake -DSIMPLEMR_BUILD_APP_TYPE=custom ..
+$ make -j
+```
 
 ## <a name="4-performance"></a>4 Performance
 
@@ -266,13 +293,13 @@ The first table shows results from original dataset.
 
 | Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
 |--|--|--|
-|23.733 sec. | 8.343 sec. | 9.562 sec. |
+| 23.733 sec. | 13.129 sec. | 13.852 sec. |
 
 and the following one is from preprocessed dataset.
 
 | Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
 |--|--|--|
-|22.295 sec. | 7.708 sec. | 6.166 sec. |
+| 22.295 sec. | 12.913 sec. | 8.599 sec. |
 
 The time in baseline becomes shorter after preprocessed,
 because the task have to open much less files than the original one.
@@ -284,16 +311,18 @@ so that running on 1 PC finished faster.
 
 Whereas with preprocessed files, it has less communications so that it becomes the fastest.
 
+### 4.4 Another example
+As an another example, calculate movie rating mean using *MovieLens 20M dataset*[[4](#ref4)].
+
+The details is described in [link](./app/movielens/README.md).
+
 ## <a name="5-todo"></a>5 TODO
 
 - Add combiners(local reduce) (mid)
 - Add configurations (mid)
-- Enable to add more mapper layers (mid)
 
 ## <a name="6-references"></a>6 References
 
 <a name="ref1"></a>\[1\] Jeffrey Dean, Sanjay Ghemawat; MapReduce: Simplified Data Processing on Large Clusters; 2004
 
 <a name="ref2"></a>\[2\] Open-MPI website [[link](https://www.open-mpi.org/)]
-
-<a name="ref3"></a>\[3\] Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. (2011). Learning Word Vectors for Sentiment Analysis. The 49th Annual Meeting of the Association for Computational Linguistics (ACL 2011)
