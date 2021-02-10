@@ -41,7 +41,6 @@ set(LIB_SOURCES
   ${PROJECT_SOURCE_DIR}/../src/loader.cc
   ${PROJECT_SOURCE_DIR}/../src/log.cc
   ${PROJECT_SOURCE_DIR}/../src/queue.cc
-  ${PROJECT_SOURCE_DIR}/../src/sorter.cc
   ${PROJECT_SOURCE_DIR}/../src/writer.cc
 )
 

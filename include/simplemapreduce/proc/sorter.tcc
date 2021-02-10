@@ -3,15 +3,16 @@
 namespace mapreduce {
 namespace proc {
 
-std::map<ByteData, std::vector<ByteData>> Sorter::run()
+template <typename K, typename V>
+std::map<K, std::vector<V>> Sorter<K, V>::run()
 {
-  KVMap container;
+  std::map<K, std::vector<V>> container;
   auto data = loader_->get_item();
 
   /// store values to vector of the associated key in map
   while (!data.first.empty())
   {
-    container[data.first].push_back(data.second);
+    container[data.first.get_data<K>()].push_back(data.second.get_data<V>());
     data = loader_->get_item();
   }
 

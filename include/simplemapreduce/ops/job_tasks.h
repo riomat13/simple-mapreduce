@@ -90,17 +90,17 @@ class ReduceJob : public JobTask
   /**
    * Get const Sorter instance.
    */
-  std::unique_ptr<Sorter> get_sorter()
+  std::unique_ptr<Sorter<K, V>> get_sorter()
   {
     std::unique_ptr<DataLoader> loader = std::make_unique<BinaryFileDataLoader<K, V>>(conf_);
-    return std::make_unique<Sorter>(std::move(loader));
+    return std::make_unique<Sorter<K, V>>(std::move(loader));
   }
 
  private:
   /// Used to create tasks with Mapper state
   template <class M, class R> friend class Job;
 
-  std::unique_ptr<Sorter> sorter_ = nullptr;
+  std::unique_ptr<Sorter<K, V>> sorter_ = nullptr;
 };
 
 }  // namespace mapreduce

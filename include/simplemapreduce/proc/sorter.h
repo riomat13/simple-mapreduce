@@ -19,11 +19,10 @@ namespace proc {
 /**
  * Sort operating class
  */
+template <typename K, typename V>
 class Sorter
 {
  public:
-  typedef std::map<ByteData, std::vector<ByteData>> KVMap;
-
   /**
    * Constructor of Sorter class.
    * This is grouping items by keywords and pass to reducer.
@@ -39,7 +38,7 @@ class Sorter
    * 
    *  @return map<K, std::vector<V>>&  map of vectors grouped by sorting process
    */
-  KVMap run();
+  std::map<K, std::vector<V>> run();
 
  private:
 
@@ -49,5 +48,7 @@ class Sorter
 
 } // namespace proc
 } // namespace mapreduce
+
+#include "simplemapreduce/proc/sorter.tcc"
 
 #endif

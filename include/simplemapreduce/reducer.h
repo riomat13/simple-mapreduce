@@ -46,7 +46,7 @@ class Reducer : private ReduceJob<IKeyType, IValueType>
    *  @param container&   Reducer input key data
    *  @param outpath&     Output directory path
    */
-  void run(std::map<ByteData, std::vector<ByteData>> &container, const fs::path &outpath);
+  void run(std::map<IKeyType, std::vector<IValueType>> &container, const fs::path &outpath);
 };
 
 } // namespace mapreduce

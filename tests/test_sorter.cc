@@ -27,16 +27,13 @@ void test_grouping_items(std::vector<K> &keys, std::vector<std::vector<V>> &valu
       std::make_unique<TestDataLoader>(inputs);
 
   /// Run sort task and group by the keys
-  Sorter sorter(std::move(loader));
+  Sorter<K, V> sorter(std::move(loader));
   auto out = sorter.run();
 
   std::map<K, std::vector<V>> res;
   for (auto it = out.begin(); it != out.end(); ++it)
   {
-    std::vector<V> values(it->second.size());
-    for (unsigned int i = 0; i < values.size(); ++i)
-      values[i] = it->second[i].get_data<V>();
-    res.insert(std::pair<K, std::vector<V>>(it->first.get_data<K>(), values));
+    res.insert(std::pair<K, std::vector<V>>(it->first, it->second));
   }
 
   REQUIRE(check_map_items<K, V>(res, keys, values));
