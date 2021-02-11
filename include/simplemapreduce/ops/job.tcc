@@ -362,12 +362,7 @@ void Job<Mapper, Reducer>::run_shuffle_tasks()
 template <class Mapper, class Reducer>
 void Job<Mapper, Reducer>::run_reduce_tasks()
 {
-  /// Clean up the target output directory
-  auto sorter = reducer_->get_sorter();
-
-  /// Grouping by the keys and store in map<key_type, vector<value_type>>
-  auto container = sorter->run();
-  reducer_->run(container, get_output_file_path());
+  reducer_->run(get_output_file_path());
 }
 
 template <class Mapper, class Reducer>

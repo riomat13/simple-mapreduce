@@ -7,9 +7,12 @@
 #include <vector>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/job.h"
 #include "simplemapreduce/ops/job_tasks.h"
+
+using namespace mapreduce::data;
 
 namespace mapreduce {
 
@@ -43,10 +46,9 @@ class Reducer : private ReduceJob<IKeyType, IValueType>
   /**
    * Run reduce task
    *
-   *  @param container&   Reducer input key data
    *  @param outpath&     Output directory path
    */
-  void run(std::map<IKeyType, std::vector<IValueType>> &container, const fs::path &outpath);
+  inline void run(const fs::path &outpath);
 };
 
 } // namespace mapreduce
