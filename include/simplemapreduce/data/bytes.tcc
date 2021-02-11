@@ -46,5 +46,5 @@ void ByteData::push_back_(T &data)
   ++size_;
 }
 
-} // namespace data
-} // namespace mapreduce
+}  // namespace data
+}  // namespace mapreduce

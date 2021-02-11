@@ -99,5 +99,5 @@ template<> void ByteData::push_back(long &value) { push_back_<long>(value); }
 template<> void ByteData::push_back(float &value) { push_back_<float>(value); }
 template<> void ByteData::push_back(double &value) { push_back_<double>(value); }
 
-} // namespace data
-} // namespace mapreduce
+}  // namespace data
+}  // namespace mapreduce

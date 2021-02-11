@@ -75,7 +75,7 @@ class ByteData
    * Helper function to set data
    */
   template <typename T>
-  void set_data_(T &data);
+  inline void set_data_(T &data);
 
   /**
    * Helper function to set data
@@ -84,19 +84,19 @@ class ByteData
    *  @param size   length of data in given data type
    */
   template <typename T>
-  void set_data_(T *data, const size_t &size);
+  inline void set_data_(T *data, const size_t &size);
 
   /**
    * Helper function to get data
    */
   template <typename T>
-  T get_data_() const;
+  inline T get_data_() const;
 
   /**
    * Helper function to append byte data
    */
   template <typename T>
-  void push_back_(T &data);
+  inline void push_back_(T &data);
 
   std::vector<char> data_;
 
@@ -107,8 +107,8 @@ class ByteData
 
 typedef std::pair<ByteData, ByteData> BytePair;
 
-} // namespace data
-} // namespace mapreduce
+}  // namespace data
+}  // namespace mapreduce
 
 #include "simplemapreduce/data/bytes.tcc"
 

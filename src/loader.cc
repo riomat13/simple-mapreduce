@@ -6,7 +6,7 @@ namespace mapreduce {
 namespace proc {
 
 template <typename T>
-ByteData load_byte_data_(std::ifstream &fin)
+inline ByteData load_byte_data_(std::ifstream &fin)
 {
   T value;
   fin.read(reinterpret_cast<char *>(&value), sizeof(T));
