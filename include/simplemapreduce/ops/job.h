@@ -69,9 +69,14 @@ class Job
   void set_config(const std::string &key, const std::string &value);
 
   /**
-   * Setup Mapper
+   * Setup Mapper.
    */
   template <class> void set_mapper();
+
+  /**
+   * Setup Combiner
+   */
+  template <class> void set_combiner();
 
   /**
    * Setup Reducer.
@@ -175,10 +180,13 @@ class Job
   std::shared_ptr<JobConf> conf_ = std::make_shared<JobConf>();
 
   /// Mapper instance
-  std::unique_ptr<MapperJob> mapper_;
+  std::unique_ptr<MapperJob> mapper_ = nullptr;
+
+  /// Combiner instance
+  std::unique_ptr<ReduceJob> combiner_ = nullptr;
 
   /// Reducer instance
-  std::unique_ptr<ReduceJob> reducer_;
+  std::unique_ptr<ReduceJob> reducer_ = nullptr;
 
   /// FileFormat instance
   FileFormat file_fmt_;

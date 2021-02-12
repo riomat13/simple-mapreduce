@@ -37,7 +37,7 @@ res = pd.merge(means, smr)
 
 The performance result is:
 
-| Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
+| Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) |
 |--|--|--|
 |14.230 sec. | 14.198 sec. | 9.044 sec. |
 

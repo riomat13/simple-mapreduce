@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <mutex>
 #include <sstream>
+#include <stdexcept>
 #include <thread>
 #include <type_traits>
 
@@ -67,11 +68,23 @@ Job::~Job()
 template <class Mapper>
 void Job::set_mapper()
 {
+  /// TODO: Check at compile time
   if (!std::is_base_of<MapperJob, Mapper>::value)
     throw std::runtime_error("Invalid Mapper Class");
 
   mapper_ = std::make_unique<Mapper>();
   mapper_->set_conf(conf_);
+}
+
+template <class Combiner>
+void Job::set_combiner()
+{
+  /// TODO: Check at compile time
+  if (!std::is_base_of<ReduceJob, Combiner>::value)
+    throw std::runtime_error("Invalid Combiner Class");
+
+  combiner_ = std::make_unique<Combiner>();
+  combiner_->set_conf(conf_);
 }
 
 template <class Reducer>
@@ -349,6 +362,13 @@ void Job::run_map_tasks()
   auto mq = mapper_->get_mq();
   mq->end();
 
+  if (combiner_ != nullptr)
+  {
+    logger.debug("[Worker] Running Combiner on worker ", conf_->worker_rank);
+    combiner_->set_mq(mq);
+    combiner_->run();
+  }
+
   logger.debug("[Worker] Finished Map on worker ", conf_->worker_rank);
 }
 
@@ -367,6 +387,9 @@ int Job::run()
   /// send target file to each node
   if (conf_->mpi_rank == 0)
   {
+    if (mapper_ == nullptr || reducer_ == nullptr)
+      throw std::runtime_error("Mapper and/or Reducer is not set.");
+
     /// Set up a directory to store intermediate state data
     setup_tmp_dir();
     setup_output_dir();
