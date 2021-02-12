@@ -17,16 +17,16 @@ using namespace mapreduce::proc;
 class TestWriter : public Writer
 {
  public:
-  TestWriter(std::vector<BytePair> &v) : vec_(v) {}
+  TestWriter(std::vector<BytePair>& v) : vec_(v) {}
   ~TestWriter() {}
 
-  void write(const ByteData &key, const ByteData &value)
+  void write(const ByteData& key, const ByteData& value)
   {
     vec_.emplace_back(key, value);
   }
 
  private:
-  std::vector<BytePair> &vec_;
+  std::vector<BytePair>& vec_;
 };
 
 
@@ -42,14 +42,14 @@ TEST_CASE("Context", "[context]")
 
     std::vector<int> values{1022, 345, -950, 0, 5578};
 
-    for (auto &value: values)
+    for (auto& value: values)
       context.write(key, value);
 
     /// Check context append data to vector 
     REQUIRE(vec.size() == values.size());
 
     unsigned int idx = 0;
-    for (auto &pair: vec)
+    for (auto& pair: vec)
     {
       REQUIRE(pair.first.get_data<std::string>() == key);
       REQUIRE(pair.second.get_data<int>() == values[idx++]);
@@ -66,14 +66,14 @@ TEST_CASE("Context", "[context]")
 
     std::vector<long> values{123456789l, -123456789l, 0l, 3531509l, -6911024l};
 
-    for (auto &value: values)
+    for (auto& value: values)
       context.write(key, value);
 
     /// Check context append data to vector 
     REQUIRE(vec.size() == values.size());
 
     unsigned int idx = 0;
-    for (auto &pair: vec)
+    for (auto& pair: vec)
     {
       REQUIRE(pair.first.get_data<std::string>() == key);
       REQUIRE(pair.second.get_data<long>() == values[idx++]);
@@ -90,14 +90,14 @@ TEST_CASE("Context", "[context]")
 
     std::vector<float> values{1022.844, 345.2, -950.45, 0, 5578.029};
 
-    for (auto &value: values)
+    for (auto& value: values)
       context.write(key, value);
 
     /// Check context append data to vector 
     REQUIRE(vec.size() == values.size());
 
     unsigned int idx = 0;
-    for (auto &pair: vec)
+    for (auto& pair: vec)
     {
       REQUIRE(pair.first.get_data<std::string>() == key);
       REQUIRE(pair.second.get_data<float>() == values[idx++]);
@@ -114,14 +114,14 @@ TEST_CASE("Context", "[context]")
 
     std::vector<double> values{0.123456789012345, -0.123456789012345, 140.98710222, 35315.0000913, -6911024.2345};
 
-    for (auto &value: values)
+    for (auto& value: values)
       context.write(key, value);
 
     /// Check context append data to vector 
     REQUIRE(vec.size() == values.size());
 
     unsigned int idx = 0;
-    for (auto &pair: vec)
+    for (auto& pair: vec)
     {
       REQUIRE(pair.first.get_data<std::string>() == key);
       REQUIRE(pair.second.get_data<double>() == values[idx++]);

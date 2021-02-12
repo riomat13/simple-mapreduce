@@ -5,7 +5,7 @@
 namespace mapreduce {
 namespace util {
 
-  void Logger::log_append_time_tag(OSS &oss)
+  void Logger::log_append_time_tag(OSS& oss)
   {
     auto curr = std::chrono::system_clock::now();
     std::time_t tm = std::chrono::system_clock::to_time_t(curr);

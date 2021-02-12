@@ -5,7 +5,7 @@ namespace fs = std::filesystem;
 namespace mapreduce {
   
   /// Used for passing this object to Job
-  FileFormat &FileFormat::operator=(const FileFormat &rhs)
+  FileFormat& FileFormat::operator=(const FileFormat& rhs)
   {
     if (this == &rhs)
       return *this;
@@ -22,9 +22,9 @@ namespace mapreduce {
     std::vector<std::string> paths;
 
     /// parse each directory and store all regular file paths
-    for (std::string &dirpath: input_paths_)
+    for (std::string& dirpath: input_paths_)
     {
-      for (auto &fpath: fs::directory_iterator(dirpath))
+      for (auto& fpath: fs::directory_iterator(dirpath))
       {
         if (!fpath.is_regular_file())
           continue;

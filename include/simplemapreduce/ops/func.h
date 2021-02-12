@@ -19,4 +19,4 @@
 // The output will be double
 #define REDUCE_MEAN(a) static_cast<double>(REDUCE_SUM(a)) / a.size()
 
-#endif
+#endif  // SIMPLEMAPREDUCE_OPS_FUNC_H_

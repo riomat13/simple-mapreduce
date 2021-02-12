@@ -1,7 +1,7 @@
 #ifndef IS_COMMONS
 #define IS_COMMONS
 #include "simplemapreduce/commons.h"
-#endif
+#endif  // IS_COMMONS
 
 #ifndef SIMPLEMAPREDUCE_UTIL_LOG_H_
 #define SIMPLEMAPREDUCE_UTIL_LOG_H_
@@ -39,14 +39,14 @@ namespace util {
     /// Used for aggregate messages to make it atomic
     typedef std::ostringstream OSS;
 
-    Logger(const Logger &) = delete;
-    Logger &operator=(const Logger &) = delete;
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
 
     /**
      * Set logging level.
      * This will be applied to all logger methods.
      */
-    void set_log_level(const int &level)
+    void set_log_level(const int& level)
     {
       get_log_level() = level;
     }
@@ -54,7 +54,7 @@ namespace util {
     /**
      * Simple logger.
      * 
-     *  @param log_level& log level
+     *  @param log_level  log level
      *    0: NOTSET
      *    1: INFO
      *    2: DEBUG
@@ -65,65 +65,51 @@ namespace util {
      *  @params args      variable numbers of inputs to display as log
      */
     template <typename ...Args>
-    void log(const unsigned int &log_level, Args&& ...args);
+    void log(const unsigned int&, Args&& ...);
 
     template <typename ...Args>
-    void info(Args&& ...args);
+    void info(Args&& ...);
 
     template <typename ...Args>
-    void debug(Args&& ...args);
+    void debug(Args&& ...);
 
     template <typename ...Args>
-    void warning(Args&& ...args);
+    void warning(Args&& ...);
 
     template <typename ...Args>
-    void error(Args&& ...args);
+    void error(Args&& ...);
 
     template <typename ...Args>
-    void critical(Args&& ...args);
+    void critical(Args&& ...);
 
    private:
 
-    /**
-     * Helper function to add timestamp tag
-     */
-    void log_append_time_tag(OSS &oss);
+    /** Helper function to add timestamp tag. */
+    void log_append_time_tag(OSS&);
 
-    /**
-     * Root helper function to output log data on stdout
-     */
+    /** Root helper function to output log data on stdout. */
     template <typename ...Args>
-    void log_stdout_root(OSS &oss, Args&& ...args);
+    void log_stdout_root(OSS&, Args&& ...);
 
-    /**
-     * Root helper function to output log data on stderr
-     */
+    /** Root helper function to output log data on stderr. */
     template <typename ...Args>
-    void log_stderr_root(OSS &oss, Args&& ...args);
+    void log_stderr_root(OSS&, Args&& ...);
 
-    /**
-     * Helper function to output log data on stdout
-     */
+    /** Helper function to output log data on stdout. */
     template <typename T>
-    void log_stdout(OSS &oss, T &t);
+    void log_stdout(OSS&, T&);
 
-    /**
-     * Helper function to output log data on stdout
-     */
+    /** Helper function to output log data on stdout. */
     template <typename T, typename ...Args>
-    void log_stdout(OSS &oss, T &t, Args&& ...args);
+    void log_stdout(OSS&, T&, Args&& ...);
 
-    /**
-     * Helper function to output log data on stderr
-     */
+    /** Helper function to output log data on stderr. */
     template <typename T>
-    void log_stderr(OSS &oss, T &t);
+    void log_stderr(OSS&, T&);
 
-    /**
-     * Helper function to output log data on stderr
-     */
+    /** Helper function to output log data on stderr. */
     template <typename T, typename ...Args>
-    void log_stderr(OSS &oss, T &t, Args ...args);
+    void log_stderr(OSS&, T&, Args ...);
 
     int& get_log_level()
     {
@@ -138,4 +124,4 @@ namespace util {
 
 #include "simplemapreduce/util/log.tcc"
 
-#endif
+#endif  // SIMPLEMAPREDUCE_UTIL_LOG_H_

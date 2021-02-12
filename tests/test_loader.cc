@@ -34,7 +34,7 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto &val: targets)
+      for (auto& val: targets)
         write_binary<int>(ofs, val);
       ofs.close();
     }
@@ -61,7 +61,7 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto &val: targets)
+      for (auto& val: targets)
         write_binary<long>(ofs, val);
       ofs.close();
     }
@@ -88,7 +88,7 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto &val: targets)
+      for (auto& val: targets)
         write_binary<float>(ofs, val);
       ofs.close();
     }
@@ -115,7 +115,7 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto &val: targets)
+      for (auto& val: targets)
         write_binary<double>(ofs, val);
       ofs.close();
     }
@@ -160,16 +160,16 @@ TEST_CASE("DataLoader", "[data_loader]")
 
 TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 {
-  JobConf conf;
-  conf.n_groups = 1;
-  conf.worker_rank = 0;
-  conf.worker_size = 1;
-  conf.tmpdir = tmpdir / "test_loader";
+  std::shared_ptr<JobConf> conf = std::make_shared<JobConf>();
+  conf->n_groups = 1;
+  conf->worker_rank = 0;
+  conf->worker_size = 1;
+  conf->tmpdir = tmpdir / "test_loader";
 
-  fs::create_directories(conf.tmpdir);
+  fs::create_directories(conf->tmpdir);
   fs::path fname{"0000-00000"};
 
-  clear_file(conf.tmpdir / fname);
+  clear_file(conf->tmpdir / fname);
 
   SECTION("string/int")
   {
@@ -181,9 +181,9 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter<std::string, int> writer(conf.tmpdir / fname);
+      BinaryFileWriter<std::string, int> writer(conf->tmpdir / fname);
 
-      for (auto &key: keys)
+      for (auto& key: keys)
       {
         int val1 = 1;
         int val2 = 4321;
@@ -206,7 +206,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    for (auto &key: keys)
+    for (auto& key: keys)
       target_keys.emplace_back(key);
 
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
@@ -222,9 +222,9 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter<int, long> writer(conf.tmpdir / fname);
+      BinaryFileWriter<int, long> writer(conf->tmpdir / fname);
 
-      for (auto &key: keys)
+      for (auto& key: keys)
       {
         long val1 = 1;
         long val2 = 123456789l;
@@ -247,7 +247,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    for (auto &key: keys)
+    for (auto& key: keys)
       target_keys.emplace_back(key);
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
@@ -262,9 +262,9 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter<std::string, float> writer(conf.tmpdir / fname);
+      BinaryFileWriter<std::string, float> writer(conf->tmpdir / fname);
 
-      for (auto &key: keys)
+      for (auto& key: keys)
       {
         float val1 = 0.1;
         float val2 = 10.987;
@@ -287,7 +287,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    for (auto &key: keys)
+    for (auto& key: keys)
       target_keys.emplace_back(key);
 
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
@@ -303,9 +303,9 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
     /// Write binary data to a target file
     {
-      BinaryFileWriter<long, double> writer(conf.tmpdir / fname);
+      BinaryFileWriter<long, double> writer(conf->tmpdir / fname);
 
-      for (auto &key: keys)
+      for (auto& key: keys)
       {
         double val1 = 0.5;
         double val2 = 1.23456789;
@@ -328,7 +328,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     while (!(data = loader->get_item()).first.empty())
       res[data.first].push_back(data.second);
 
-    for (auto &key: keys)
+    for (auto& key: keys)
       target_keys.emplace_back(key);
 
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
@@ -351,7 +351,7 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
       {ByteData("test"), ByteData(20)}
     };
 
-    for (auto &kv: targets)
+    for (auto& kv: targets)
     {
       ByteData key(kv.first), value(kv.second);
       mq->send(std::make_pair(key, value));
@@ -378,7 +378,7 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
       {ByteData("example"), ByteData(-54019283l)},
     };
 
-    for (auto &kv: targets)
+    for (auto& kv: targets)
       mq->send(std::pair(kv));
     mq->end();
 

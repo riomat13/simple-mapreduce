@@ -29,18 +29,18 @@ template <typename T>
 class BinFileReader
 {
  public:
-  BinFileReader(const fs::path &path)
+  BinFileReader(const fs::path& path)
   {
     ifs.open(path, std::ios::binary | std::ios::in);
   }
   ~BinFileReader() { ifs.close(); }
 
-  void read_binary(std::vector<BytePair> &items)
+  void read_binary(std::vector<BytePair>& items)
   {
     while (true)
     {
       size_t keysize;
-      ifs.read(reinterpret_cast<char *>(&keysize), sizeof(size_t));
+      ifs.read(reinterpret_cast<char*>(&keysize), sizeof(size_t));
       if(ifs.eof())
         break;
 
@@ -51,7 +51,7 @@ class BinFileReader
 
       /// Read value data
       T value;
-      ifs.read(reinterpret_cast<char *>(&value), sizeof(T));
+      ifs.read(reinterpret_cast<char*>(&value), sizeof(T));
 
       items.emplace_back(ByteData(key), ByteData(value));
     }
@@ -63,14 +63,14 @@ class BinFileReader
 
 /**
  * Read data from given binary files.
- * 
- *  @param files&       target files to read
- *  @param container&   vector to store key-value pair read from files
+ *
+ *  @param files       target files to read
+ *  @param container   vector to store key-value pair read from files
  */
 template <typename K, typename V>
-void read_all_data(std::vector<fs::path> &files, std::vector<BytePair> &container)
+void read_all_data(std::vector<fs::path>& files, std::vector<BytePair>& container)
 {
-  for (auto &file: files)
+  for (auto& file: files)
   {
     BinFileReader<V> reader(file);
     reader.read_binary(container);
@@ -81,16 +81,16 @@ TEST_CASE("Shuffle", "[shuffle]")
 {
   typedef MessageQueue MQ;
 
-  JobConf conf;
-  conf.tmpdir = tmpdir / "test_shuffle";
-  fs::remove_all(conf.tmpdir);
-  fs::create_directories(conf.tmpdir);
+  std::shared_ptr<JobConf> conf = std::make_shared<JobConf>();
+  conf->tmpdir = tmpdir / "test_shuffle";
+  fs::remove_all(conf->tmpdir);
+  fs::create_directories(conf->tmpdir);
 
   SECTION("string/int")
   {
-    conf.worker_rank = 0;
-    conf.worker_size = 2;
-    conf.n_groups = 5;  // this will be equal to a number of output files
+    conf->worker_rank = 0;
+    conf->worker_size = 2;
+    conf->n_groups = 5;  // this will be equal to a number of output files
 
     /// Target key-value dataset
     std::vector<BytePair> dataset{
@@ -105,7 +105,7 @@ TEST_CASE("Shuffle", "[shuffle]")
       Shuffle<std::string, int> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
-      for (auto &data: dataset)
+      for (auto& data: dataset)
         mq->send(std::pair(data));
       mq->end();
 
@@ -114,8 +114,8 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(conf.tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf.n_groups);
+    extract_files(conf->tmpdir, bin_files);
+    REQUIRE(bin_files.size() == conf->n_groups);
 
     std::vector<BytePair> kv_items;
     read_all_data<std::string, int>(bin_files, kv_items);
@@ -126,9 +126,9 @@ TEST_CASE("Shuffle", "[shuffle]")
 
   SECTION("string/long")
   {
-    conf.worker_rank = 1;
-    conf.worker_size = 2;
-    conf.n_groups = 4;  // this will be equal to a number of output files
+    conf->worker_rank = 1;
+    conf->worker_size = 2;
+    conf->n_groups = 4;  // this will be equal to a number of output files
 
     /// Target key-value dataset
     std::vector<BytePair> dataset{
@@ -143,7 +143,7 @@ TEST_CASE("Shuffle", "[shuffle]")
       Shuffle<std::string, long> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
-      for (auto &data: dataset)
+      for (auto& data: dataset)
         mq->send(std::pair(data));
       mq->end();
 
@@ -152,8 +152,8 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(conf.tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf.n_groups);
+    extract_files(conf->tmpdir, bin_files);
+    REQUIRE(bin_files.size() == conf->n_groups);
 
     std::vector<BytePair> kv_items;
     read_all_data<std::string, long>(bin_files, kv_items);
@@ -165,9 +165,9 @@ TEST_CASE("Shuffle", "[shuffle]")
   SECTION("string/float")
   {
 
-    conf.worker_rank = 3;
-    conf.worker_size = 5;
-    conf.n_groups = 3;  // this will be equal to a number of output files
+    conf->worker_rank = 3;
+    conf->worker_size = 5;
+    conf->n_groups = 3;  // this will be equal to a number of output files
 
     /// Target key-value dataset
     std::vector<BytePair> dataset{
@@ -182,7 +182,7 @@ TEST_CASE("Shuffle", "[shuffle]")
       Shuffle<std::string, float> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
-      for (auto &data: dataset)
+      for (auto& data: dataset)
         mq->send(std::pair(data));
       mq->end();
 
@@ -191,8 +191,8 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(conf.tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf.n_groups);
+    extract_files(conf->tmpdir, bin_files);
+    REQUIRE(bin_files.size() == conf->n_groups);
 
     std::vector<BytePair> kv_items;
     read_all_data<std::string, float>(bin_files, kv_items);
@@ -203,9 +203,9 @@ TEST_CASE("Shuffle", "[shuffle]")
 
   SECTION("string/double")
   {
-    conf.worker_rank = 0;
-    conf.worker_size = 3;
-    conf.n_groups = 2;  // this will be equal to a number of output files
+    conf->worker_rank = 0;
+    conf->worker_size = 3;
+    conf->n_groups = 2;  // this will be equal to a number of output files
 
     /// Target key-value dataset
     std::vector<BytePair> dataset{
@@ -220,7 +220,7 @@ TEST_CASE("Shuffle", "[shuffle]")
       Shuffle<std::string, double> shuffle(mq, conf);
 
       /// Store all data to MessageQueue
-      for (auto &data: dataset)
+      for (auto& data: dataset)
         mq->send(std::pair(data));
       mq->end();
 
@@ -229,8 +229,8 @@ TEST_CASE("Shuffle", "[shuffle]")
 
     /// Total file counts after processed by shuffler
     std::vector<fs::path> bin_files;
-    extract_files(conf.tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf.n_groups);
+    extract_files(conf->tmpdir, bin_files);
+    REQUIRE(bin_files.size() == conf->n_groups);
 
     std::vector<BytePair> kv_items;
     read_all_data<std::string, double>(bin_files, kv_items);

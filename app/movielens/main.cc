@@ -36,10 +36,12 @@ int main(int argc, char *argv[])
   fmt.add_input_path("./inputs");
   fmt.set_output_path("./outputs");
 
-  Job<RatingMeanMapper, RatingMeanReducer> job{argc, argv};
-
+  Job job{argc, argv};
   job.set_file_format(fmt);
   job.set_config("log_level", 2);
+  job.set_mapper<RatingMeanMapper>();
+  job.set_reducer<RatingMeanReducer>();
+
   job.run();
 
   return 0;
@@ -73,6 +75,6 @@ void RatingMeanReducer::reduce(const long &key,
                                const Context<long, double> &context)
 {
   long key_(key);
-  double value = static_cast<double>(REDUCE_SUM(values)) / values.size();
+  double value = REDUCE_MEAN(values);
   context.write(key_, value);
 }

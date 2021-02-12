@@ -89,7 +89,7 @@ TEST_CASE("MessageQueue with threads", "[mq][threads]")
     sum += (i + 1) * 10;
   }
 
-  for (auto &thread: threads)
+  for (auto& thread: threads)
     thread.join();
 
   mq.end();

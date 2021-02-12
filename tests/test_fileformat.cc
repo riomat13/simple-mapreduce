@@ -27,12 +27,12 @@ TEST_CASE("FileFormat", "[file]")
 
     std::vector<std::string> targets;
 
-    for (auto &dir: dirs)
+    for (auto& dir: dirs)
     {
       fs::path directory = testdir / dir;
       fs::create_directory(directory);
 
-      for (auto &file: files)
+      for (auto& file: files)
       {
         std::ofstream ost(directory / file);
         ost.close();

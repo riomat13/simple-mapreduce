@@ -9,7 +9,6 @@
 #include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/ops/context.h"
-#include "simplemapreduce/ops/job.h"
 #include "simplemapreduce/proc/writer.h"
 
 using namespace mapreduce::data;
@@ -17,26 +16,37 @@ using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
+class ShuffleJob
+{
+ public:
+  virtual ~ShuffleJob() {}
+
+  /**
+   * Run shuffle process.
+   */
+  virtual void run() = 0;
+};
+
 /**
  * Shuffle process handler object.
  */
 template <typename K, typename V>
-class Shuffle
+class Shuffle : public ShuffleJob
 {
  public:
   /**
    * Shuffle constructor
    * 
-   *  @param MessageQueue<K, V>* Shared data cotainer to process
-   *  @param const JobConf&      Configuration set in Job class
+   *  @param mq     data cotainer to process
+   *  @param conf   Configuration set in Job class
    */
-  Shuffle(std::shared_ptr<MessageQueue>, const JobConf&);
+  Shuffle(std::shared_ptr<MessageQueue>, std::shared_ptr<JobConf>);
   ~Shuffle() {};
 
   /// Not use for copy/move and to avoid accidentaly pass objects
-  Shuffle &operator=(const Shuffle &) = delete;
-  Shuffle(Shuffle &&) = delete;
-  Shuffle &operator=(Shuffle &&) = delete;
+  Shuffle &operator=(const Shuffle&) = delete;
+  Shuffle(Shuffle&&) = delete;
+  Shuffle &operator=(Shuffle&&) = delete;
 
   /**
    * Run the shuffle process.
@@ -47,7 +57,7 @@ class Shuffle
 
  private:
   /// Job configuration
-  const JobConf &conf_;
+  std::shared_ptr<JobConf> conf_;
 
   /// Hash function to group the intermediate states
   int hash(const K&);
@@ -59,9 +69,9 @@ class Shuffle
   std::vector<std::unique_ptr<BinaryFileWriter<K, V>>> fouts_;
 };
 
-} // namespace proc
-} // namespace mapreduce
+}  // namespace proc
+}  // namespace mapreduce
 
 #include "simplemapreduce/proc/shuffle.tcc"
 
-#endif
+#endif  // SIMPLEMAPREDUCE_PROC_SHUFFLE_H_

@@ -104,7 +104,7 @@ TEST_CASE("ByteData Modification", "[byte][data]")
   {
     std::vector<int> target{1, 10, 15, 25, -10};
     ByteData bdata;
-    for (auto &val: target)
+    for (auto& val: target)
       bdata.push_back(val);
 
     std::vector<int> res = bdata.get_data<std::vector<int>>();
@@ -115,7 +115,7 @@ TEST_CASE("ByteData Modification", "[byte][data]")
   {
     std::vector<float> target{1.4, -30.5, 22, 5.4};
     ByteData bdata;
-    for (auto &val: target)
+    for (auto& val: target)
       bdata.push_back(val);
 
     std::vector<float> res = bdata.get_data<std::vector<float>>();

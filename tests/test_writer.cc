@@ -29,7 +29,7 @@ class BaseFileIStream
       ifs.close();
   }
 
-  std::ifstream &get_stream() { return ifs; }
+  std::ifstream& get_stream() { return ifs; }
 
  protected:
   std::ifstream ifs;
@@ -41,7 +41,7 @@ class BaseFileIStream
 class FileIStream : public BaseFileIStream
 {
  public:
-  FileIStream(const fs::path &path)
+  FileIStream(const fs::path& path)
   {
     ifs.open(path);
   }
@@ -53,7 +53,7 @@ class FileIStream : public BaseFileIStream
 class BinFileIStream : public BaseFileIStream
 {
  public:
-  BinFileIStream(const fs::path &path)
+  BinFileIStream(const fs::path& path)
   {
     ifs.open(path, std::ios::binary);
   }
@@ -62,22 +62,22 @@ class BinFileIStream : public BaseFileIStream
 /**
  * Read data from binary file.
  *
- *  @param path& target binary file path
+ *  @param path   target binary file path
  */
 template <typename V>
-std::pair<std::string, V> read_binary(const fs::path &path)
+std::pair<std::string, V> read_binary(const fs::path& path)
 {
   BinFileIStream ifs(path);
 
   size_t keysize;
-  ifs.get_stream().read(reinterpret_cast<char *>(&keysize), sizeof(size_t));
+  ifs.get_stream().read(reinterpret_cast<char*>(&keysize), sizeof(size_t));
 
   char kw[keysize];
   ifs.get_stream().read(kw, sizeof(char) * keysize);
   std::string key(kw, keysize);
 
   V value;
-  ifs.get_stream().read(reinterpret_cast<char *>(&value), sizeof(V));
+  ifs.get_stream().read(reinterpret_cast<char*>(&value), sizeof(V));
 
   return std::make_pair<std::string, V>(std::move(key), std::move(value));
 }
@@ -153,22 +153,22 @@ TEST_CASE("BinaryFileWriter", "[writer]")
 }
 
 template <typename Writer, typename MQ, typename K, typename V>
-bool mqwriter_test(Writer &writer, MQ &mq,
-                   std::vector<K> &keys, std::vector<V> &values)
+bool mqwriter_test(Writer& writer, MQ& mq,
+                   std::vector<K>& keys, std::vector<V>& values)
 {
   /// Use copy string since the string is moved by the implementation
-  for(auto &kw: keys)
+  for(auto& kw: keys)
   {
-    for (auto &val: values)
+    for (auto& val: values)
     {
       ByteData key(kw), value(val);
       writer.write(key, value);
     }
   }
 
-  for(auto &kw: keys)
+  for(auto& kw: keys)
   {
-    for (auto &val: values)
+    for (auto& val: values)
     {
       BytePair item = mq->receive();
       if (item.first.get_data<K>() != kw || item.second.get_data<V>() != val)

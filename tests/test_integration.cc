@@ -26,15 +26,15 @@ using namespace mapreduce;
 template <typename T>
 T convert_key(const std::string&);
 
-template<> int convert_key(const std::string &key) { return std::stoi(key); }
-template<> long convert_key(const std::string &key) { return std::stol(key); }
-template<> std::string convert_key(const std::string &key) { return std::string(key); }
+template<> int convert_key(const std::string& key) { return std::stoi(key); }
+template<> long convert_key(const std::string& key) { return std::stol(key); }
+template<> std::string convert_key(const std::string& key) { return std::string(key); }
 
 template <typename K, typename V>
 class TestMapper: public Mapper<std::string, long, K, V>
 {
  public:
-  void map(const std::string &ikey, const long&, const Context<K, V> &context)
+  void map(const std::string& ikey, const long&, const Context<K, V>& context)
   {
     std::string line, word;
     std::istringstream iss(ikey);
@@ -55,7 +55,7 @@ template <typename K, typename V>
 class TestReducer: public Reducer<K, V, K, V>
 {
  public:
-  void reduce(const K& ikey, const std::vector<V> &ivalues, const Context<K, V> &context)
+  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context)
   {
     K key(ikey);
     /// For testing, only returns vector size
@@ -72,7 +72,7 @@ class TestReducer: public Reducer<K, V, K, V>
  *  @param count&         number of times to generate data per key
  */
 template <typename K, typename V>
-void test_runner(std::vector<K> &target_keys, const unsigned int &count)
+void test_runner(std::vector<K>& target_keys, const unsigned int& count)
 {
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
@@ -82,9 +82,12 @@ void test_runner(std::vector<K> &target_keys, const unsigned int &count)
   ffmt.set_output_path(output_dir);
 
   /// Setup MapReduce Job
-  Job<TestMapper<K, V>, TestReducer<K, V>> job;
+  Job job;
   job.set_file_format(ffmt);
   job.set_config("log_level", 4);
+
+  job.template set_mapper<TestMapper<K, V>>();
+  job.template set_reducer<TestReducer<K, V>>();
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -103,7 +106,7 @@ void test_runner(std::vector<K> &target_keys, const unsigned int &count)
     for (unsigned int i = 0; i < count; ++i)
     {
       std::ofstream ofs(input_dir / std::to_string(i));
-      for (auto &key: target_keys)
+      for (auto& key: target_keys)
         ofs << key << " ";
       ofs.close();
     }
@@ -114,7 +117,7 @@ void test_runner(std::vector<K> &target_keys, const unsigned int &count)
     REQUIRE(fs::is_directory(output_dir));
 
     /// Parse output data
-    for (auto &path: fs::directory_iterator(output_dir))
+    for (auto& path: fs::directory_iterator(output_dir))
     {
       std::ifstream ifs(path.path());
       std::string line;

@@ -18,18 +18,16 @@ class JobTask
 {
  public:
   /**
-   * Set configuration to create Shuffle and Sorter.
+   * Set MapReduce job configuration.
    */
-  void set_conf(const JobConf &conf)
-  {
-    conf_ = conf;
-  }
+  void set_conf(std::shared_ptr<JobConf> conf) { conf_ = conf; }
 
  protected:
-  JobConf conf_;
+  std::shared_ptr<JobConf> conf_;
+
+  virtual void run() {};
 };
 
-template <typename K, typename V>
 class MapperJob : public JobTask
 {
  public:
@@ -39,27 +37,17 @@ class MapperJob : public JobTask
     mq_ = std::make_shared<MessageQueue>(MessageQueue());
   }
 
-  /**
-   * Get const Context data writer.
-   */
-  std::unique_ptr<Context<K, V>> get_context()
-  {
-    std::unique_ptr<MQWriter> writer = std::make_unique<MQWriter>(mq_);
-    return std::make_unique<Context<K, V>>(std::move(writer));
-  }
+  virtual std::unique_ptr<ShuffleJob> get_shuffle() = 0;
 
   /**
-   * Get const Shuffle instance.
+   * Run Map process.
+   *
+   *  @param key    Mapper input key data
+   *  @param value  Mapper input value data
    */
-  std::unique_ptr<Shuffle<K, V>> get_shuffle()
-  {
-    return std::make_unique<Shuffle<K, V>>(mq_, conf_);
-  };
+  virtual void run(ByteData&, ByteData&) = 0;
 
- private:
-  /// Used to create tasks with Mapper state
-  template <class M, class R> friend class Job;
-
+protected:
   /**
    * Create a MessageQueue object for mapper
    */
@@ -68,41 +56,24 @@ class MapperJob : public JobTask
   /// MessageQueue to store data processed by mapper
   std::shared_ptr<MessageQueue> mq_ = nullptr;
 
-  std::unique_ptr<Shuffle<K, V>> shuffle_ = nullptr;
+ private:
+  /// Used to create tasks with Mapper state
+  friend class Job;
 };
 
-template <typename K, typename V>
 class ReduceJob : public JobTask
 {
  public:
-
   /**
-   * Create output data writer.
-   *
-   *  @param path& output file path
+   * Run Reduce process.
    */
-  std::unique_ptr<Context<K, V>> get_context(const std::string &path)
-  {
-    std::unique_ptr<OutputWriter<K, V>> writer = std::make_unique<OutputWriter<K, V>>(path);
-    return std::make_unique<Context<K, V>>(std::move(writer));
-  }
-
-  /**
-   * Get const Sorter instance.
-   */
-  std::unique_ptr<Sorter<K, V>> get_sorter()
-  {
-    std::unique_ptr<DataLoader> loader = std::make_unique<BinaryFileDataLoader<K, V>>(conf_);
-    return std::make_unique<Sorter<K, V>>(std::move(loader));
-  }
+  virtual void run() = 0;
 
  private:
   /// Used to create tasks with Mapper state
-  template <class M, class R> friend class Job;
-
-  std::unique_ptr<Sorter<K, V>> sorter_ = nullptr;
+  friend class Job;
 };
 
 }  // namespace mapreduce
 
-#endif
+#endif  // SIMPLEMAPREDUCE_OPS_JOB_TASKS_H_
