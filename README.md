@@ -1,7 +1,6 @@
 # Simple MapReduce
 
 This is a project to build simple *mapreduce*[[1](#ref1)] app with *C++* using *MPI*[[2](#ref2)].
-(some APIs namings are referred from *Apache Hadoop*[[link](https://hadoop.apache.org/docs/current/)])
 
 ### Disclaimer
 
@@ -29,7 +28,9 @@ The directory is structured as following.
 |   ├─ CMakeLists.txt    # cmake file for main task
 |   ├─ sourcelist.cmake  # put all source file used in the mapreduce task
 |   ├─ movielens/        # example app to compute movie rating mean
-|   └─ wordcount/        # example app to count words in texts
+|   ├─ wordcount/        # example app to count words in texts
+|   └─ wordcount_with_combiner/
+|                        # example app to count words using Combiner
 |
 ├─ cmake/          # contains files used for build
 ├─ include/        # directory containing documents and related items
@@ -73,7 +74,6 @@ The host list should be stored in `./conf/host_file`.
 If use the script from the next section to run the operation, the file name and hte location must match.
 
 ## <a name="3-execute-example"></a>3 Execution
-
 
 ### 3.1 Initial build
 
@@ -298,20 +298,23 @@ Time score can be very vary so that this is just an example result.
 
 The first table shows results from original dataset.
 
-| Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
+| Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) |
 |--|--|--|
 | 23.733 sec. | 13.129 sec. | 13.852 sec. |
 
 and the following one is from preprocessed dataset.
 
-| Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
-|--|--|--|
-| 22.295 sec. | 11.717 sec. | 8.086 sec. |
+| Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) | SimpleMapReduce</br>with Combiner</br>(2 PCs, 1 master, 7 workers)
+|--|--|--|--|
+| 22.295 sec. | 11.717 sec. | 8.086 sec. | 5.331 sec. |
 
-The time in baseline becomes shorter after preprocessed,
+The process time in baseline becomes slightly faster after preprocessed,
 because the task have to open much less files than the original one.
 
 However, it still took relatively long time, whereas MapReduce versions took less time.
+
+With *Combiner*, the processing becomes *4.18x* faster than baseline.
+(The code is located at `app/wordcount_with_combiner/main.cc`)
 
 When reading 100K files, it involves many network communications which are overhead for this process,
 so that running on 1 PC finished faster.
@@ -325,8 +328,7 @@ The details is described in [link](./app/movielens/README.md).
 
 ## <a name="5-todo"></a>5 TODO
 
-- Add combiners(local reduce) (mid)
-- Add configurations (mid)
+- Add configurations
 
 ## <a name="6-references"></a>6 References
 

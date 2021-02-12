@@ -61,6 +61,12 @@ class Reducer : public ReduceJob
   inline void run_(std::shared_ptr<MessageQueue>);
 
   /**
+   * Set a MessageQueue object for combiner.
+   * If this is set, the Reducer will be seen as Combiner.
+   */
+  void set_mq(std::shared_ptr<MessageQueue> mq) override { mq_ = mq; };
+
+  /**
    * Create output data writer.
    *
    *  @param path   output file path

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/job.h"
 #include "simplemapreduce/proc/loader.h"
@@ -10,6 +11,7 @@
 #include "simplemapreduce/proc/sorter.h"
 #include "simplemapreduce/proc/writer.h"
 
+using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
 namespace mapreduce {
@@ -47,7 +49,7 @@ class MapperJob : public JobTask
    */
   virtual void run(ByteData&, ByteData&) = 0;
 
-protected:
+ protected:
   /**
    * Create a MessageQueue object for mapper
    */
@@ -68,6 +70,13 @@ class ReduceJob : public JobTask
    * Run Reduce process.
    */
   virtual void run() = 0;
+
+ protected:
+  /**
+   * Set a MessageQueue object for combiner.
+   * If this is set, the Reducer will be seen as Combiner.
+   */
+  virtual void set_mq(std::shared_ptr<MessageQueue>) = 0;
 
  private:
   /// Used to create tasks with Mapper state

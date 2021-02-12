@@ -12,10 +12,8 @@ void Reducer<IK, IV, OK, OV>::run()
 template <typename IK, typename IV, typename OK, typename OV>
 void Reducer<IK, IV, OK, OV>::run_(std::shared_ptr<MessageQueue> mq)
 {
-  /// Clean up the target output directory
+  /// Grouping data by the keys from mapped data
   auto sorter = this->get_sorter(mq);
-
-  /// Grouping by the keys and store in map<key_type, vector<value_type>>
   std::map<IK, std::vector<IV>> container = sorter->run();
 
   auto context = this->get_context(mq);
@@ -28,10 +26,8 @@ void Reducer<IK, IV, OK, OV>::run_(std::shared_ptr<MessageQueue> mq)
 template <typename IK, typename IV, typename OK, typename OV>
 void Reducer<IK, IV, OK, OV>::run_(const fs::path& outpath)
 {
-  /// Clean up the target output directory
+  /// Grouping data by the keys from shuffled data
   auto sorter = this->get_sorter();
-
-  /// Grouping by the keys and store in map<key_type, vector<value_type>>
   std::map<IK, std::vector<IV>> container = sorter->run();
 
   auto context = this->get_context(outpath);
