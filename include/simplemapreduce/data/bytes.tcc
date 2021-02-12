@@ -4,27 +4,27 @@ namespace mapreduce {
 namespace data {
 
 template <typename T>
-void ByteData::set_bytes(char *data, const size_t &size)
+void ByteData::set_bytes(char* data, const size_t& size)
 {
   data_ = std::vector<char>(data, data + size);
   size_ = size / sizeof(T);
 }
 
 template <typename T>
-void ByteData::set_data_(T &data)
+void ByteData::set_data_(T& data)
 {
   data_.clear();
-  char *buff = reinterpret_cast<char *>(&data);
+  char* buff = reinterpret_cast<char*>(&data);
   data_ = std::vector<char>(buff, buff + sizeof(T));
 
   size_ = 1;
 }
 
 template <typename T>
-void ByteData::set_data_(T *data, const size_t &size)
+void ByteData::set_data_(T* data, const size_t& size)
 {
   data_.clear();
-  char *buff = reinterpret_cast<char *>(data);
+  char* buff = reinterpret_cast<char*>(data);
   data_ = std::vector<char>(buff, buff + sizeof(T) * size);
   size_ = size;
 }
@@ -39,12 +39,12 @@ T ByteData::get_data_() const
 }
 
 template <typename T>
-void ByteData::push_back_(T &data)
+void ByteData::push_back_(T& data)
 {
-  char *buff = reinterpret_cast<char *>(&data);
+  char* buff = reinterpret_cast<char*>(&data);
   data_.insert(data_.end(), buff, buff + sizeof(T));
   ++size_;
 }
 
-} // namespace data
-} // namespace mapreduce
+}  // namespace data
+}  // namespace mapreduce

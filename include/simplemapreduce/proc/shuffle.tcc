@@ -11,13 +11,13 @@ namespace mapreduce {
 namespace proc {
 
 template <typename K, typename V>
-Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue> mq, const JobConf &conf)
+Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue> mq, std::shared_ptr<JobConf> conf)
     : conf_(conf), mq_(std::move(mq))
 {
   std::ostringstream oss_rank;
-  oss_rank << std::setw(4) << std::setfill('0') << conf.worker_rank;
+  oss_rank << std::setw(4) << std::setfill('0') << conf_->worker_rank;
 
-  for (int i = 0; i < conf.n_groups; ++i)
+  for (int i = 0; i < conf_->n_groups; ++i)
   {
     /// Create each file path to store intermediate states
     std::ostringstream oss_id;
@@ -25,15 +25,15 @@ Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue> mq, const JobConf &conf)
     fs::path filename = oss_rank.str() + "-" + oss_id.str();
 
     /// Set writer with the file defined above
-    fouts_.push_back(std::make_unique<BinaryFileWriter<K, V>>((conf_.tmpdir / filename).string()));
+    fouts_.push_back(std::make_unique<BinaryFileWriter<K, V>>((conf_->tmpdir / filename).string()));
   }
 }
 
 template <typename K, typename V>
-int Shuffle<K, V>::hash(const K &data)
+int Shuffle<K, V>::hash(const K& data)
 {
   std::hash<K> hasher;
-  auto hashed = hasher(data) % conf_.n_groups;
+  auto hashed = hasher(data) % conf_->n_groups;
 
   return hashed;
 }
@@ -55,5 +55,5 @@ void Shuffle<K, V>::run()
   }
 }
 
-} // namespace proc
-} // namespace mapreduce
+}  // namespace proc
+}  // namespace mapreduce

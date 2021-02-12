@@ -22,34 +22,34 @@ extern fs::path tmpdir;
 /**
  * Clear all content in a file with given path.
  *
- *  @param path&  target file path to clear data
+ *  @param path  target file path to clear data
  */
-void clear_file(const fs::path &path);
+void clear_file(const fs::path& path);
 
 /**
  * Extract files in the given directory.
  * The files will be pushed back to the given vector.
  * This will return files which are true by `std::filesystem::is_regular_file`
  *
- *  @param path&        directory path to parse
- *  @param container&   vector to store extracted file paths
+ *  @param path        directory path to parse
+ *  @param container   vector to store extracted file paths
  */
-void extract_files(const fs::path&, std::vector<fs::path> &);
+void extract_files(const fs::path&, std::vector<fs::path>&);
 
 /**
  * Compare map with key and values.
  * Assumed all values in each containes are the same.
  * Example: {"key1": {1, 2, 3}, "key2": {1, 2, 3}, ...}
  *
- *  @param input&   target map to evaluate
- *  @param keys&    vectors storing keys
- *  @param values&  vector of vectors storing values associated with keys
+ *  @param input   target map to evaluate
+ *  @param keys    vectors storing keys
+ *  @param values  vector of vectors storing values associated with keys
  *  @param bool     return true if all items are matched without considering order
  */
 template <class K, class V>
-bool check_map_items(std::map<K, std::vector<V>> &input,
-                     std::vector<K> &keys,
-                     std::vector<std::vector<V>> &values)
+bool check_map_items(std::map<K, std::vector<V>>& input,
+                     std::vector<K>& keys,
+                     std::vector<std::vector<V>>& values)
 {
   /// Check map holds same number of the keywords
   if(input.size() != keys.size())
@@ -71,7 +71,7 @@ bool check_map_items(std::map<K, std::vector<V>> &input,
 class TestDataLoader : public DataLoader
 {
  public:
-  TestDataLoader(std::vector<BytePair> &input) : kv_items_(std::move(input))
+  TestDataLoader(std::vector<BytePair>& input) : kv_items_(std::move(input))
   {
   };
 

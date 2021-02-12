@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
   fmt.add_input_path("./inputs");
   fmt.set_output_path("./outputs");
 
-  mapreduce::Job<WordCountMapper, WordCountReducer> job{argc, argv};
+  mapreduce::Job job{argc, argv};
 
   job.set_file_format(fmt);        // Notify target directories
   job.set_config("n_groups", -1);  // Number of workers to run reduced task
@@ -48,6 +48,9 @@ int main(int argc, char *argv[])
                                    // -1 for using all workers
   job.set_config("log_level", 2);  // 1->debug, 2->info, 3->warning,...
                                    // Disable logs which levels are less than it
+
+  job.set_mapper<WordCountMapper>();
+  job.set_reducer<WordCountReducer>();
 
   /// Start mapreduce task
   job.run();

@@ -22,10 +22,10 @@ namespace proc {
 /**
  * Load data from binary file.
  *
- *  @param fin&   input binary file stream
+ *  @param fin  input binary file stream
  */
 template <typename T>
-ByteData load_byte_data(std::ifstream &fin);
+ByteData load_byte_data(std::ifstream&);
 
 class DataLoader
 {
@@ -46,7 +46,7 @@ template <typename K, typename V>
 class BinaryFileDataLoader : public DataLoader
 {
  public:
-  BinaryFileDataLoader(const JobConf &conf);
+  BinaryFileDataLoader(std::shared_ptr<JobConf>);
   ~BinaryFileDataLoader()
   {
     if (fin_.is_open())
@@ -54,10 +54,10 @@ class BinaryFileDataLoader : public DataLoader
   }
 
   /// Copy/Move are not allowed
-  BinaryFileDataLoader(const BinaryFileDataLoader &) = delete;
-  BinaryFileDataLoader &operator=(const BinaryFileDataLoader &) = delete;
-  BinaryFileDataLoader(BinaryFileDataLoader &&) = delete;
-  BinaryFileDataLoader &operator=(BinaryFileDataLoader &&) = delete;
+  BinaryFileDataLoader(const BinaryFileDataLoader&) = delete;
+  BinaryFileDataLoader &operator=(const BinaryFileDataLoader&) = delete;
+  BinaryFileDataLoader(BinaryFileDataLoader&&) = delete;
+  BinaryFileDataLoader &operator=(BinaryFileDataLoader&&) = delete;
 
   /**
    * Return key-value pair item until read all data from a file.
@@ -66,9 +66,7 @@ class BinaryFileDataLoader : public DataLoader
   BytePair get_item();
   
  private:
-  /**
-   * Read key-value data from files.
-   */
+  /** Read key-value data from files. */
   void extract_target_files();
 
   /// Intermediate file directory
@@ -77,7 +75,7 @@ class BinaryFileDataLoader : public DataLoader
   std::ifstream fin_;
 
   /// Job configuration
-  const JobConf &conf_;
+  std::shared_ptr<JobConf> conf_;
 };
 
 class MQDataLoader : public DataLoader
@@ -87,10 +85,10 @@ class MQDataLoader : public DataLoader
   MQDataLoader(std::shared_ptr<MessageQueue> mq) : mq_(mq) {}
 
   /// Copy/Move are not allowed
-  MQDataLoader(const MQDataLoader &) = delete;
-  MQDataLoader &operator=(const MQDataLoader &) = delete;
-  MQDataLoader(MQDataLoader &&) = delete;
-  MQDataLoader &operator=(MQDataLoader &&) = delete;
+  MQDataLoader(const MQDataLoader&) = delete;
+  MQDataLoader& operator=(const MQDataLoader&) = delete;
+  MQDataLoader(MQDataLoader&&) = delete;
+  MQDataLoader& operator=(MQDataLoader&&) = delete;
 
   /**
    * Return key-value pair item from MessageQueue.
@@ -102,9 +100,9 @@ class MQDataLoader : public DataLoader
   std::shared_ptr<MessageQueue> mq_;
 };
 
-} // namespace proc
-} // namespace mapreduce
+}  // namespace proc
+}  // namespace mapreduce
 
 #include "simplemapreduce/proc/loader.tcc"
 
-#endif
+#endif  // SIMPLEMAPREDUCE_PROC_LOADER_H_

@@ -15,16 +15,29 @@ namespace mapreduce {
 namespace data {
 
 /**
- * FIFO queue to store shared text data
+ * FIFO queue to store key/value byte data.
  */
 class MessageQueue
 {
  public:
   MessageQueue() {};
-  MessageQueue(const MessageQueue &);
+  MessageQueue(const MessageQueue&);
 
   BytePair receive();
+
+  /**
+   * Send data to storage.
+   * The format can be either
+   *  - (ByteData, ByteData)
+   *  - std::pair<ByteData, ByteData>
+   */
+  void send(ByteData&&, ByteData&&);
   void send(BytePair&&);
+
+  /**
+   * Signal as end of pushing new data.
+   * This is simply pushing empty data pair to the end of the queue.
+   */
   void end();
 
  private:
@@ -33,7 +46,7 @@ class MessageQueue
   std::condition_variable cond_;
 };
 
-} // namespace data
-} // namespace mapreduce
+}  // namespace data
+}  // namespace mapreduce
 
-#endif
+#endif  // SIMPLEMAPREDUCE_DATA_QUEUE_H_

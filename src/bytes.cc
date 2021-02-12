@@ -13,13 +13,13 @@ ByteData::ByteData(double data) { set_data_<double>(data); }
 ByteData::ByteData(const std::string &data) { set_data(std::move(data)); }
 
 /// Copy
-ByteData::ByteData(const ByteData &rhs)
+ByteData::ByteData(const ByteData& rhs)
 {
   this->data_ = rhs.data_;
   this->size_ = rhs.size_;
 }
 
-ByteData &ByteData::operator=(const ByteData &rhs)
+ByteData& ByteData::operator=(const ByteData& rhs)
 {
   if (this == &rhs)
     return *this;
@@ -30,13 +30,13 @@ ByteData &ByteData::operator=(const ByteData &rhs)
 }
 
 /// Move
-ByteData::ByteData(ByteData &&rhs)
+ByteData::ByteData(ByteData&& rhs)
 {
   this->data_ = std::move(rhs.data_);
   this->size_ = rhs.size_;
 }
 
-ByteData &ByteData::operator=(ByteData &&rhs)
+ByteData& ByteData::operator=(ByteData&& rhs)
 {
   this->data_ = std::move(rhs.data_);
   this->size_ = rhs.size_;
@@ -54,10 +54,10 @@ void ByteData::set_data(std::string data)
   data_ = std::vector<char>(data.data(), data.data() + data.size());
   size_ = data.size();
 }
-void ByteData::set_data(int *data, const size_t &size) { set_data_<int>(data, size); }
-void ByteData::set_data(long *data, const size_t &size) { set_data_<long>(data, size); }
-void ByteData::set_data(float *data, const size_t &size) { set_data_<float>(data, size); }
-void ByteData::set_data(double *data, const size_t &size) { set_data_<double>(data, size); }
+void ByteData::set_data(int* data, const size_t& size) { set_data_<int>(data, size); }
+void ByteData::set_data(long* data, const size_t& size) { set_data_<long>(data, size); }
+void ByteData::set_data(float* data, const size_t& size) { set_data_<float>(data, size); }
+void ByteData::set_data(double* data, const size_t& size) { set_data_<double>(data, size); }
 
 template<> int ByteData::get_data() const { return get_data_<int>(); }
 template<> long ByteData::get_data() const { return get_data_<long>(); }
@@ -94,10 +94,10 @@ std::vector<double> ByteData::get_data() const
   return out;
 }
 
-template<> void ByteData::push_back(int &value) { push_back_<int>(value); }
-template<> void ByteData::push_back(long &value) { push_back_<long>(value); }
-template<> void ByteData::push_back(float &value) { push_back_<float>(value); }
-template<> void ByteData::push_back(double &value) { push_back_<double>(value); }
+template<> void ByteData::push_back(int& value) { push_back_<int>(value); }
+template<> void ByteData::push_back(long& value) { push_back_<long>(value); }
+template<> void ByteData::push_back(float& value) { push_back_<float>(value); }
+template<> void ByteData::push_back(double& value) { push_back_<double>(value); }
 
-} // namespace data
-} // namespace mapreduce
+}  // namespace data
+}  // namespace mapreduce

@@ -1,5 +1,5 @@
-#ifndef SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H
-#define SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H
+#ifndef SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H_
+#define SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H_
 
 #include <filesystem>
 #include <string>
@@ -15,15 +15,15 @@ class FileFormat final
   FileFormat() {};
   ~FileFormat() {};
 
-  FileFormat &operator=(const FileFormat &rhs);
+  FileFormat& operator=(const FileFormat& rhs);
 
   /// not allowed to copy nor move constructor/assignments
   /// since there is no useful cases
-  FileFormat(FileFormat const &rhs) = delete;
-  FileFormat &operator=(FileFormat &&rhs) = delete;
+  FileFormat(const FileFormat& rhs) = delete;
+  FileFormat& operator=(FileFormat&& rhs) = delete;
 
   /** Add directory path containing input files */
-  void add_input_path(const std::string &path) { input_paths_.push_back(std::move(path)); }
+  void add_input_path(const std::string& path) { input_paths_.push_back(std::move(path)); }
 
   /**
    * Get all input files from registered paths.
@@ -35,7 +35,7 @@ class FileFormat final
   std::vector<std::string> get_input_file_paths();
 
   /** Set target directory path to save output files */
-  void set_output_path(const std::string &path) { output_path_ = std::move(path); }
+  void set_output_path(const std::string& path) { output_path_ = std::move(path); }
 
   /** Get target output path */
   fs::path get_output_path() const { return output_path_; }
@@ -49,4 +49,4 @@ class FileFormat final
 
 } // namespace mapreduce
 
-#endif
+#endif  // SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H_

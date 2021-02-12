@@ -36,7 +36,7 @@ class Sorter
    * Each execution handles each file groped ID.
    * This will create a new map with values grouped by the given key.
    * 
-   *  @return map<K, std::vector<V>>&  map of vectors grouped by sorting process
+   *  @return   map of vectors grouped by sorting process
    */
   std::map<K, std::vector<V>> run();
 
@@ -46,9 +46,9 @@ class Sorter
   std::unique_ptr<DataLoader> loader_;
 };
 
-} // namespace proc
-} // namespace mapreduce
+}  // namespace proc
+}  // namespace mapreduce
 
 #include "simplemapreduce/proc/sorter.tcc"
 
-#endif
+#endif  // SIMPLEMAPREDUCE_PROC_SORTER_H_

@@ -5,7 +5,7 @@
 namespace mapreduce {
 namespace data {
 
-MessageQueue::MessageQueue(const MessageQueue &rhs)
+MessageQueue::MessageQueue(const MessageQueue& rhs)
 {
   this->queue_ = std::move(rhs.queue_);
 }
@@ -21,7 +21,12 @@ BytePair MessageQueue::receive()
   return data;
 }
 
-void MessageQueue::send(BytePair &&data)
+void MessageQueue::send(ByteData&& key, ByteData&& value)
+{
+  this->send(std::make_pair(std::move(key), std::move(value)));
+}
+
+void MessageQueue::send(BytePair&& data)
 {
   std::lock_guard<std::mutex> lock{mq_mutex_};
 

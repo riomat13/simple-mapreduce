@@ -19,10 +19,10 @@ namespace mapreduce {
 namespace proc {
 
 /**
- * Read data from binary.
+ * Write data as binary to file stream.
  *
- *  @param filestream&  target file stream to write data
- *  @param data&        data to be stored the read data
+ *  @param filestream  target file stream to write data
+ *  @param data        data to be stored the read data
  */
 template <typename T>
 void write_binary(std::ofstream&, const T&);
@@ -30,11 +30,11 @@ void write_binary(std::ofstream&, const T&);
 /**
  * Format value to output.
  *
- *  @param filestream&  target file stream to write data
- *  @param data&        data to be stored the read data
+ *  @param filestream  target file stream to write data
+ *  @param data        data to be stored the read data
  */
 template <typename T>
-void write_output(std::ofstream&, T&);
+void write_output(std::ofstream&, const T&);
 
 /** Base class to write data used by context. */
 class Writer
@@ -58,7 +58,7 @@ class BinaryFileWriter : public Writer
   /**
    * Constructor Binary data writing class.
    *
-   *  @param path&  file path to write the data
+   *  @param path  file path to write the data
    */
   BinaryFileWriter(const fs::path &path);
   BinaryFileWriter(const std::string &path);
@@ -102,7 +102,7 @@ class OutputWriter : public Writer
   /**
    * Constructor
    *
-   *  @param path& target file path to write data
+   *  @param path  target file path to write data
    */
   OutputWriter(const fs::path&);
   OutputWriter(const std::string&);
@@ -115,9 +115,9 @@ class OutputWriter : public Writer
   std::ofstream fout_;
 };
 
-} // namespace proc
-} // namespace mapreduce
+}  // namespace proc
+}  // namespace mapreduce
 
 #include "simplemapreduce/proc/writer.tcc"
 
-#endif
+#endif  // SIMPLEMAPREDUCE_PROC_WRITER_H_

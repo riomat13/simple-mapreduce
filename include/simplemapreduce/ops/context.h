@@ -30,10 +30,10 @@ class Context
    * Send provided key and value item
    * This will convery to binary format and then pass to processor.
    * 
-   *  @param key&   key item to be written
-   *  @param value& value item to be written
+   *  @param key   key item to be written
+   *  @param value value item to be written
    */
-  void write(K &key, V &value) const ;
+  void write(K& key, V& value) const ;
 
  private:
   std::unique_ptr<Writer> writer_ = nullptr;
@@ -43,4 +43,4 @@ class Context
 
 #include "simplemapreduce/ops/context.tcc"
 
-#endif
+#endif  // SIMPLEMAPREDUCE_OPS_CONTEXT_H_

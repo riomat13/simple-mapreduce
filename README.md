@@ -28,7 +28,8 @@ The directory is structured as following.
 ├─ app/                  # put main task of mapreduce
 |   ├─ CMakeLists.txt    # cmake file for main task
 |   ├─ sourcelist.cmake  # put all source file used in the mapreduce task
-|   └─ word_count.cc     # example mapreduce task
+|   ├─ movielens/        # example app to compute movie rating mean
+|   └─ wordcount/        # example app to count words in texts
 |
 ├─ cmake/          # contains files used for build
 ├─ include/        # directory containing documents and related items
@@ -225,8 +226,12 @@ int main(int &, char *[])
   fmt.add_input_path("./inputs");
   fmt.set_output_path("./outputs");
 
-  Job<SomeMapper, SomeReducer> job{};
+  Job job{};
   job.set_file_format(fmt);
+
+  /// Set Mapper and Reducer (pass as template name)
+  job.set_mapper<SomeMapper>();
+  job.set_reducer<SomeReducer>();
 
   job.run();  // execute mapreduce task
 
@@ -288,6 +293,8 @@ Additionally, made sure other processes were idle or ran few processes which wou
 ### 4.3 Result
 
 The performance is tested with original dataset (100K files) and preprocessed dataset (50 files, see section 4.1).
+The tests are run three times each and took the middle.
+Time score can be very vary so that this is just an example result.
 
 The first table shows results from original dataset.
 
@@ -299,7 +306,7 @@ and the following one is from preprocessed dataset.
 
 | Baseline | SimpleMapReduce</br>(1 machine, 1 master, 3 workers) | SimpleMapReduce</br>(2 machines, 1 master, 7 workers) |
 |--|--|--|
-| 22.295 sec. | 12.913 sec. | 8.599 sec. |
+| 22.295 sec. | 11.717 sec. | 8.086 sec. |
 
 The time in baseline becomes shorter after preprocessed,
 because the task have to open much less files than the original one.
