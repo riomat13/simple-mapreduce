@@ -34,8 +34,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<int>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -61,8 +61,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<long>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -88,8 +88,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<float>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -115,8 +115,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<double>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 

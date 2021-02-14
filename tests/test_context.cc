@@ -21,9 +21,9 @@ class TestWriter : public Writer
   TestWriter(std::vector<BytePair>& v) : vec_(v) {}
   ~TestWriter() {}
 
-  void write(const ByteData& key, const ByteData& value)
+  void write(ByteData&& key, ByteData&& value)
   {
-    vec_.emplace_back(key, value);
+    vec_.emplace_back(std::move(key), std::move(value));
   }
 
  private:

@@ -75,6 +75,11 @@ class ByteData
   /** Get data as bytes in char array. */
   const char* get_byte() { return data_.data(); }
 
+  /** Get a length of the data. */
+  size_t size() const { return size_; }
+  /** Get a size of the byte array. */
+  size_t bsize() const { return data_.size(); }
+
   /** Check if data is empty. */
   bool empty() { return data_.empty(); }
 
@@ -111,8 +116,8 @@ class ByteData
 
   std::vector<char> data_;
 
-  /// Length of values in the original data type
-  /// If the data size is unknown, set as 0.
+  /// Length of values in the original data type.
+  /// If the data is single primitive type, the size is set as 0.
   size_t size_{0};
 };
 

@@ -53,9 +53,9 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1 > bdata2);
 
     ByteData bdata3{value};
-    REQUIRE(bdata3.get_data<int>() == value);
+    REQUIRE(bdata3.get_data<long>() == value);
     REQUIRE(bdata1 == bdata3);
-    REQUIRE(bdata1.get_data<int>() == bdata3.get_data<int>());
+    REQUIRE(bdata1.get_data<long>() == bdata3.get_data<long>());
   }
 
   SECTION("float")
@@ -71,7 +71,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1 > bdata2);
 
     ByteData bdata3{value};
-    REQUIRE(bdata1.get_data<double>() == Approx(bdata3.get_data<double>()));
+    REQUIRE(bdata1.get_data<float>() == Approx(bdata3.get_data<float>()));
   }
 
   SECTION("double")

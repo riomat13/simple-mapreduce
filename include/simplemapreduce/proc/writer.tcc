@@ -24,12 +24,12 @@ BinaryFileWriter<K, V>::~BinaryFileWriter()
 }
 
 template <typename K, typename V>
-void BinaryFileWriter<K, V>::write(const ByteData& key, const ByteData& value)
+void BinaryFileWriter<K, V>::write(ByteData&& key, ByteData&& value)
 {
   std::lock_guard<std::mutex> lock(mr_mutex_);
 
-  write_binary<K>(fout_, key.get_data<K>());
-  write_binary<V>(fout_, value.get_data<V>());
+  write_binary(fout_, std::move(key));
+  write_binary(fout_, std::move(value));
 }
 
 template <typename K, typename V>
@@ -49,7 +49,7 @@ OutputWriter<K, V>::~OutputWriter()
 }
 
 template <typename K, typename V>
-void OutputWriter<K, V>::write(const ByteData& key, const ByteData& value)
+void OutputWriter<K, V>::write(ByteData&& key, ByteData&& value)
 {
   std::lock_guard<std::mutex> lock(mr_mutex_);
 

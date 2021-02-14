@@ -16,8 +16,6 @@ void ByteData::set_data_(T& data)
   data_.clear();
   char* buff = reinterpret_cast<char*>(&data);
   data_ = std::vector<char>(buff, buff + sizeof(T));
-
-  size_ = 1;
 }
 
 template <typename T>
@@ -34,7 +32,9 @@ T ByteData::get_data_() const
 {
   T data;
   /// Only used on the same machine so no need to consider endianness
-  std::memcpy(&data, data_.data(), sizeof(T) * size_);
+  size_ ? std::memcpy(&data, data_.data(), sizeof(T) * size_)
+        : std::memcpy(&data, data_.data(), sizeof(T));
+
   return data;
 }
 

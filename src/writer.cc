@@ -6,12 +6,28 @@
 #include <thread>
 #include <utility>
 
-typedef std::numeric_limits<float> lim_float;
-typedef std::numeric_limits<double> lim_double;
+#include "simplemapreduce/data/bytes.h"
+
+namespace {
+  using lim_float = std::numeric_limits<float>;
+  using lim_double = std::numeric_limits<double>;
+}
+
 namespace mapreduce {
 namespace proc {
 
-template <>
+template<>
+void write_binary(std::ofstream& fout, ByteData&& bdata)
+{
+  if (bdata.size() > 0)
+  {
+    size_t data_size = bdata.size();
+    fout.write(reinterpret_cast<char*>(&data_size), sizeof(size_t));
+  }
+  fout.write(bdata.get_byte(), bdata.bsize());
+}
+
+template<>
 void write_binary(std::ofstream& fout, const std::string& data)
 {
   /// Store string size and the chars
@@ -20,61 +36,61 @@ void write_binary(std::ofstream& fout, const std::string& data)
   fout.write(data.c_str(), data_size);
 }
 
-template <>
-void write_binary(std::ofstream& fout, const int& data)
+template<>
+void write_binary(std::ofstream& fout, int&& data)
 {
   fout.write(reinterpret_cast<char*>(const_cast<int*>(&data)), sizeof(int));
 }
 
-template <>
-void write_binary(std::ofstream& fout, const long& data)
+template<>
+void write_binary(std::ofstream& fout, long&& data)
 {
   fout.write(reinterpret_cast<char*>(const_cast<long*>(&data)), sizeof(long));
 }
 
-template <>
-void write_binary(std::ofstream& fout, const float& data)
+template<>
+void write_binary(std::ofstream& fout, float&& data)
 {
   fout.write(reinterpret_cast<char*>(const_cast<float*>(&data)), sizeof(float));
 }
 
-template <>
-void write_binary(std::ofstream& fout, const double& data)
+template<>
+void write_binary(std::ofstream& fout, double&& data)
 {
   fout.write(reinterpret_cast<char*>(const_cast<double*>(&data)), sizeof(double));
 }
 
-template <>
+template<>
 void write_output(std::ofstream& fout, const std::string& data)
 {
   fout << std::left << std::setw(10) << data;
 }
 
-template <>
+template<>
 void write_output(std::ofstream& fout, const int& data)
 {
   fout << std::right << std::setw(6) << data;
 }
 
-template <>
+template<>
 void write_output(std::ofstream& fout, const long& data)
 {
   fout << std::right << std::setw(10) << data;
 }
 
-template <>
+template<>
 void write_output(std::ofstream& fout, const float& data)
 {
   fout << std::right << std::fixed << std::setprecision(lim_float::max_digits10) << data;
 }
 
-template <>
+template<>
 void write_output(std::ofstream& fout, const double& data)
 {
   fout << std::right << std::fixed << std::setprecision(lim_double::max_digits10) << data;
 }
 
-void MQWriter::write(const ByteData& key, const ByteData& value)
+void MQWriter::write(ByteData&& key, ByteData&& value)
 {
   mq_->send(std::make_pair(std::move(key), std::move(value)));
 }

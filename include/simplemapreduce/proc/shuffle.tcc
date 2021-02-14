@@ -48,7 +48,7 @@ void Shuffle<K, V>::run()
   while (!data.first.empty())
   {
     int id = hash(data.first.get_data<K>());
-    fouts_[id]->write(data.first, data.second);
+    fouts_[id]->write(std::move(data.first), std::move(data.second));
 
     /// Get new one after processed
     data = mq_->receive();
