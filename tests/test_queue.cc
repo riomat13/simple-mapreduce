@@ -19,7 +19,7 @@ TEST_CASE("MessageQueue", "[mq]")
     MessageQueue mq;
 
     std::string target_key{"test"};
-    ByteData key(target_key);
+    ByteData key{std::string(target_key)};
     int target_value{1};
     ByteData value(target_value);
 
@@ -45,7 +45,7 @@ TEST_CASE("MessageQueue", "[mq]")
     MessageQueue mq;
 
     std::string target_key{"test"};
-    ByteData key(target_key);
+    ByteData key{std::string(target_key)};
     double target_value{0.123456789};
     ByteData value(target_value);
 

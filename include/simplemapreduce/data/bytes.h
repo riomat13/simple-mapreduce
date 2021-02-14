@@ -16,7 +16,8 @@ class ByteData
   explicit ByteData(long);
   explicit ByteData(float);
   explicit ByteData(double);
-  ByteData(const std::string&);
+  /// Only reference is accepted to avoid copy
+  ByteData(std::string&&);
 
   ByteData(const ByteData&);
   ByteData &operator=(const ByteData&);
@@ -32,11 +33,12 @@ class ByteData
    *
    *  @param data   input data (int, long, float, double, string)
    */
-  void set_data(int);
-  void set_data(long);
-  void set_data(float);
-  void set_data(double);
-  void set_data(std::string);
+  void set_data(int) noexcept;
+  void set_data(long) noexcept;
+  void set_data(float) noexcept;
+  void set_data(double) noexcept;
+  /// Only reference is accepted to avoid copy
+  void set_data(std::string&&) noexcept;
 
   /**
    * Set array data.
@@ -72,6 +74,11 @@ class ByteData
 
   /** Get data as bytes in char array. */
   const char* get_byte() { return data_.data(); }
+
+  /** Get a length of the data. */
+  size_t size() const { return size_; }
+  /** Get a size of the byte array. */
+  size_t bsize() const { return data_.size(); }
 
   /** Check if data is empty. */
   bool empty() { return data_.empty(); }
@@ -109,8 +116,8 @@ class ByteData
 
   std::vector<char> data_;
 
-  /// Length of values in the original data type
-  /// If the data size is unknown, set as 0.
+  /// Length of values in the original data type.
+  /// If the data is single primitive type, the size is set as 0.
   size_t size_{0};
 };
 

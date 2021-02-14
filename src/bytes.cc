@@ -10,7 +10,7 @@ ByteData::ByteData(int data) { set_data_<int>(data); }
 ByteData::ByteData(long data) { set_data_<long>(data); }
 ByteData::ByteData(float data) { set_data_<float>(data); }
 ByteData::ByteData(double data) { set_data_<double>(data); }
-ByteData::ByteData(const std::string &data) { set_data(std::move(data)); }
+ByteData::ByteData(std::string&& data) { set_data(std::move(data)); }
 
 /// Copy
 ByteData::ByteData(const ByteData& rhs)
@@ -44,11 +44,11 @@ ByteData& ByteData::operator=(ByteData&& rhs)
 }
 
 /// Single values
-void ByteData::set_data(int data) { set_data_<int>(data); }
-void ByteData::set_data(long data) { set_data_<long>(data); }
-void ByteData::set_data(float data) { set_data_<float>(data); }
-void ByteData::set_data(double data) { set_data_<double>(data); }
-void ByteData::set_data(std::string data)
+void ByteData::set_data(int data) noexcept { set_data_<int>(data); }
+void ByteData::set_data(long data) noexcept { set_data_<long>(data); }
+void ByteData::set_data(float data) noexcept { set_data_<float>(data); }
+void ByteData::set_data(double data) noexcept { set_data_<double>(data); }
+void ByteData::set_data(std::string&& data) noexcept
 {
   data_.clear();
   data_ = std::vector<char>(data.data(), data.data() + data.size());

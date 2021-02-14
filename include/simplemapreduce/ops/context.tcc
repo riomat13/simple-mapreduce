@@ -30,8 +30,7 @@ Context<K, V>& Context<K, V>::operator=(Context&& rhs)
 template <typename K, typename V>
 void Context<K, V>::write(K& key, V& value) const
 {
-  ByteData k(key), v(value);
-  writer_->write(k, v);
+  writer_->write(ByteData{std::move(key)}, ByteData{std::move(value)});
 }
 
 } // namespace mapreduce

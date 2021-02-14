@@ -34,8 +34,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<int>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -61,8 +61,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<long>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -88,8 +88,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<float>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -115,8 +115,8 @@ TEST_CASE("load_data", "[binary][read][file]")
     /// Write bytes data to a file
     {
       std::ofstream ofs(fpath, std::ios::binary);
-      for (auto& val: targets)
-        write_binary<double>(ofs, val);
+      for (auto val: targets)
+        write_binary(ofs, ByteData{val});
       ofs.close();
     }
 
@@ -207,7 +207,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
       res[data.first].push_back(data.second);
 
     for (auto& key: keys)
-      target_keys.emplace_back(key);
+      target_keys.emplace_back(std::move(key));
 
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
@@ -288,7 +288,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
       res[data.first].push_back(data.second);
 
     for (auto& key: keys)
-      target_keys.emplace_back(key);
+      target_keys.emplace_back(std::move(key));
 
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
@@ -346,9 +346,9 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
   SECTION("string/int")
   {
     std::vector<BytePair> targets{
-      {ByteData("test"), ByteData(10)},
-      {ByteData("example"), ByteData(-5)},
-      {ByteData("test"), ByteData(20)}
+      {ByteData(std::string{"test"}), ByteData(10)},
+      {ByteData(std::string{"example"}), ByteData(-5)},
+      {ByteData(std::string{"test"}), ByteData(20)}
     };
 
     for (auto& kv: targets)
@@ -374,8 +374,8 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
   SECTION("string/long")
   {
     std::vector<BytePair> targets{
-      {ByteData("test"), ByteData(1357902468l)},
-      {ByteData("example"), ByteData(-54019283l)},
+      {ByteData(std::string{"test"}), ByteData(1357902468l)},
+      {ByteData(std::string{"example"}), ByteData(-54019283l)},
     };
 
     for (auto& kv: targets)

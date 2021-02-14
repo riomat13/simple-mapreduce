@@ -25,7 +25,7 @@ namespace proc {
  *  @param data        data to be stored the read data
  */
 template <typename T>
-void write_binary(std::ofstream&, const T&);
+void write_binary(std::ofstream&, T&&);
 
 /**
  * Format value to output.
@@ -42,7 +42,7 @@ class Writer
  public:
   virtual ~Writer() = default;
 
-  virtual void write(const ByteData&, const ByteData&) = 0;
+  virtual void write(ByteData&&, ByteData&&) = 0;
 };
 
 /**
@@ -65,7 +65,7 @@ class BinaryFileWriter : public Writer
   ~BinaryFileWriter();
 
   /* Write data to file */
-  void write(const ByteData&, const ByteData&);
+  void write(ByteData&&, ByteData&&);
 
   /* Return current set path */
   const std::string &get_path() { return path_; }
@@ -85,7 +85,7 @@ class MQWriter : public Writer
   ~MQWriter() {};
 
   /* Save data to Message Queue */
-  void write(const ByteData&, const ByteData&);
+  void write(ByteData&&, ByteData&&);
 
  private:
   std::shared_ptr<MessageQueue> mq_ = nullptr;
@@ -109,7 +109,7 @@ class OutputWriter : public Writer
   ~OutputWriter();
 
   /* Write data to output file */
-  void write(const ByteData&, const ByteData&);
+  void write(ByteData&&, ByteData&&);
 
  private:
   std::ofstream fout_;
