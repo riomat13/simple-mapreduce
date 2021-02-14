@@ -9,11 +9,10 @@ using namespace mapreduce::data;
 
 TEST_CASE("ByteData", "[byte][data]")
 {
-  ByteData bdata1;
-  ByteData bdata2;
-
   SECTION("Constructor")
   {
+    ByteData bdata1, bdata2;
+
     int value = 10;
     bdata1 = ByteData(value);
     REQUIRE(bdata1.get_data<int>() == 10);
@@ -24,57 +23,95 @@ TEST_CASE("ByteData", "[byte][data]")
 
   SECTION("int")
   {
-    bdata1.set_data(10);
-    REQUIRE(bdata1.get_data<int>() == 10);
+    ByteData bdata1, bdata2;
+    int value = 10;
 
-    bdata2.set_data(10);
+    bdata1.set_data(value);
+    REQUIRE(bdata1.get_data<int>() == value);
+
+    bdata2.set_data(value);
     REQUIRE(bdata1 == bdata2);
     bdata2.set_data(20);
     REQUIRE(bdata1 < bdata2);
+
+    ByteData bdata3{value};
+    REQUIRE(bdata3.get_data<int>() == value);
+    REQUIRE(bdata1 == bdata3);
+    REQUIRE(bdata1.get_data<int>() == bdata3.get_data<int>());
   }
 
   SECTION("long")
   {
-    bdata1.set_data(123456789l);
-    REQUIRE(bdata1.get_data<long>() == 123456789l);
-    bdata2.set_data(123456789l);
+    ByteData bdata1, bdata2;
+    long value = 123456789l;
+
+    bdata1.set_data(value);
+    REQUIRE(bdata1.get_data<long>() == value);
+    bdata2.set_data(value);
     REQUIRE(bdata1 == bdata2);
     bdata2.set_data(20l);
     REQUIRE(bdata1 > bdata2);
+
+    ByteData bdata3{value};
+    REQUIRE(bdata3.get_data<int>() == value);
+    REQUIRE(bdata1 == bdata3);
+    REQUIRE(bdata1.get_data<int>() == bdata3.get_data<int>());
   }
 
   SECTION("float")
   {
-    bdata1.set_data(10.234f);
-    REQUIRE(bdata1.get_data<float>() == Approx(10.234f));
-    bdata2.set_data(10.234f);
+    ByteData bdata1, bdata2;
+    float value = 10.234f;
+
+    bdata1.set_data(value);
+    REQUIRE(bdata1.get_data<float>() == Approx(value));
+    bdata2.set_data(value);
     REQUIRE(bdata1 == bdata2);
     bdata2.set_data(1.234f);
     REQUIRE(bdata1 > bdata2);
+
+    ByteData bdata3{value};
+    REQUIRE(bdata1.get_data<double>() == Approx(bdata3.get_data<double>()));
   }
 
   SECTION("double")
   {
-    bdata1.set_data(1.23456789012345);
-    REQUIRE(bdata1.get_data<double>() == Approx(1.23456789012345));
-    bdata2.set_data(1.23456789012345);
+    ByteData bdata1, bdata2;
+    double value = 1.23456789012345;
+
+    bdata1.set_data(value);
+    REQUIRE(bdata1.get_data<double>() == Approx(value));
+    bdata2.set_data(value);
     REQUIRE(bdata1 == bdata2);
     bdata2.set_data(9.123456789012345);
     REQUIRE(bdata1 < bdata2);
+
+    ByteData bdata3{value};
+    REQUIRE(bdata1.get_data<double>() == Approx(bdata3.get_data<double>()));
   }
 
   SECTION("string")
   {
-    bdata1.set_data("test");
+    using namespace std::string_literals;
+
+    ByteData bdata1, bdata2;
+
+    bdata1.set_data(std::string("test"));
     REQUIRE(bdata1.get_data<std::string>() == "test");
-    bdata2.set_data("test");
+    bdata2.set_data("test"s);
     REQUIRE(bdata1 == bdata2);
-    bdata2.set_data("example");
+    bdata2.set_data("example"s);
     REQUIRE(bdata1 > bdata2);
+
+    ByteData bdata3{"example"s};
+    REQUIRE(bdata2 == bdata3);
+    REQUIRE(bdata2.get_data<std::string>() == bdata3.get_data<std::string>());
   }
 
   SECTION("int_array")
   {
+    ByteData bdata1, bdata2;
+
     std::vector<int> arr{1, 2, 3, 4};
     bdata1.set_data(arr.data(), arr.size());
 
@@ -84,6 +121,8 @@ TEST_CASE("ByteData", "[byte][data]")
 
   SECTION("double_bytes_array")
   {
+    ByteData bdata1, bdata2;
+
     /// Create byte array to store
     std::vector<double> target{1.23456, 2.34567, -3.45678, 4.56789};
     char *buff = reinterpret_cast<char *>(target.data());

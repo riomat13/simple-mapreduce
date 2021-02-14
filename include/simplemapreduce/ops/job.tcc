@@ -351,7 +351,7 @@ void Job::run_map_tasks()
 
     /// Read data from text file
     /// Start map task asynchronously
-    ByteData key{input}, value{1};
+    ByteData key{std::move(input)}, value{1};
     mapper_->run(key, value);
 
     /// Notify the map task is finished

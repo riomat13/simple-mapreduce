@@ -16,7 +16,8 @@ class ByteData
   explicit ByteData(long);
   explicit ByteData(float);
   explicit ByteData(double);
-  ByteData(const std::string&);
+  /// Only reference is accepted to avoid copy
+  ByteData(std::string&&);
 
   ByteData(const ByteData&);
   ByteData &operator=(const ByteData&);
@@ -32,11 +33,12 @@ class ByteData
    *
    *  @param data   input data (int, long, float, double, string)
    */
-  void set_data(int);
-  void set_data(long);
-  void set_data(float);
-  void set_data(double);
-  void set_data(std::string);
+  void set_data(int) noexcept;
+  void set_data(long) noexcept;
+  void set_data(float) noexcept;
+  void set_data(double) noexcept;
+  /// Only reference is accepted to avoid copy
+  void set_data(std::string&&) noexcept;
 
   /**
    * Set array data.

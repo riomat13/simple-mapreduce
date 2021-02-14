@@ -53,7 +53,7 @@ class BinFileReader
       T value;
       ifs.read(reinterpret_cast<char*>(&value), sizeof(T));
 
-      items.emplace_back(ByteData(key), ByteData(value));
+      items.emplace_back(ByteData(std::move(key)), ByteData(std::move(value)));
     }
   }
 

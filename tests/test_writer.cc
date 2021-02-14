@@ -95,7 +95,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     int val = 1;
     {
       BinaryFileWriter<std::string, int> writer(testdir / fpath);
-      writer.write(ByteData(key), ByteData(val));
+      writer.write(ByteData{std::string(key)}, ByteData(val));
     }
 
     /// Check read key and value pair matchs items writtin by the writer
@@ -109,7 +109,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     long val = 123456789l;
     {
       BinaryFileWriter<std::string, long> writer(testdir / fpath);
-      ByteData key_(key), value_(val);
+      ByteData key_{std::string(key)}, value_(val);
       writer.write(key_, value_);
     }
 
@@ -124,7 +124,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     float val = 0.1;
     {
       BinaryFileWriter<std::string, float> writer(testdir / fpath);
-      ByteData key_(key), value_(val);
+      ByteData key_{std::string(key)}, value_(val);
       writer.write(key_, value_);
     }
 
@@ -139,7 +139,7 @@ TEST_CASE("BinaryFileWriter", "[writer]")
     double val = 1.23456789;
     {
       BinaryFileWriter<std::string, double> writer(testdir / fpath);
-      ByteData key_(key), value_(val);
+      ByteData key_{std::string(key)}, value_(val);
       writer.write(key_, value_);
     }
 
@@ -161,7 +161,7 @@ bool mqwriter_test(Writer& writer, MQ& mq,
   {
     for (auto& val: values)
     {
-      ByteData key(kw), value(val);
+      ByteData key{std::string(kw)}, value(std::move(val));
       writer.write(key, value);
     }
   }
@@ -224,7 +224,7 @@ TEST_CASE("OutputWriter", "[writer]")
 
     {
       OutputWriter<std::string, int> writer(testdir / fname);
-      ByteData key_(key), value_(value);
+      ByteData key_{std::string(key)}, value_(value);
       writer.write(key_, value_);
     }
 
@@ -247,7 +247,7 @@ TEST_CASE("OutputWriter", "[writer]")
 
     {
       OutputWriter<std::string, long> writer(testdir / fname);
-      ByteData key_(key), value_(value);
+      ByteData key_{std::string(key)}, value_(value);
       writer.write(key_, value_);
     }
 
@@ -270,7 +270,7 @@ TEST_CASE("OutputWriter", "[writer]")
 
     {
       OutputWriter<std::string, float> writer(testdir / fname);
-      ByteData key_(key), value_(value);
+      ByteData key_{std::string(key)}, value_(value);
       writer.write(key_, value_);
     }
 
@@ -293,7 +293,7 @@ TEST_CASE("OutputWriter", "[writer]")
 
     {
       OutputWriter<std::string, double> writer(testdir / fname);
-      ByteData key_(key), value_(value);
+      ByteData key_{std::string(key)}, value_(value);
       writer.write(key_, value_);
     }
 
