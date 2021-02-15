@@ -3,6 +3,9 @@
 
 #include <functional>
 #include <numeric>
+
+namespace mapreduce {
+
 #ifdef HAS_TBB
 #include <execution>
 
@@ -18,5 +21,7 @@
 // Macro to calculate average
 // The output will be double
 #define REDUCE_MEAN(a) static_cast<double>(REDUCE_SUM(a)) / a.size()
+
+}  // namespace mapreduce
 
 #endif  // SIMPLEMAPREDUCE_OPS_FUNC_H_

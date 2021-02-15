@@ -11,10 +11,6 @@
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
 
-namespace fs = std::filesystem;
-
-using namespace mapreduce::data;
-
 namespace mapreduce {
 namespace proc {
 
@@ -42,7 +38,7 @@ class Writer
  public:
   virtual ~Writer() = default;
 
-  virtual void write(ByteData&&, ByteData&&) = 0;
+  virtual void write(mapreduce::data::ByteData&&, mapreduce::data::ByteData&&) = 0;
 };
 
 /**
@@ -60,12 +56,12 @@ class BinaryFileWriter : public Writer
    *
    *  @param path  file path to write the data
    */
-  BinaryFileWriter(const fs::path &path);
+  BinaryFileWriter(const std::filesystem::path &path);
   BinaryFileWriter(const std::string &path);
   ~BinaryFileWriter();
 
   /* Write data to file */
-  void write(ByteData&&, ByteData&&);
+  void write(mapreduce::data::ByteData&&, mapreduce::data::ByteData&&);
 
   /* Return current set path */
   const std::string &get_path() { return path_; }
@@ -81,14 +77,14 @@ class MQWriter : public Writer
 {
  public:
 
-  MQWriter(std::shared_ptr<MessageQueue> mq) : mq_(mq) {};
+  MQWriter(std::shared_ptr<mapreduce::data::MessageQueue> mq) : mq_(mq) {};
   ~MQWriter() {};
 
   /* Save data to Message Queue */
-  void write(ByteData&&, ByteData&&);
+  void write(mapreduce::data::ByteData&&, mapreduce::data::ByteData&&);
 
  private:
-  std::shared_ptr<MessageQueue> mq_ = nullptr;
+  std::shared_ptr<mapreduce::data::MessageQueue> mq_ = nullptr;
 };
 
 /**
@@ -104,12 +100,12 @@ class OutputWriter : public Writer
    *
    *  @param path  target file path to write data
    */
-  OutputWriter(const fs::path&);
+  OutputWriter(const std::filesystem::path&);
   OutputWriter(const std::string&);
   ~OutputWriter();
 
   /* Write data to output file */
-  void write(ByteData&&, ByteData&&);
+  void write(mapreduce::data::ByteData&&, mapreduce::data::ByteData&&);
 
  private:
   std::ofstream fout_;

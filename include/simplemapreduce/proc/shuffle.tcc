@@ -5,13 +5,11 @@
 
 #include <mpi.h>
 
-namespace fs = std::filesystem;
-
 namespace mapreduce {
 namespace proc {
 
 template <typename K, typename V>
-Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue> mq, std::shared_ptr<JobConf> conf)
+Shuffle<K, V>::Shuffle(std::shared_ptr<mapreduce::data::MessageQueue> mq, std::shared_ptr<mapreduce::JobConf> conf)
     : conf_(conf), mq_(std::move(mq))
 {
   std::ostringstream oss_rank;
@@ -22,10 +20,10 @@ Shuffle<K, V>::Shuffle(std::shared_ptr<MessageQueue> mq, std::shared_ptr<JobConf
     /// Create each file path to store intermediate states
     std::ostringstream oss_id;
     oss_id << std::setw(5) << std::setfill('0') << i;
-    fs::path filename = oss_rank.str() + "-" + oss_id.str();
+    std::filesystem::path filename = oss_rank.str() + "-" + oss_id.str();
 
     /// Set writer with the file defined above
-    fouts_.push_back(std::make_unique<BinaryFileWriter<K, V>>((conf_->tmpdir / filename).string()));
+    fouts_.push_back(std::make_unique<mapreduce::proc::BinaryFileWriter<K, V>>((conf_->tmpdir / filename).string()));
   }
 }
 

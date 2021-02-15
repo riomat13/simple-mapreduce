@@ -2,7 +2,7 @@ namespace mapreduce {
 namespace proc {
 
 template <typename K, typename V>
-BinaryFileDataLoader<K, V>::BinaryFileDataLoader(std::shared_ptr<JobConf> conf) : conf_(conf)
+BinaryFileDataLoader<K, V>::BinaryFileDataLoader(std::shared_ptr<mapreduce::JobConf> conf) : conf_(conf)
 {
   extract_target_files();
   fin_.open(fpaths_.back(), std::ios::binary);
@@ -12,7 +12,7 @@ BinaryFileDataLoader<K, V>::BinaryFileDataLoader(std::shared_ptr<JobConf> conf) 
 template <typename K, typename V>
 void BinaryFileDataLoader<K, V>::extract_target_files()
 {
-  for (auto& p: fs::directory_iterator(conf_->tmpdir))
+  for (auto& p: std::filesystem::directory_iterator(conf_->tmpdir))
   {
     if (!p.is_regular_file())
       continue;
@@ -35,10 +35,10 @@ void BinaryFileDataLoader<K, V>::extract_target_files()
 }
 
 template <typename K, typename V>
-BytePair BinaryFileDataLoader<K, V>::get_item()
+mapreduce::data::BytePair BinaryFileDataLoader<K, V>::get_item()
 {
   /// Load key data
-  ByteData key;
+  mapreduce::data::ByteData key;
   while (true)
   {
     key = load_byte_data<K>(fin_);
@@ -46,7 +46,7 @@ BytePair BinaryFileDataLoader<K, V>::get_item()
     {
       fin_.close();
       if (fpaths_.empty())
-        return std::make_pair(std::move(key), ByteData());
+        return std::make_pair(std::move(key), mapreduce::data::ByteData());
 
       fin_.open(fpaths_.back(), std::ios::binary);
       fpaths_.pop_back();

@@ -2,6 +2,8 @@
 
 #include <string>
 
+using namespace mapreduce::data;
+
 namespace mapreduce {
 namespace proc {
 

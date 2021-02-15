@@ -13,6 +13,9 @@
 #include "simplemapreduce/proc/writer.h"
 #include "simplemapreduce/util/log.h"
 
+namespace fs = std::filesystem;
+
+using namespace mapreduce::commons;
 using namespace mapreduce::data;
 using namespace mapreduce::proc;
 using namespace mapreduce::util;
@@ -271,7 +274,7 @@ void Job::run_map_tasks()
     /// Read data from text file
     std::string input;
     {
-      std::lock_guard<std::mutex> lock(mr_mutex_);
+      std::lock_guard<std::mutex> lock(mr_mutex);
       std::ifstream ifs(target_path);
       std::stringstream ss;
       ss << ifs.rdbuf();

@@ -4,6 +4,12 @@
 #include <mutex>
 #include <thread>
 
-static std::mutex mr_mutex_;
+namespace mapreduce {
+namespace commons {
+
+static std::mutex mr_mutex;
+
+}  // namespace commons
+}  // namespace mapreduce
 
 #endif

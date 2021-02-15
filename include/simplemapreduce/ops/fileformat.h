@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-namespace fs = std::filesystem;
-
 namespace mapreduce {
 
 class FileFormat final
@@ -38,13 +36,13 @@ class FileFormat final
   void set_output_path(const std::string& path) { output_path_ = std::move(path); }
 
   /** Get target output path */
-  fs::path get_output_path() const { return output_path_; }
+  std::filesystem::path get_output_path() const { return output_path_; }
 
  private:
   /// directory paths to read input files
   std::vector<std::string> input_paths_;
   /// target directory path to save files
-  fs::path output_path_;
+  std::filesystem::path output_path_;
 };
 
 } // namespace mapreduce

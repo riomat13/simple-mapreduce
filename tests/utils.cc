@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+namespace fs = std::filesystem;
+
 fs::path tmpdir = fs::temp_directory_path() / "test_smr";
 
 void clear_file(const fs::path& path)

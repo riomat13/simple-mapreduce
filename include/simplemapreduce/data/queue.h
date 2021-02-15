@@ -23,7 +23,7 @@ class MessageQueue
   MessageQueue() {};
   MessageQueue(const MessageQueue&);
 
-  BytePair receive();
+  mapreduce::data::BytePair receive();
 
   /**
    * Send data to storage.
@@ -31,8 +31,8 @@ class MessageQueue
    *  - (ByteData, ByteData)
    *  - std::pair<ByteData, ByteData>
    */
-  void send(ByteData&&, ByteData&&);
-  void send(BytePair&&);
+  void send(mapreduce::data::ByteData&&, mapreduce::data::ByteData&&);
+  void send(mapreduce::data::BytePair&&);
 
   /**
    * Signal as end of pushing new data.
@@ -41,7 +41,7 @@ class MessageQueue
   void end();
 
  private:
-  std::deque<BytePair> queue_;
+  std::deque<mapreduce::data::BytePair> queue_;
   std::mutex mq_mutex_;
   std::condition_variable cond_;
 };

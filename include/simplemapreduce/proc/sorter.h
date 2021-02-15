@@ -11,8 +11,6 @@
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/proc/loader.h"
 #include "simplemapreduce/ops/conf.h"
-
-using namespace mapreduce::data;
 namespace mapreduce {
 namespace proc {
 
@@ -29,7 +27,7 @@ class Sorter
    * 
    *  @param loader DataLoader unique pointer
    */
-  Sorter(std::unique_ptr<DataLoader> loader) : loader_(std::move(loader)) {}
+  Sorter(std::unique_ptr<mapreduce::proc::DataLoader> loader) : loader_(std::move(loader)) {}
 
   /**
    * Execute sorting.
@@ -43,7 +41,7 @@ class Sorter
  private:
 
   /// File data loader
-  std::unique_ptr<DataLoader> loader_;
+  std::unique_ptr<mapreduce::proc::DataLoader> loader_;
 };
 
 }  // namespace proc

@@ -10,7 +10,7 @@ void Reducer<IK, IV, OK, OV>::run()
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-void Reducer<IK, IV, OK, OV>::run_(std::shared_ptr<MessageQueue> mq)
+void Reducer<IK, IV, OK, OV>::run_(std::shared_ptr<mapreduce::data::MessageQueue> mq)
 {
   /// Grouping data by the keys from mapped data
   auto sorter = this->get_sorter(mq);
@@ -24,7 +24,7 @@ void Reducer<IK, IV, OK, OV>::run_(std::shared_ptr<MessageQueue> mq)
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-void Reducer<IK, IV, OK, OV>::run_(const fs::path& outpath)
+void Reducer<IK, IV, OK, OV>::run_(const std::filesystem::path& outpath)
 {
   /// Grouping data by the keys from shuffled data
   auto sorter = this->get_sorter();

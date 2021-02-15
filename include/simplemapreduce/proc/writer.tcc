@@ -6,7 +6,7 @@ namespace mapreduce {
 namespace proc {
 
 template <typename K, typename V>
-BinaryFileWriter<K, V>::BinaryFileWriter(const fs::path& path) : path_(std::move(path))
+BinaryFileWriter<K, V>::BinaryFileWriter(const std::filesystem::path& path) : path_(std::move(path))
 {
   fout_.open(path_, std::ios::binary | std::ios::trunc);
 };
@@ -24,16 +24,16 @@ BinaryFileWriter<K, V>::~BinaryFileWriter()
 }
 
 template <typename K, typename V>
-void BinaryFileWriter<K, V>::write(ByteData&& key, ByteData&& value)
+void BinaryFileWriter<K, V>::write(mapreduce::data::ByteData&& key, mapreduce::data::ByteData&& value)
 {
-  std::lock_guard<std::mutex> lock(mr_mutex_);
+  std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
 
   write_binary(fout_, std::move(key));
   write_binary(fout_, std::move(value));
 }
 
 template <typename K, typename V>
-OutputWriter<K, V>::OutputWriter(const fs::path& path) {
+OutputWriter<K, V>::OutputWriter(const std::filesystem::path& path) {
   fout_.open(path, std::ios::out | std::ios::ate);
 };
 
@@ -49,9 +49,9 @@ OutputWriter<K, V>::~OutputWriter()
 }
 
 template <typename K, typename V>
-void OutputWriter<K, V>::write(ByteData&& key, ByteData&& value)
+void OutputWriter<K, V>::write(mapreduce::data::ByteData&& key, mapreduce::data::ByteData&& value)
 {
-  std::lock_guard<std::mutex> lock(mr_mutex_);
+  std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
 
   write_output<K>(fout_, key.get_data<K>());
   fout_ << "\t";

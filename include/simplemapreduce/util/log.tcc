@@ -39,7 +39,7 @@ namespace util {
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
     *buff << "\033[0;92m[INFO] ";
     log_stdout_root(*buff, args...);
     return buff;
@@ -52,7 +52,7 @@ namespace util {
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
     *buff << "[DEBUG] ";
     log_stdout_root(*buff, args...);
     return buff;
@@ -65,7 +65,7 @@ namespace util {
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
     *buff << "\033[0;33m[WARNING] ";
     log_stderr_root(*buff, args...);
     return buff;
@@ -78,7 +78,7 @@ namespace util {
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
     *buff << "\033[0;91m[ERROR] ";
     log_stderr_root(*buff, args...);
     return buff;
@@ -91,7 +91,7 @@ namespace util {
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
     *buff << "\033[1;35m[URGENT] ";
     log_stderr_root(*buff, args...);
     return buff;

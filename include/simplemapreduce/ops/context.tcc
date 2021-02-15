@@ -1,16 +1,11 @@
 #include "simplemapreduce/ops/context.h"
 
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 
 #include <mpi.h>
 
 #include "simplemapreduce/data/bytes.h"
-
-namespace fs = std::filesystem;
-
-using namespace mapreduce::data;
 
 namespace mapreduce {
 
@@ -30,7 +25,7 @@ Context<K, V>& Context<K, V>::operator=(Context&& rhs)
 template <typename K, typename V>
 void Context<K, V>::write(K& key, V& value) const
 {
-  writer_->write(ByteData{std::move(key)}, ByteData{std::move(value)});
+  writer_->write(mapreduce::data::ByteData{std::move(key)}, mapreduce::data::ByteData{std::move(value)});
 }
 
 } // namespace mapreduce
