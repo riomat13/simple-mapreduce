@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
   Job job{argc, argv};
   job.set_file_format(fmt);
-  job.set_config("log_level", 2);
+  job.set_config("log_level", mapreduce::util::LogLevel::INFO);
   job.set_mapper<RatingMeanMapper>();
   job.set_reducer<RatingMeanReducer>();
 

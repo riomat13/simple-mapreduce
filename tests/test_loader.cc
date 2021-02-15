@@ -1,5 +1,6 @@
 #include "simplemapreduce/proc/loader.h"
 
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -15,6 +16,9 @@
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/proc/writer.h"
 
+namespace fs = std::filesystem;
+
+using namespace mapreduce;
 using namespace mapreduce::data;
 using namespace mapreduce::proc;
 

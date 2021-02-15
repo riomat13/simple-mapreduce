@@ -39,6 +39,7 @@ set(UTEST_NAME simplemr-utests)
 set(LIB_SOURCES
   ${PROJECT_SOURCE_DIR}/../src/bytes.cc
   ${PROJECT_SOURCE_DIR}/../src/fileformat.cc
+  ${PROJECT_SOURCE_DIR}/../src/job.cc
   ${PROJECT_SOURCE_DIR}/../src/loader.cc
   ${PROJECT_SOURCE_DIR}/../src/log.cc
   ${PROJECT_SOURCE_DIR}/../src/queue.cc
@@ -60,6 +61,7 @@ else()
       test_fileformat.cc
       test_func.cc
       test_loader.cc
+      test_log.cc
       test_queue.cc
       test_shuffle.cc
       test_sorter.cc

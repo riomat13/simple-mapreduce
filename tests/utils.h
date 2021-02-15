@@ -11,20 +11,15 @@
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/proc/loader.h"
 
-namespace fs = std::filesystem;
-
-using namespace mapreduce::data;
-using namespace mapreduce::proc;
-
 /// Directory to store all temporary files for testing
-extern fs::path tmpdir;
+extern std::filesystem::path tmpdir;
 
 /**
  * Clear all content in a file with given path.
  *
  *  @param path  target file path to clear data
  */
-void clear_file(const fs::path& path);
+void clear_file(const std::filesystem::path& path);
 
 /**
  * Extract files in the given directory.
@@ -34,7 +29,7 @@ void clear_file(const fs::path& path);
  *  @param path        directory path to parse
  *  @param container   vector to store extracted file paths
  */
-void extract_files(const fs::path&, std::vector<fs::path>&);
+void extract_files(const std::filesystem::path&, std::vector<std::filesystem::path>&);
 
 /**
  * Compare map with key and values.
@@ -68,27 +63,27 @@ bool check_map_items(std::map<K, std::vector<V>>& input,
   return true;
 }
 
-class TestDataLoader : public DataLoader
+class TestDataLoader : public mapreduce::proc::DataLoader
 {
  public:
-  TestDataLoader(std::vector<BytePair>& input) : kv_items_(std::move(input))
+  TestDataLoader(std::vector<mapreduce::data::BytePair>& input) : kv_items_(std::move(input))
   {
   };
 
-  BytePair get_item()
+  mapreduce::data::BytePair get_item()
   {
     /// Return empty once consumed all elements
     if (kv_items_.empty())
-      return std::make_pair(ByteData(), ByteData());
+      return std::make_pair(mapreduce::data::ByteData(), mapreduce::data::ByteData());
 
     /// Take item one by one
-    BytePair item = std::move(kv_items_.back());
+    mapreduce::data::BytePair item = std::move(kv_items_.back());
     kv_items_.pop_back();
     return item;
   }
 
  private:
-  std::vector<BytePair> kv_items_;
+  std::vector<mapreduce::data::BytePair> kv_items_;
 };
 
 #endif

@@ -8,10 +8,10 @@
 
 #include "simplemapreduce/data/bytes.h"
 
-namespace {
-  using lim_float = std::numeric_limits<float>;
-  using lim_double = std::numeric_limits<double>;
-}
+using lim_float = std::numeric_limits<float>;
+using lim_double = std::numeric_limits<double>;
+
+using namespace mapreduce::data;
 
 namespace mapreduce {
 namespace proc {

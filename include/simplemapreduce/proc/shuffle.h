@@ -11,8 +11,6 @@
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/proc/writer.h"
 
-using namespace mapreduce::data;
-
 namespace mapreduce {
 namespace proc {
 
@@ -40,7 +38,7 @@ class Shuffle : public ShuffleJob
    *  @param mq     data cotainer to process
    *  @param conf   Configuration set in Job class
    */
-  Shuffle(std::shared_ptr<MessageQueue>, std::shared_ptr<JobConf>);
+  Shuffle(std::shared_ptr<mapreduce::data::MessageQueue>, std::shared_ptr<mapreduce::JobConf>);
   ~Shuffle() {};
 
   /// Not use for copy/move and to avoid accidentaly pass objects
@@ -57,16 +55,16 @@ class Shuffle : public ShuffleJob
 
  private:
   /// Job configuration
-  std::shared_ptr<JobConf> conf_;
+  std::shared_ptr<mapreduce::JobConf> conf_;
 
   /// Hash function to group the intermediate states
   int hash(const K&);
 
   /// Message Queue to get data to process
-  std::shared_ptr<MessageQueue> mq_ = nullptr;
+  std::shared_ptr<mapreduce::data::MessageQueue> mq_ = nullptr;
 
   /// BinaryFileWriter for each grouping after shuffled
-  std::vector<std::unique_ptr<BinaryFileWriter<K, V>>> fouts_;
+  std::vector<std::unique_ptr<mapreduce::proc::BinaryFileWriter<K, V>>> fouts_;
 };
 
 }  // namespace proc

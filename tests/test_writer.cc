@@ -14,9 +14,8 @@
 #include "simplemapreduce/data/queue.h"
 
 namespace fs = std::filesystem;
-#include "simplemapreduce/util/log.h"
-using namespace mapreduce::util;
 
+using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
 /**

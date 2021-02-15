@@ -1,136 +1,151 @@
+#include <memory>
+
 namespace mapreduce {
 namespace util {
 
+  template <typename Arg>
+  LogBuffer& LogBuffer::operator<<(Arg&& arg)
+  {
+    oss << arg;
+    return *this;
+  }
+
   /// Reference: https://stackoverflow.com/a/50923834
   template <typename ...Args>
-  void Logger::log(const unsigned int &log_level, Args&& ...args)
+  std::unique_ptr<LogBuffer> Logger::log(const LogLevel& log_level, Args&&... args)
   {
-    if (log_level > 5 || log_level < get_log_level())
-    {
-      std::cerr << "[WARNING] Invalid input for logger" << std::endl;
-      return;
-    }
-
-    if (log_level == 2)
-      info(args...);
-    else if (log_level == 1)
-      debug(args...);
-    else if (log_level == 4)
-      error(args...);
-    else if (log_level == 3)
-      warning(args...);
-    else if (log_level == 5)
-      critical(args...);
+    if (log_level == LogLevel::INFO)
+      return info(args...);
+    else if (log_level == LogLevel::DEBUG)
+      return debug(args...);
+    else if (log_level == LogLevel::WARNING)
+      return warning(args...);
+    else if (log_level == LogLevel::ERROR)
+      return error(args...);
+    else if (log_level == LogLevel::CRITICAL)
+      return critical(args...);
     else
-      log_stdout_root(args...);
+    {
+      std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+      log_stdout_root(*buff, args...);
+      return buff;
+    }
   }
 
   template <typename ...Args>
-  void Logger::info(Args&& ...args)
+  std::unique_ptr<LogBuffer> Logger::info(Args&&... args)
   {
-    if (get_log_level() > 2) return;
+    if (get_log_level() > LogLevel::INFO) return nullptr;
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
-    OSS oss{};
-    oss << "\033[0;92m[INFO] ";
-    log_stdout_root(oss, args...);
+    std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
+    *buff << "\033[0;92m[INFO] ";
+    log_stdout_root(*buff, args...);
+    return buff;
   }
 
   template <typename ...Args>
-  void Logger::debug(Args&& ...args)
+  std::unique_ptr<LogBuffer> Logger::debug(Args&&... args)
   {
-    if (get_log_level() > 1) return;
+    if (get_log_level() > LogLevel::DEBUG) return nullptr;
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
-    OSS oss{};
-    oss << "[DEBUG] ";
-    log_stdout_root(oss, args...);
+    std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
+    *buff << "[DEBUG] ";
+    log_stdout_root(*buff, args...);
+    return buff;
   }
 
   template <typename ...Args>
-  void Logger::warning(Args&& ...args)
+  std::unique_ptr<LogBuffer> Logger::warning(Args&&... args)
   {
-    if (get_log_level() > 3) return;
+    if (get_log_level() > LogLevel::WARNING) return nullptr;
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
-    OSS oss{};
-    oss << "\033[0;33m[WARNING] ";
-    log_stderr_root(oss, args...);
+    std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
+    *buff << "\033[0;33m[WARNING] ";
+    log_stderr_root(*buff, args...);
+    return buff;
   }
 
   template <typename ...Args>
-  void Logger::error(Args&& ...args)
+  std::unique_ptr<LogBuffer> Logger::error(Args&&... args)
   {
-    if (get_log_level() > 4) return;
+    if (get_log_level() > LogLevel::ERROR) return nullptr;
 
-    std::lock_guard<std::mutex> lock(mr_mutex_);
-    OSS oss{};
-    oss << "\033[0;91m[ERROR] ";
-    log_stderr_root(oss, args...);
+    std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
+    *buff << "\033[0;91m[ERROR] ";
+    log_stderr_root(*buff, args...);
+    return buff;
   }
 
   template <typename ...Args>
-  void Logger::critical(Args&& ...args)
+  std::unique_ptr<LogBuffer> Logger::critical(Args&&... args)
   {
-    std::lock_guard<std::mutex> lock(mr_mutex_);
-    OSS oss{};
-    oss << "\033[1;31m[UREGENT] ";
-    log_stderr_root(oss, args...);
+    if (get_log_level() > LogLevel::CRITICAL) return nullptr;
+
+    std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+
+    std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
+    *buff << "\033[1;35m[URGENT] ";
+    log_stderr_root(*buff, args...);
+    return buff;
   }
 
   template <typename ...Args>
-  void Logger::log_stdout_root(OSS &oss, Args&& ...args)
+  void Logger::log_stdout_root(LogBuffer &buff, Args&&... args)
   {
     /// add timestamp to log stream
-    log_append_time_tag(oss);
+    log_append_time_tag(buff);
 
-    log_stdout(oss, args...);
-    oss << "\033[0m";
+    log_stdout(buff, args...);
+    buff << "\033[0m";
 
-    std::cout << oss.str() << std::endl;
-    oss.clear();
+    std::cout << buff.to_string() << std::endl;
   }
 
   template <typename ...Args>
-  void Logger::log_stderr_root(OSS &oss, Args&& ...args)
+  void Logger::log_stderr_root(LogBuffer &buff, Args&&... args)
   {
     /// add timestamp to log stream
-    log_append_time_tag(oss);
+    log_append_time_tag(buff);
 
-    log_stdout(oss, args...);
-    oss << "\033[0m";
+    log_stdout(buff, args...);
+    buff << "\033[0m";
 
-    std::cerr << oss.str() << std::endl;
-    oss.clear();
+    std::cerr << buff.to_string() << std::endl;
   }
 
   template <typename T>
-  void Logger::log_stdout(OSS &oss, T &t)
+  void Logger::log_stdout(LogBuffer &buff, T &t)
   {
-    oss << t;
+    buff << t;
   }
 
   template <typename T, typename ...Args>
-  void Logger::log_stdout(OSS &oss, T &t, Args&& ...args)
+  void Logger::log_stdout(LogBuffer &buff, T &t, Args&&... args)
   {
-    oss << t;
-    log_stdout(oss, args...);
+    buff << t;
+    log_stdout(buff, args...);
   }
 
   template <typename T>
-  void Logger::log_stderr(OSS &oss, T &t)
+  void Logger::log_stderr(LogBuffer &buff, T &t)
   {
-    oss << t;
+    buff << t;
   }
 
   template <typename T, typename ...Args>
-  void Logger::log_stderr(OSS &oss, T &t, Args ...args)
+  void Logger::log_stderr(LogBuffer &buff, T &t, Args... args)
   {
-    oss << t;
-    log_stderr(oss, args...);
+    buff << t;
+    log_stderr(buff, args...);
   }
 
 } // namespace util
 } // namespace mapreduce
-
-extern mapreduce::util::Logger logger;

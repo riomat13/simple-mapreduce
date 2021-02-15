@@ -8,8 +8,6 @@
 #include "simplemapreduce/commons.h"
 #include "simplemapreduce/proc/writer.h"
 
-using namespace mapreduce::proc;
-
 namespace mapreduce {
 
 /**
@@ -19,7 +17,7 @@ template <typename K, typename V>
 class Context
 {
  public:
-  Context(std::unique_ptr<Writer> writer) : writer_(std::move(writer)) {}
+  Context(std::unique_ptr<mapreduce::proc::Writer> writer) : writer_(std::move(writer)) {}
 
   Context(const Context&) = delete;
   Context &operator=(const Context&) = delete;
@@ -36,7 +34,7 @@ class Context
   void write(K& key, V& value) const ;
 
  private:
-  std::unique_ptr<Writer> writer_ = nullptr;
+  std::unique_ptr<mapreduce::proc::Writer> writer_ = nullptr;
 };
 
 } // namespace mapreduce

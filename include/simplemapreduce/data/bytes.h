@@ -121,7 +121,7 @@ class ByteData
   size_t size_{0};
 };
 
-typedef std::pair<ByteData, ByteData> BytePair;
+using BytePair =  std::pair<ByteData, ByteData>;
 
 }  // namespace data
 }  // namespace mapreduce

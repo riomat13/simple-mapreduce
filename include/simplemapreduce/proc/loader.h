@@ -1,7 +1,6 @@
 #ifndef SIMPLEMAPREDUCE_PROC_LOADER_H_
 #define SIMPLEMAPREDUCE_PROC_LOADER_H_
 
-#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <utility>
@@ -10,11 +9,6 @@
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/conf.h"
-
-namespace fs = std::filesystem;
-
-using namespace mapreduce;
-using namespace mapreduce::data;
 
 namespace mapreduce {
 namespace proc {
@@ -25,7 +19,7 @@ namespace proc {
  *  @param fin  input binary file stream
  */
 template <typename T>
-ByteData load_byte_data(std::ifstream&);
+mapreduce::data::ByteData load_byte_data(std::ifstream&);
 
 class DataLoader
 {
@@ -36,7 +30,7 @@ class DataLoader
    * Return key-value pair item until read all data from a file.
    * Return nullptr when reached eof.
    */
-  virtual BytePair get_item() = 0;
+  virtual mapreduce::data::BytePair get_item() = 0;
 };
 
 /**
@@ -46,7 +40,7 @@ template <typename K, typename V>
 class BinaryFileDataLoader : public DataLoader
 {
  public:
-  BinaryFileDataLoader(std::shared_ptr<JobConf>);
+  BinaryFileDataLoader(std::shared_ptr<mapreduce::JobConf>);
   ~BinaryFileDataLoader()
   {
     if (fin_.is_open())
@@ -63,26 +57,26 @@ class BinaryFileDataLoader : public DataLoader
    * Return key-value pair item until read all data from a file.
    * Once finished reading, return with invalid key.
    */
-  BytePair get_item();
+  mapreduce::data::BytePair get_item();
   
  private:
   /** Read key-value data from files. */
   void extract_target_files();
 
   /// Intermediate file directory
-  std::vector<fs::path> fpaths_;
+  std::vector<std::filesystem::path> fpaths_;
 
   std::ifstream fin_;
 
   /// Job configuration
-  std::shared_ptr<JobConf> conf_;
+  std::shared_ptr<mapreduce::JobConf> conf_;
 };
 
 class MQDataLoader : public DataLoader
 {
  public:
   MQDataLoader() {}
-  MQDataLoader(std::shared_ptr<MessageQueue> mq) : mq_(mq) {}
+  MQDataLoader(std::shared_ptr<mapreduce::data::MessageQueue> mq) : mq_(mq) {}
 
   /// Copy/Move are not allowed
   MQDataLoader(const MQDataLoader&) = delete;
@@ -94,10 +88,10 @@ class MQDataLoader : public DataLoader
    * Return key-value pair item from MessageQueue.
    * Once fetched all data, return with empty key.
    */
-  BytePair get_item();
+  mapreduce::data::BytePair get_item();
 
  private:
-  std::shared_ptr<MessageQueue> mq_;
+  std::shared_ptr<mapreduce::data::MessageQueue> mq_;
 };
 
 }  // namespace proc

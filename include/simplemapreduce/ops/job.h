@@ -2,7 +2,6 @@
 #define SIMPLEMAPREDUCE_OPS_JOB_H_
 
 #include <filesystem>
-#include <future>
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,12 +9,10 @@
 #include <mpi.h>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/base/job_tasks.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/fileformat.h"
-#include "simplemapreduce/ops/job_tasks.h"
-
-namespace fs = std::filesystem;
 
 namespace mapreduce {
 
@@ -60,13 +57,13 @@ class Job
    *
    *  @param fmt& FileFormat instance storing input/output directory path
    */
-  void set_file_format(FileFormat &fmt) { file_fmt_ = fmt; };
+  void set_file_format(mapreduce::FileFormat &fmt) { file_fmt_ = fmt; };
 
   /**
    * Set configurations for Job.
    */
-  void set_config(const std::string &key, const int &value);
-  void set_config(const std::string &key, const std::string &value);
+  template <typename T>
+  void set_config(const std::string &, T&&);
 
   /**
    * Setup Mapper.
@@ -114,7 +111,7 @@ class Job
    * Get file path of the last state
    * based on provided output path.
    */
-  fs::path get_output_file_path();
+  std::filesystem::path get_output_file_path();
 
   /**
    * Receive file path to process with Mapper from master node.
@@ -177,19 +174,19 @@ class Job
   unsigned int is_running{0};
 
   /// Job parameters
-  std::shared_ptr<JobConf> conf_ = std::make_shared<JobConf>();
+  std::shared_ptr<mapreduce::JobConf> conf_ = std::make_shared<mapreduce::JobConf>();
 
   /// Mapper instance
-  std::unique_ptr<MapperJob> mapper_ = nullptr;
+  std::unique_ptr<mapreduce::base::MapTask> mapper_ = nullptr;
 
   /// Combiner instance
-  std::unique_ptr<ReduceJob> combiner_ = nullptr;
+  std::unique_ptr<mapreduce::base::ReduceTask> combiner_ = nullptr;
 
   /// Reducer instance
-  std::unique_ptr<ReduceJob> reducer_ = nullptr;
+  std::unique_ptr<mapreduce::base::ReduceTask> reducer_ = nullptr;
 
   /// FileFormat instance
-  FileFormat file_fmt_;
+  mapreduce::FileFormat file_fmt_;
 
   /// Network parameters and statuses
   std::vector<MPI_Request> mpi_reqs;
