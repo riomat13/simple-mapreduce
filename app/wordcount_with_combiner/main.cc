@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
   job.set_file_format(fmt);
   job.set_config("n_groups", -1);
-  job.set_config("log_level", 2);
+  job.set_config("log_level", LogLevel::INFO);
 
   job.set_mapper<WordCountMapper>();
   job.set_reducer<WordCountReducer>();

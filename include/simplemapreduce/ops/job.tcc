@@ -98,8 +98,8 @@ void Job::set_reducer()
   reducer_->set_conf(conf_);
 }
 
-// TODO
-void Job::set_config(const std::string &key, const int &value)
+template <typename T>
+void Job::set_config(const std::string &key, T&& value)
 {
   if (key == "n_groups")
   {
@@ -119,7 +119,7 @@ void Job::set_config(const std::string &key, const int &value)
     }
   }
   else if (key == "log_level")
-    logger.set_log_level(value);
+    logger.set_log_level(LogLevel(value));
   else {
     if (conf_->worker_rank == 0)
       logger.warning("Invalid parameter key: ", key);
@@ -129,11 +129,6 @@ void Job::set_config(const std::string &key, const int &value)
   /// Only show the change from master node to avoid duplicates
   if (conf_->worker_rank == 0)
     logger.info("[Master] Config: ", key, "=", value);
-}
-
-// TODO
-void Job::set_config(const std::string&, const std::string&)
-{
 }
 
 void Job::setup_tmp_dir()

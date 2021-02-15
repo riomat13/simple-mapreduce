@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
                                    // (Note: even if this is set to small value,
                                    //  all workers will be used for other processes)
                                    // -1 for using all workers
-  job.set_config("log_level", 2);  // 1->debug, 2->info, 3->warning,...
+  job.set_config("log_level", LogLevel::INFO);
+                                   // DEBUG, INFO, WARNING, ERROR, CRITICAL, DISABLE
                                    // Disable logs which levels are less than it
 
   job.set_mapper<WordCountMapper>();

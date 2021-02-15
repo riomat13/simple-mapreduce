@@ -65,8 +65,8 @@ class Job
   /**
    * Set configurations for Job.
    */
-  void set_config(const std::string &key, const int &value);
-  void set_config(const std::string &key, const std::string &value);
+  template <typename T>
+  void set_config(const std::string &, T&&);
 
   /**
    * Setup Mapper.
