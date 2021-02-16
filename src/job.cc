@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <fstream>
+#include <future>
 #include <iomanip>
 #include <mutex>
 #include <sstream>
@@ -253,6 +254,18 @@ void Job::run_child_tasks()
 
 void Job::run_map_tasks()
 {
+  /// Send signal to notify enqueue step is finished
+  auto mq = mapper_->get_mq();
+
+  std::future<void> combiner_ftr;
+
+  if (combiner_ != nullptr)
+  {
+    /// Start Combiner
+    combiner_->set_mq(mq);
+    combiner_ftr = std::async(std::launch::async, [&]{ combiner_->run(); });
+  }
+
   while (true)
   {
     char req;
@@ -292,15 +305,15 @@ void Job::run_map_tasks()
     MPI_Send("\1", 1, MPI_CHAR, 0, TaskType::map_end, MPI_COMM_WORLD);
   }
 
-  /// Send signal to notify enqueue step is finished
-  auto mq = mapper_->get_mq();
+  /// Send signal to the end of Map
   mq->end();
 
-  if (combiner_ != nullptr)
+  if(combiner_ != nullptr)
   {
     logger.debug("[Worker] Running Combiner on worker ", conf_->worker_rank);
-    combiner_->set_mq(mq);
-    combiner_->run();
+    /// Wait until Combiner end and send signal to notify the end of the process
+    combiner_ftr.get();
+    mq->end();
   }
 
   logger.debug("[Worker] Finished Map on worker ", conf_->worker_rank);
