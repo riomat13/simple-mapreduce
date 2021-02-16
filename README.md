@@ -306,13 +306,13 @@ and the following one is from preprocessed dataset.
 
 | Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) | SimpleMapReduce</br>with Combiner</br>(2 PCs, 1 master, 7 workers)
 |--|--|--|--|
-| 22.295 sec. | 11.137 sec. | 7.532 sec. | 4.828 sec. |
+| 22.295 sec. | 11.137 sec. | 7.532 sec. | 4.585 sec. |
 
 The process time in baseline becomes slightly faster after preprocessed,
 because the task have to open much less files than the original one.
 However, it still took relatively long time, whereas MapReduce versions took less time.
 
-With *Combiner*, the processing becomes ***4.62x*** faster than baseline.
+With *Combiner*, the processing becomes ***4.86x*** faster than baseline.
 (The code is located at `app/wordcount_with_combiner/main.cc`)
 
 When reading 100K files, it involves many network communications which are overhead for this process,

@@ -4,10 +4,8 @@
 #include <fstream>
 #include <future>
 #include <iomanip>
-#include <mutex>
 #include <sstream>
 #include <stdexcept>
-#include <thread>
 #include <type_traits>
 
 #include "simplemapreduce/data/bytes.h"
@@ -285,21 +283,19 @@ void Job::run_map_tasks()
     logger.debug("[Worker] Assigned a file: \"", target_path, "\" to worker ", conf_->worker_rank);
 
     /// Read data from text file
-    std::string input;
     {
-      std::lock_guard<std::mutex> lock(mr_mutex);
       std::ifstream ifs(target_path);
-      std::stringstream ss;
-      ss << ifs.rdbuf();
+      std::ostringstream oss;
+      oss << ifs.rdbuf();
       ifs.close();
-      input = std::move(ss.str());
-      ss.clear();
-    }
 
-    /// Read data from text file
-    /// Start map task asynchronously
-    ByteData key{std::move(input)}, value{1};
-    mapper_->run(key, value);
+      /// Read data from text file
+      ByteData key{oss.str()}, value{1l};
+      oss.clear();
+
+      /// Start map task
+      mapper_->run(key, value);
+    }
 
     /// Notify the map task is finished
     MPI_Send("\1", 1, MPI_CHAR, 0, TaskType::map_end, MPI_COMM_WORLD);
