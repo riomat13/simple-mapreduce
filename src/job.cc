@@ -149,13 +149,10 @@ void Job::start_mapper_tasks()
 {
   logger.debug("[Master] Starting Map tasks");
 
-  /// Extract all files in input directories
-  std::vector<std::string> paths = file_fmt_.get_input_file_paths();
-
   /// Temporary data container to receive data from child node
   char tmp;
 
-  for (auto& path: paths)
+  for (std::string path = file_fmt_.get_filepath(); !path.empty(); path = file_fmt_.get_filepath())
   {
     /// Find available worker node
     /// This involves blocking until at least one connection is finished

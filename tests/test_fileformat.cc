@@ -13,17 +13,27 @@ namespace fs = std::filesystem;
 
 using namespace mapreduce;
 
+/** Create test empty files */
+void create_test_files(fs::path& dirpath, unsigned int n)
+{
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    std::ofstream ost(dirpath / std::to_string(i));
+    ost.close();
+  }
+}
+
 TEST_CASE("FileFormat", "[file]")
 {
   FileFormat ffmt;
 
   SECTION("input_file_paths")
   {
+    unsigned int count = 10;
     fs::path testdir = tmpdir / "test_fileformat";
     fs::create_directories(testdir);
 
     std::vector<fs::path> dirs{fs::path{"testdir1"}, fs::path{"testdir2"}};
-    std::vector<fs::path> files{fs::path{"text1"}, fs::path{"text2"}, fs::path{"text3"}};
 
     std::vector<std::string> targets;
 
@@ -32,22 +42,38 @@ TEST_CASE("FileFormat", "[file]")
       fs::path directory = testdir / dir;
       fs::create_directory(directory);
 
-      for (auto& file: files)
-      {
-        std::ofstream ost(directory / file);
-        ost.close();
+      create_test_files(directory, count);
 
-        targets.push_back((directory / file).string());
-      }
+      for (unsigned int i = 0; i < count; ++i)
+        targets.push_back(directory / std::to_string(i));
       
       /// Register multiple directories
       ffmt.add_input_path(directory);
+
+      /// Dummy directories
+      /// These paths should be ignored
+      fs::create_directories(directory / "dummy1");
+      fs::create_directories(directory / "dummy2");
     }
 
-    std::vector<std::string> paths = ffmt.get_input_file_paths();
+    std::vector<std::string> paths;
+
+    for (auto&& p = ffmt.get_filepath(); !p.empty(); p = ffmt.get_filepath())
+      paths.push_back(std::move(p));
 
     /// Check two vectors contains the same paths
-    REQUIRE(paths.size() == (dirs.size() * files.size()));
+    REQUIRE(paths.size() == (dirs.size() * count));
+    REQUIRE_THAT(paths, Catch::Matchers::UnorderedEquals(targets));
+
+    /// Reset and take one more time
+    paths.clear();
+    ffmt.reset_input_paths();
+
+    for (auto&& p = ffmt.get_filepath(); !p.empty(); p = ffmt.get_filepath())
+      paths.push_back(std::move(p));
+
+    /// Check two vectors contains the same paths
+    REQUIRE(paths.size() == (dirs.size() * count));
     REQUIRE_THAT(paths, Catch::Matchers::UnorderedEquals(targets));
 
     fs::remove_all(testdir);

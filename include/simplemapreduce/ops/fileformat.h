@@ -20,17 +20,18 @@ class FileFormat final
   FileFormat(const FileFormat& rhs) = delete;
   FileFormat& operator=(FileFormat&& rhs) = delete;
 
-  /** Add directory path containing input files */
-  void add_input_path(const std::string& path) { input_paths_.push_back(std::move(path)); }
-
   /**
-   * Get all input files from registered paths.
-   * Each call incurs parsing files.
-   * 
-   * This is intended to use only once in the entire execution,
-   * therefore, this will not save the data into memory such as array.
+   * Add directory path containing input files.
+   *
+   *  @param path   input directory path
    */
-  std::vector<std::string> get_input_file_paths();
+  void add_input_path(const std::string& path);
+
+  /** Get next file. */
+  std::string get_filepath();
+
+  /** Reset input file path extraction. */
+  void reset_input_paths() { input_idx_ = 0; };
 
   /** Set target directory path to save output files */
   void set_output_path(const std::string& path) { output_path_ = std::move(path); }
@@ -39,8 +40,15 @@ class FileFormat final
   std::filesystem::path get_output_path() const { return output_path_; }
 
  private:
+  /// Current input file path index in input_dirs_
+  size_t input_idx_{0};
+
+  /// Current directory iterator
+  std::filesystem::directory_iterator curr_;
+
   /// directory paths to read input files
-  std::vector<std::string> input_paths_;
+  std::vector<std::filesystem::path> input_dirs_;
+
   /// target directory path to save files
   std::filesystem::path output_path_;
 };

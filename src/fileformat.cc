@@ -1,5 +1,10 @@
 #include "simplemapreduce/ops/fileformat.h"
 
+#include <mutex>
+#include <thread>
+
+#include "simplemapreduce/commons.h"
+
 namespace fs = std::filesystem;
 
 namespace mapreduce {
@@ -10,29 +15,37 @@ namespace mapreduce {
     if (this == &rhs)
       return *this;
     
-    this->input_paths_.clear();
-    this->input_paths_ = std::move(rhs.input_paths_);
+    this->input_dirs_.clear();
+    this->input_dirs_ = std::move(rhs.input_dirs_);
+    this->curr_ = std::move(rhs.curr_);
     this->output_path_ = std::move(rhs.output_path_);
 
     return *this;
   }
 
-  std::vector<std::string> FileFormat::get_input_file_paths()
+  void FileFormat::add_input_path(const std::string& path)
   {
-    std::vector<std::string> paths;
+    input_dirs_.emplace_back(std::move(path));
+  }
 
-    /// parse each directory and store all regular file paths
-    for (std::string& dirpath: input_paths_)
+  std::string FileFormat::get_filepath()
+  {
+    std::lock_guard<std::mutex> lock_(mapreduce::commons::mr_mutex);
+
+    while (true)
     {
-      for (auto& fpath: fs::directory_iterator(dirpath))
+      if (curr_ == fs::end(curr_))
       {
-        if (!fpath.is_regular_file())
-          continue;
+        if (input_idx_ == input_dirs_.size())
+          return "";
 
-        paths.push_back(fpath.path());
+        curr_ = fs::directory_iterator(input_dirs_[input_idx_++]);
+      } else if (!fs::is_regular_file((*curr_).path())) {
+        ++curr_;
+      } else {
+        return (*(curr_++)).path().string();
       }
     }
-    return paths;
   }
 
 } // namespace mapreduce
