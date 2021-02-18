@@ -3,8 +3,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include <mpi.h>
-
 namespace mapreduce {
 namespace proc {
 

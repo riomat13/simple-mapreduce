@@ -91,13 +91,11 @@ void test_runner(std::vector<K>& target_keys, const unsigned int& count)
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
-  FileFormat ffmt;
-  ffmt.add_input_path(input_dir);
-  ffmt.set_output_path(output_dir);
-
   /// Setup MapReduce Job
   Job job;
-  job.set_file_format(ffmt);
+  job.add_input_path(input_dir);
+  job.set_output_path(output_dir);
+
   job.set_config("log_level", 4);
 
   job.template set_mapper<TestMapper<K, V>>();
@@ -169,13 +167,10 @@ void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& 
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
-  FileFormat ffmt;
-  ffmt.add_input_path(input_dir);
-  ffmt.set_output_path(output_dir);
-
   /// Setup MapReduce Job
   Job job;
-  job.set_file_format(ffmt);
+  job.add_input_path(input_dir);
+  job.set_output_path(output_dir);
   job.set_config("log_level", 4);
 
   job.template set_mapper<TestMapper<K, V>>();

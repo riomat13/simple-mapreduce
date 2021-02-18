@@ -33,13 +33,12 @@ class WordCountReducer
 int main(int argc, char *argv[])
 {
   /// Set directory paths to handle data
-  mapreduce::FileFormat fmt{};
-  fmt.add_input_path("./inputs");
-  fmt.set_output_path("./outputs");
 
   mapreduce::Job job{argc, argv};
 
-  job.set_file_format(fmt);
+  //job.add_input_path("../data/inputs-reviews-double");
+  //job.set_output_path("./outputs");
+
   job.set_config("n_groups", -1);
   job.set_config("log_level", mapreduce::util::LogLevel::INFO);
 

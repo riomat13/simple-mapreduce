@@ -53,11 +53,20 @@ class Job
   Job &operator=(Job&&) = delete;
 
   /**
-   * Set paths of input and output files
+   * Add directory path containing input files.
    *
-   *  @param fmt& FileFormat instance storing input/output directory path
+   *  @param path   input directory path
    */
-  void set_file_format(mapreduce::FileFormat &fmt) { file_fmt_ = fmt; };
+  void add_input_path(const std::string&);
+
+  /**
+   * Add directory path to store output files.
+   * Note that if already set by command line argument,
+   * raise warning and skip this.
+   *
+   *  @param path   output directory path
+   */
+  void set_output_path(const std::string&);
 
   /**
    * Set configurations for Job.
@@ -170,8 +179,10 @@ class Job
    */
   void cleanup_temps();
 
-  /// Worker flag to check if running
-  unsigned int is_running{0};
+  /// Worker flag to valid to run.
+  /// Set to false if not going to run,
+  /// which is when -h/--help option is passed.
+  bool is_valid_{true};
 
   /// Job parameters
   std::shared_ptr<mapreduce::JobConf> conf_ = std::make_shared<mapreduce::JobConf>();
@@ -186,7 +197,7 @@ class Job
   std::unique_ptr<mapreduce::base::ReduceTask> reducer_ = nullptr;
 
   /// FileFormat instance
-  mapreduce::FileFormat file_fmt_;
+  mapreduce::FileFormat file_fmt_{};
 
   /// Network parameters and statuses
   std::vector<MPI_Request> mpi_reqs;

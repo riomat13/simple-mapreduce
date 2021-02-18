@@ -32,12 +32,7 @@ class RatingMeanReducer : public Reducer<long, double, long, double>
 
 int main(int argc, char *argv[])
 {
-  FileFormat fmt;
-  fmt.add_input_path("./inputs");
-  fmt.set_output_path("./outputs");
-
   Job job{argc, argv};
-  job.set_file_format(fmt);
   job.set_config("log_level", mapreduce::util::LogLevel::INFO);
   job.set_mapper<RatingMeanMapper>();
   job.set_reducer<RatingMeanReducer>();

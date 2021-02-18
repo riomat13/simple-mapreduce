@@ -122,13 +122,21 @@ so change directory to root and execute `run_task` with *MPI*.
 ```sh
 # change directory to root
 $ cd ../..
-$ mpirun [options] ./run_task
+
+# to see options for MapReduce app
+$ ./run_task --help
+
+# set input/output directories with -i/--input and -o/--output options
+$ mpirun [options] ./run_task --input ./inputs --output ./outputs
+
+# if there are multiple input directories, separate by commas
+$ mpirun [options] ./run_task -i ./inputs1,./inputs2,./inputs3 -o ./outputs
 
 # for instance,
 # use all node on the local machine
 $ mpirun ./run_task
 # use machines set in `host_file` and 4 nodes in total
-$ mpirun -np 4 --hostfile host_file ./run_task
+$ mpirun -np 4 --hostfile host_file ./run_task  -i ./inputs -o ./outputs
 ```
 
 If you need root privilages to execute `mpirun`, create a user and run with `su -c`.
@@ -222,12 +230,13 @@ class SomeReducer : public Reducer<in_key_type,
 
 int main(int &, char *[])
 {
-  FileFormat fmt{};
-  fmt.add_input_path("./inputs");
-  fmt.set_output_path("./outputs");
-
   Job job{};
-  job.set_file_format(fmt);
+
+  /// Set input/output directories, if you would like to set on source file.
+  /// However, recommended to pass by command line arguments instead for flexibility
+  job.add_input_path("./inputs1");
+  job.add_input_path("./inputs2");
+  job.set_output_path("./outputs");   // command line argument will override this
 
   /// Set Mapper and Reducer (pass as template name)
   job.set_mapper<SomeMapper>();

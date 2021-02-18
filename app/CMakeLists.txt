@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.10)
 
 project(simplemr-task LANGUAGES CXX)
 
+if(UNIX AND NOT APPLE)
+  set(USED_OS "Linux")
+elseif(APPLE)
+  set(USED_OS "MacOS")
+elseif(UNIX)
+  set(USED_OS "Unix")
+elseif(WIN32)
+  set(USED_OS "Win32")
+endif()
+
+if(NOT USED_OS STREQUAL "Linux")
+  message(SEND_ERROR "Currently only work on Linux")
+endif()
+
 set(SIMPLEMR_BUILD_APP_TYPE "wordcount" CACHE INTERNAL "App name to build")
 
 # MPI

@@ -3,8 +3,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <mpi.h>
-
 #include "simplemapreduce/data/bytes.h"
 
 namespace mapreduce {

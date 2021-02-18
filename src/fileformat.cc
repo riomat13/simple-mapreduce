@@ -4,8 +4,11 @@
 #include <thread>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/util/log.h"
 
 namespace fs = std::filesystem;
+
+using namespace mapreduce::util;
 
 namespace mapreduce {
   
@@ -28,14 +31,25 @@ namespace mapreduce {
     input_dirs_.emplace_back(std::move(path));
   }
 
+  void FileFormat::add_input_paths(const std::vector<std::string>& paths)
+  {
+    input_dirs_.insert(input_dirs_.end(), paths.begin(), paths.end());
+  }
+
+  void FileFormat::set_output_path(const std::string& path)
+  {
+    if (!output_path_.empty())
+      logger.warning("Output path is already set.");
+    else
+      output_path_ = std::move(path);
+  }
+
   std::string FileFormat::get_filepath()
   {
     std::lock_guard<std::mutex> lock_(mapreduce::commons::mr_mutex);
 
-    while (true)
-    {
-      if (curr_ == fs::end(curr_))
-      {
+    while (true) {
+      if (curr_ == fs::end(curr_)) {
         if (input_idx_ == input_dirs_.size())
           return "";
 

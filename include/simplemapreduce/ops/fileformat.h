@@ -13,19 +13,26 @@ class FileFormat final
   FileFormat() {};
   ~FileFormat() {};
 
-  FileFormat& operator=(const FileFormat& rhs);
+  FileFormat& operator=(const FileFormat&);
 
   /// not allowed to copy nor move constructor/assignments
   /// since there is no useful cases
-  FileFormat(const FileFormat& rhs) = delete;
-  FileFormat& operator=(FileFormat&& rhs) = delete;
+  FileFormat(const FileFormat&) = delete;
+  FileFormat& operator=(FileFormat&&) = delete;
 
   /**
    * Add directory path containing input files.
    *
    *  @param path   input directory path
    */
-  void add_input_path(const std::string& path);
+  void add_input_path(const std::string&);
+
+  /**
+   * Add multiple directory paths containing input files.
+   *
+   *  @param paths  input directory paths
+   */
+  void add_input_paths(const std::vector<std::string>&);
 
   /** Get next file. */
   std::string get_filepath();
@@ -34,7 +41,7 @@ class FileFormat final
   void reset_input_paths() { input_idx_ = 0; };
 
   /** Set target directory path to save output files */
-  void set_output_path(const std::string& path) { output_path_ = std::move(path); }
+  void set_output_path(const std::string& path);
 
   /** Get target output path */
   std::filesystem::path get_output_path() const { return output_path_; }
