@@ -12,4 +12,4 @@ static std::mutex mr_mutex;
 }  // namespace commons
 }  // namespace mapreduce
 
-#endif
+#endif  // SIMPLEMAPREDUCE_COMMONS_H_

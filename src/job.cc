@@ -26,15 +26,13 @@ namespace mapreduce {
 /* --------------------------------------------------
  *   Constructor/Destructor
  * -------------------------------------------------- */
-Job::Job()
-{
+Job::Job() {
   /// Start networking
   MPI_Init(nullptr, nullptr);
   start_up();
 }
 
-Job::Job(int &argc, char *argv[])
-{
+Job::Job(int &argc, char *argv[]) {
   ArgParser parser{argc, argv};
 
   /// Not to run if -h/--help option is passed
@@ -55,8 +53,7 @@ Job::Job(int &argc, char *argv[])
   file_fmt_.set_output_path(std::move(output));
 }
 
-void Job::start_up()
-{
+void Job::start_up() {
   /// Initialize connection and get the status
   MPI_Comm_rank(MPI_COMM_WORLD, &(conf_->mpi_rank));
   MPI_Comm_size(MPI_COMM_WORLD, &(conf_->mpi_size));
@@ -75,8 +72,7 @@ void Job::start_up()
   }
 }
 
-Job::~Job()
-{
+Job::~Job() {
   /// Close connection
   if (is_valid_)
     MPI_Finalize();
@@ -85,42 +81,39 @@ Job::~Job()
 /* --------------------------------------------------
  *   Setup
  * -------------------------------------------------- */
-void Job::add_input_path(const std::string& path)
-{
+void Job::add_input_path(const std::string& path) {
   file_fmt_.add_input_path(std::move(path));
 }
 
-void Job::set_output_path(const std::string& path)
-{
+void Job::set_output_path(const std::string& path) {
   file_fmt_.set_output_path(std::move(path));
 }
 
-void Job::setup_tmp_dir()
-{
+void Job::setup_tmp_dir() {
   /// Clear all directory if exists
   if (fs::exists(conf_->tmpdir)) {
-    for (const auto& p: fs::directory_iterator(conf_->tmpdir))
+    for (const auto& p: fs::directory_iterator(conf_->tmpdir)) {
       fs::remove_all(p);
+    }
   } else {
     /// create a new one if not exist
     fs::create_directory(conf_->tmpdir);
   }
 }
 
-void Job::setup_output_dir()
-{
+void Job::setup_output_dir() {
   /// Clear all directory if exists
   if (fs::exists(file_fmt_.get_output_path())) {
-    for (const auto& p: fs::directory_iterator(file_fmt_.get_output_path()))
+    for (const auto& p: fs::directory_iterator(file_fmt_.get_output_path())) {
       fs::remove_all(p);
+    }
   } else {
     /// create a new one if not exist
     fs::create_directory(file_fmt_.get_output_path());
   }
 }
 
-fs::path Job::get_output_file_path()
-{
+fs::path Job::get_output_file_path() {
   /// Set file path named by current worker rank and join with the output directory
   std::ostringstream oss;
   oss << std::setw(5) << std::setfill('0') << conf_->worker_rank;
@@ -132,8 +125,7 @@ fs::path Job::get_output_file_path()
 /* --------------------------------------------------
  *   Helper functions
  * -------------------------------------------------- */
-int Job::find_available_worker()
-{
+int Job::find_available_worker() {
   /// If not all workers started
   if (static_cast<int>(mpi_reqs.size()) < conf_->worker_size) {
     mpi_reqs.emplace_back();
@@ -147,35 +139,32 @@ int Job::find_available_worker()
   return index;
 }
 
-std::string Job::receive_filepath()
-{
-    MPI_Status status;
-    MPI_Probe(0, TaskType::map_data, MPI_COMM_WORLD, &status);
+std::string Job::receive_filepath() {
+  MPI_Status status;
+  MPI_Probe(0, TaskType::map_data, MPI_COMM_WORLD, &status);
 
-    /// Get data size to reveive for receiving file path.
-    /// Lengths of file path are vary so that need to check data size first.
-    int data_size;
-    MPI_Get_count(&status, MPI_CHAR, &data_size);
+  /// Get data size to reveive for receiving file path.
+  /// Lengths of file path are vary so that need to check data size first.
+  int data_size;
+  MPI_Get_count(&status, MPI_CHAR, &data_size);
 
-    /// Receive target file path to apply map task
-    char path_data[data_size];
-    MPI_Recv(path_data, data_size, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  /// Receive target file path to apply map task
+  char path_data[data_size];
+  MPI_Recv(path_data, data_size, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    return std::string(path_data, data_size);
+  return std::string(path_data, data_size);
 }
 
 /* --------------------------------------------------
  *   Master Node
  * -------------------------------------------------- */
-void Job::start_mapper_tasks()
-{
+void Job::start_mapper_tasks() {
   logger.debug("[Master] Starting Map tasks");
 
   /// Temporary data container to receive data from child node
   char tmp;
 
-  for (std::string path = file_fmt_.get_filepath(); !path.empty(); path = file_fmt_.get_filepath())
-  {
+  for (std::string path = file_fmt_.get_filepath(); !path.empty(); path = file_fmt_.get_filepath()) {
     /// Find available worker node
     /// This involves blocking until at least one connection is finished
     int worker_id = find_available_worker();
@@ -212,8 +201,7 @@ void Job::start_mapper_tasks()
   logger.debug("[Master] All Maps finished");
 }
 
-void Job::start_reducer_tasks()
-{
+void Job::start_reducer_tasks() {
   logger.debug("[Master] Starting Reduce tasks");
 
   /// Send signals to all nodes to resume for reduce tasks
@@ -231,8 +219,7 @@ void Job::start_reducer_tasks()
   logger.debug("[Master] All Reduces finished");
 }
 
-void Job::start_master_node()
-{
+void Job::start_master_node() {
   /// Following two processes must be synchronized
   /// Map/Shuffle
   start_mapper_tasks();
@@ -243,8 +230,7 @@ void Job::start_master_node()
 /* --------------------------------------------------
  *   Child Node
  * -------------------------------------------------- */
-void Job::run_child_tasks()
-{
+void Job::run_child_tasks() {
   conf_->output_fpath = get_output_file_path();
 
   /// Run mapreduce processes
@@ -267,8 +253,7 @@ void Job::run_child_tasks()
   logger.debug("[Worker] Finished all tasks on worker ", conf_->worker_rank);
 }
 
-void Job::run_map_tasks()
-{
+void Job::run_map_tasks() {
   /// Send signal to notify enqueue step is finished
   auto mq = mapper_->get_mq();
 
@@ -280,8 +265,7 @@ void Job::run_map_tasks()
     combiner_ftr = std::async(std::launch::async, [&]{ combiner_->run(); });
   }
 
-  while (true)
-  {
+  while (true) {
     char req;
     MPI_Recv(&req, 1, MPI_CHAR, 0, TaskType::ready, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
@@ -330,8 +314,7 @@ void Job::run_map_tasks()
   logger.debug("[Worker] Finished Map on worker ", conf_->worker_rank);
 }
 
-void Job::run_shuffle_tasks()
-{
+void Job::run_shuffle_tasks() {
   auto shuffler = mapper_->get_shuffle();
   shuffler->run();
 }
@@ -340,8 +323,7 @@ void Job::run_reduce_tasks() {
   reducer_->run();
 }
 
-int Job::run()
-{
+int Job::run() {
   /// Not run when -h/--help option is passed
   if (!is_valid_) return 0;
 

@@ -13,8 +13,7 @@ using namespace mapreduce::util;
 namespace mapreduce {
   
   /// Used for passing this object to Job
-  FileFormat& FileFormat::operator=(const FileFormat& rhs)
-  {
+  FileFormat& FileFormat::operator=(const FileFormat& rhs) {
     if (this == &rhs)
       return *this;
     
@@ -26,26 +25,23 @@ namespace mapreduce {
     return *this;
   }
 
-  void FileFormat::add_input_path(const std::string& path)
-  {
+  void FileFormat::add_input_path(const std::string& path) {
     input_dirs_.emplace_back(std::move(path));
   }
 
-  void FileFormat::add_input_paths(const std::vector<std::string>& paths)
-  {
+  void FileFormat::add_input_paths(const std::vector<std::string>& paths) {
     input_dirs_.insert(input_dirs_.end(), paths.begin(), paths.end());
   }
 
-  void FileFormat::set_output_path(const std::string& path)
-  {
-    if (!output_path_.empty())
+  void FileFormat::set_output_path(const std::string& path) {
+    if (!output_path_.empty()) {
       logger.warning("Output path is already set.");
-    else
+    } else {
       output_path_ = std::move(path);
+    }
   }
 
-  std::string FileFormat::get_filepath()
-  {
+  std::string FileFormat::get_filepath() {
     std::lock_guard<std::mutex> lock_(mapreduce::commons::mr_mutex);
 
     while (true) {

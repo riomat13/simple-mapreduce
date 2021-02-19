@@ -14,21 +14,17 @@ namespace fs = std::filesystem;
 using namespace mapreduce;
 
 /** Create test empty files */
-void create_test_files(fs::path& dirpath, unsigned int n)
-{
-  for (unsigned int i = 0; i < n; ++i)
-  {
+void create_test_files(fs::path& dirpath, unsigned int n) {
+  for (unsigned int i = 0; i < n; ++i) {
     std::ofstream ost(dirpath / std::to_string(i));
     ost.close();
   }
 }
 
-TEST_CASE("FileFormat", "[file]")
-{
+TEST_CASE("FileFormat", "[file]") {
   FileFormat ffmt;
 
-  SECTION("add_input_path")
-  {
+  SECTION("add_input_path") {
     unsigned int count = 10;
     fs::path testdir = tmpdir / "test_fileformat";
     fs::create_directories(testdir);
@@ -37,8 +33,7 @@ TEST_CASE("FileFormat", "[file]")
 
     std::vector<std::string> targets;
 
-    for (auto& dir: dirs)
-    {
+    for (auto& dir: dirs) {
       fs::path directory = testdir / dir;
       fs::create_directory(directory);
 
@@ -79,20 +74,16 @@ TEST_CASE("FileFormat", "[file]")
     fs::remove_all(testdir);
   }
 
-  SECTION("add_input_paths")
-  {
+  SECTION("add_input_paths") {
     unsigned int count = 10;
     fs::path testdir = tmpdir / "test_fileformat";
     fs::create_directories(testdir);
 
     std::vector<std::string> dirs{"testdir1", "testdir2"};
-
     std::vector<std::string> inputs;
-
     std::vector<std::string> targets;
 
-    for (auto& dir: dirs)
-    {
+    for (auto& dir: dirs) {
       fs::path directory = testdir / dir;
       fs::create_directory(directory);
       inputs.push_back(directory);
@@ -134,8 +125,7 @@ TEST_CASE("FileFormat", "[file]")
     fs::remove_all(testdir);
   }
 
-  SECTION("output_directory_path")
-  {
+  SECTION("output_directory_path") {
     fs::path outdir{"testout"};
     ffmt.set_output_path(outdir);
 

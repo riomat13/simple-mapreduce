@@ -7,10 +7,9 @@
 
 using namespace mapreduce::data;
 
-TEST_CASE("ByteData", "[byte][data]")
-{
-  SECTION("Constructor")
-  {
+TEST_CASE("ByteData", "[byte][data]") {
+
+  SECTION("Constructor") {
     ByteData bdata1, bdata2;
 
     int value = 10;
@@ -21,8 +20,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1.get_data<int>() == 10);
   }
 
-  SECTION("int")
-  {
+  SECTION("int") {
     ByteData bdata1, bdata2;
     int value = 10;
 
@@ -40,8 +38,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1.get_data<int>() == bdata3.get_data<int>());
   }
 
-  SECTION("long")
-  {
+  SECTION("long") {
     ByteData bdata1, bdata2;
     long value = 123456789l;
 
@@ -58,8 +55,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1.get_data<long>() == bdata3.get_data<long>());
   }
 
-  SECTION("float")
-  {
+  SECTION("float") {
     ByteData bdata1, bdata2;
     float value = 10.234f;
 
@@ -74,8 +70,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1.get_data<float>() == Approx(bdata3.get_data<float>()));
   }
 
-  SECTION("double")
-  {
+  SECTION("double") {
     ByteData bdata1, bdata2;
     double value = 1.23456789012345;
 
@@ -90,8 +85,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata1.get_data<double>() == Approx(bdata3.get_data<double>()));
   }
 
-  SECTION("string")
-  {
+  SECTION("string") {
     using namespace std::string_literals;
 
     ByteData bdata1, bdata2;
@@ -108,8 +102,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE(bdata2.get_data<std::string>() == bdata3.get_data<std::string>());
   }
 
-  SECTION("int_array")
-  {
+  SECTION("int_array") {
     ByteData bdata1, bdata2;
 
     std::vector<int> arr{1, 2, 3, 4};
@@ -119,8 +112,7 @@ TEST_CASE("ByteData", "[byte][data]")
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(arr));
   }
 
-  SECTION("double_bytes_array")
-  {
+  SECTION("double_bytes_array") {
     ByteData bdata1, bdata2;
 
     /// Create byte array to store
@@ -137,10 +129,9 @@ TEST_CASE("ByteData", "[byte][data]")
   }
 }
 
-TEST_CASE("ByteData Modification", "[byte][data]")
-{
-  SECTION("int array")
-  {
+TEST_CASE("ByteData Modification", "[byte][data]") {
+
+  SECTION("int array") {
     std::vector<int> target{1, 10, 15, 25, -10};
     ByteData bdata;
     for (auto& val: target)
@@ -150,8 +141,7 @@ TEST_CASE("ByteData Modification", "[byte][data]")
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
   }
 
-  SECTION("float array")
-  {
+  SECTION("float array") {
     std::vector<float> target{1.4, -30.5, 22, 5.4};
     ByteData bdata;
     for (auto& val: target)

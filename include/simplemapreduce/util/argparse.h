@@ -7,8 +7,7 @@
 namespace mapreduce {
 namespace util {
 
-class ArgParser
-{
+class ArgParser {
  public:
   ArgParser(int&, char*[]);
 

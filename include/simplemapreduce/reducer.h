@@ -19,8 +19,7 @@ template <typename /* Input key datatype    */ IKeyType,
           typename /* Input value datatype  */ IValueType,
           typename /* Output key datatype   */ OKeyType,
           typename /* Output value datatype */ OValueType>
-class Reducer : public mapreduce::base::ReduceTask
-{
+class Reducer : public mapreduce::base::ReduceTask {
  public:
 
   /**
@@ -70,40 +69,24 @@ class Reducer : public mapreduce::base::ReduceTask
    *
    *  @param path   output file path
    */
-  std::unique_ptr<mapreduce::Context<IKeyType, IValueType>> get_context(const std::string& path)
-  {
-    std::unique_ptr<mapreduce::proc::OutputWriter<IKeyType, IValueType>> writer = std::make_unique<mapreduce::proc::OutputWriter<IKeyType, IValueType>>(path);
-    return std::make_unique<mapreduce::Context<IKeyType, IValueType>>(std::move(writer));
-  }
+  std::unique_ptr<mapreduce::Context<IKeyType, IValueType>> get_context(const std::string&);
 
   /**
    * Create output data writer for combiner.
    *
    *  @param mq     MessageQueue to store output data
    */
-  std::unique_ptr<mapreduce::Context<IKeyType, IValueType>> get_context(std::shared_ptr<mapreduce::data::MessageQueue> mq)
-  {
-    std::unique_ptr<mapreduce::proc::MQWriter> writer = std::make_unique<mapreduce::proc::MQWriter>(mq);
-    return std::make_unique<mapreduce::Context<IKeyType, IValueType>>(std::move(writer));
-  }
+  std::unique_ptr<mapreduce::Context<IKeyType, IValueType>> get_context(std::shared_ptr<mapreduce::data::MessageQueue>);
 
   /** Get const Sorter instance. */
-  std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter()
-  {
-    std::unique_ptr<mapreduce::proc::DataLoader> loader = std::make_unique<mapreduce::proc::BinaryFileDataLoader<IKeyType, IValueType>>(this->conf_);
-    return std::make_unique<mapreduce::proc::Sorter<IKeyType, IValueType>>(std::move(loader));
-  }
+  std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter();
 
   /**
    * Get const Sorter instance for combiner.
    *
    *  @param mq     MessageQueue created at Mapper task or the previous Combiner/Reducer task
    */
-  std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter(std::shared_ptr<mapreduce::data::MessageQueue> mq)
-  {
-    std::unique_ptr<mapreduce::proc::DataLoader> loader = std::make_unique<mapreduce::proc::MQDataLoader>(mq);
-    return std::make_unique<mapreduce::proc::Sorter<IKeyType, IValueType>>(std::move(loader));
-  }
+  std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter(std::shared_ptr<mapreduce::data::MessageQueue>);
 
   /// MessageQueue to store data
   std::shared_ptr<mapreduce::data::MessageQueue> mq_ = nullptr;
@@ -111,6 +94,6 @@ class Reducer : public mapreduce::base::ReduceTask
 
 } // namespace mapreduce
 
-#include "simplemapreduce/reducer.tcc"
+#include "simplemapreduce/reducer-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_REDUCER_H_

@@ -18,13 +18,13 @@ using namespace mapreduce::data;
 using namespace mapreduce::proc;
 
 template <typename K, typename V>
-void test_grouping_items(std::vector<K>& keys, std::vector<std::vector<V>>& values)
-{
+void test_grouping_items(std::vector<K>& keys, std::vector<std::vector<V>>& values) {
   /// Create input value key-value pairs
   std::vector<BytePair> inputs;
-  for (unsigned int i = 0; i < keys.size(); ++i)
+  for (unsigned int i = 0; i < keys.size(); ++i) {
     for (auto& val: values[i])
       inputs.emplace_back(ByteData(K(keys[i])), ByteData(V(val)));
+  }
 
   std::unique_ptr<DataLoader> loader =
       std::make_unique<TestDataLoader>(inputs);
@@ -35,17 +35,14 @@ void test_grouping_items(std::vector<K>& keys, std::vector<std::vector<V>>& valu
 
   std::map<K, std::vector<V>> res;
   for (auto it = out.begin(); it != out.end(); ++it)
-  {
     res.insert(std::pair<K, std::vector<V>>(it->first, it->second));
-  }
 
   REQUIRE(check_map_items<K, V>(res, keys, values));
 }
 
-TEST_CASE("Base Sorter", "[sorter]")
-{
-  SECTION("string/int")
-  {
+TEST_CASE("Base Sorter", "[sorter]") {
+
+  SECTION("string/int") {
     std::vector<std::string> keys{"test", "example", "sort"};
     std::vector<std::vector<int>> values{
       {1, -1, 5, 123, -6092},
@@ -56,8 +53,7 @@ TEST_CASE("Base Sorter", "[sorter]")
     test_grouping_items<std::string, int>(keys, values);
   }
 
-  SECTION("int/long")
-  {
+  SECTION("int/long") {
     std::vector<int> keys{1, 10, 100};
     std::vector<std::vector<long>> values{
       {1234567890, -987654321, 543209},
@@ -68,8 +64,7 @@ TEST_CASE("Base Sorter", "[sorter]")
     test_grouping_items<int, long>(keys, values);
   }
 
-  SECTION("string/double")
-  {
+  SECTION("string/double") {
     std::vector<std::string> keys{"test", "example", "sort"};
     std::vector<std::vector<double>> values{
       {-1.23456789012345, 94504.3300856, 217.8123001115},
@@ -82,14 +77,12 @@ TEST_CASE("Base Sorter", "[sorter]")
 }
 
 template <typename K, typename V>
-void test_with_mqdataloader(std::vector<K>& keys, std::vector<std::vector<V>>& values)
-{
+void test_with_mqdataloader(std::vector<K>& keys, std::vector<std::vector<V>>& values) {
   assert(keys.size() == values.size());
 
   /// Set up initial dataset
   std::shared_ptr<MessageQueue> mq = std::make_unique<MessageQueue>();
-  for (unsigned int i = 0; i < keys.size(); ++i)
-  {
+  for (unsigned int i = 0; i < keys.size(); ++i) {
     for (auto& val: values[i])
       mq->send(ByteData(K(keys[i])), ByteData(V(val)));
   }
@@ -103,18 +96,16 @@ void test_with_mqdataloader(std::vector<K>& keys, std::vector<std::vector<V>>& v
   REQUIRE(check_map_items(res, keys, values));
 }
 
-TEST_CASE("Sorter with MQDataLoader", "[sorter][mq]")
-{
-  SECTION("load string/long data")
-  {
+TEST_CASE("Sorter with MQDataLoader", "[sorter][mq]") {
+
+  SECTION("load string/long data") {
     std::vector<std::string> keys{"test", "example"};
     std::vector<std::vector<long>> values{{10, 20}, {100, 200, 300}};
 
     test_with_mqdataloader(keys, values);
   }
 
-  SECTION("load int/float data")
-  {
+  SECTION("load int/float data") {
     std::vector<int> keys{100, 101};
     std::vector<std::vector<float>> values{{1.23, -20}, {-5.0, -4.18, 437.55}};
 

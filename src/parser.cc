@@ -5,8 +5,7 @@
 namespace mapreduce {
 namespace util {
 
-std::vector<std::string> parse_string(const std::string& data, const char& delimiter)
-{
+std::vector<std::string> parse_string(const std::string& data, const char& delimiter) {
   std::istringstream iss(std::move(data));
   std::string chunk;
 

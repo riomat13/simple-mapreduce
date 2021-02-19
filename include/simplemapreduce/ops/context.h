@@ -14,8 +14,7 @@ namespace mapreduce {
  * Write key and value items to send through network
  */
 template <typename K, typename V>
-class Context
-{
+class Context {
  public:
   Context(std::unique_ptr<mapreduce::proc::Writer> writer) : writer_(std::move(writer)) {}
 
@@ -39,6 +38,6 @@ class Context
 
 } // namespace mapreduce
 
-#include "simplemapreduce/ops/context.tcc"
+#include "simplemapreduce/ops/context-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_OPS_CONTEXT_H_

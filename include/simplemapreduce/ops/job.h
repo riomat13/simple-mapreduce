@@ -39,8 +39,7 @@ enum TaskType {
  * Job class to handle and manage all mapreduce process
  * including master and child nodes
  */
-class Job
-{
+class Job {
  public:
   Job();
   Job(int &, char *[]);
@@ -206,6 +205,6 @@ class Job
 
 }  // namespace mapreduce
 
-#include "simplemapreduce/ops/job.tcc"
+#include "simplemapreduce/ops/job-inl.h"
 
 #endif

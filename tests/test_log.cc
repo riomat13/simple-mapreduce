@@ -7,8 +7,7 @@
 
 using namespace mapreduce::util;
 
-TEST_CASE("LogLevel", "[log][loglevel]")
-{
+TEST_CASE("LogLevel", "[log][loglevel]") {
   /// Check log level order
   REQUIRE(LogLevel::DEBUG < LogLevel::INFO);
   REQUIRE(LogLevel::INFO < LogLevel::WARNING);
@@ -17,8 +16,7 @@ TEST_CASE("LogLevel", "[log][loglevel]")
   REQUIRE(LogLevel::CRITICAL < LogLevel::DISABLE);
 }
 
-TEST_CASE("LogBuffer", "[log][buffer]")
-{
+TEST_CASE("LogBuffer", "[log][buffer]") {
   LogBuffer buffer;
   buffer << 10;
   buffer << "test";
@@ -27,8 +25,8 @@ TEST_CASE("LogBuffer", "[log][buffer]")
   REQUIRE(buffer.to_string() == "10test42.1424 sample");
 }
 
-TEST_CASE("Logger", "[log][logger]")
-{
+TEST_CASE("Logger", "[log][logger]") {
+
   SECTION("general")
   {
     Logger logger{};
@@ -38,8 +36,7 @@ TEST_CASE("Logger", "[log][logger]")
     REQUIRE(log.find("test log 100") != std::string::npos);
   }
 
-  SECTION("DEBUG")
-  {
+  SECTION("DEBUG") {
     Logger logger{};
     logger.set_log_level(LogLevel::DEBUG);
     logger.debug(10, " debug ", 20, " example");
@@ -50,8 +47,7 @@ TEST_CASE("Logger", "[log][logger]")
     REQUIRE(log.find("10 debug 20 example") != std::string::npos);
   }
 
-  SECTION("INFO")
-  {
+  SECTION("INFO") {
     Logger logger{};
     logger.set_log_level(LogLevel::INFO);
     REQUIRE(logger.debug(10, " debug ", 20, " example") == nullptr);
@@ -62,8 +58,7 @@ TEST_CASE("Logger", "[log][logger]")
     REQUIRE(log.find("test 1020 example") != std::string::npos);
   }
 
-  SECTION("WARNING")
-  {
+  SECTION("WARNING") {
     Logger logger{};
     logger.set_log_level(LogLevel::WARNING);
     REQUIRE(logger.info("info") == nullptr);
@@ -76,8 +71,7 @@ TEST_CASE("Logger", "[log][logger]")
     REQUIRE(log.find("warning 123456789 example") != std::string::npos);
   }
 
-  SECTION("ERROR")
-  {
+  SECTION("ERROR") {
     Logger logger{};
     logger.set_log_level(LogLevel::ERROR);
     REQUIRE(logger.warning("warning") == nullptr);
@@ -90,8 +84,7 @@ TEST_CASE("Logger", "[log][logger]")
     REQUIRE(log.find("error 123456789 test") != std::string::npos);
   }
 
-  SECTION("CRITICAL")
-  {
+  SECTION("CRITICAL") {
     Logger logger{};
     logger.set_log_level(LogLevel::CRITICAL);
     REQUIRE(logger.error("error") == nullptr);
@@ -104,8 +97,7 @@ TEST_CASE("Logger", "[log][logger]")
     REQUIRE(log.find("critical 12345 sample") != std::string::npos);
   }
 
-  SECTION("CRITICAL")
-  {
+  SECTION("CRITICAL") {
     Logger logger{};
     logger.set_log_level(LogLevel::DISABLE);
     REQUIRE(logger.critical("test") == nullptr);

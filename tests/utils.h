@@ -44,34 +44,29 @@ void extract_files(const std::filesystem::path&, std::vector<std::filesystem::pa
 template <class K, class V>
 bool check_map_items(std::map<K, std::vector<V>>& input,
                      std::vector<K>& keys,
-                     std::vector<std::vector<V>>& values)
-{
+                     std::vector<std::vector<V>>& values) {
   /// Check map holds same number of the keywords
   if(input.size() != keys.size())
     return false;
 
   /// Compare each values in a keyword with mapped values
-  for (size_t i = 0; i < keys.size(); ++i)
-  {
+  for (size_t i = 0; i < keys.size(); ++i) {
     auto item = input.find(keys[i]);
 
     /// Check if two vectors containes the same items
     if (item->second.size() != values[i].size()
-        || !std::is_permutation(item->second.begin(), item->second.end(), values[i].begin()))
+        || !std::is_permutation(item->second.begin(), item->second.end(), values[i].begin())) {
       return false;
+    }
   }
   return true;
 }
 
-class TestDataLoader : public mapreduce::proc::DataLoader
-{
+class TestDataLoader : public mapreduce::proc::DataLoader {
  public:
-  TestDataLoader(std::vector<mapreduce::data::BytePair>& input) : kv_items_(std::move(input))
-  {
-  };
+  TestDataLoader(std::vector<mapreduce::data::BytePair>& input) : kv_items_(std::move(input)) {};
 
-  mapreduce::data::BytePair get_item()
-  {
+  mapreduce::data::BytePair get_item() {
     /// Return empty once consumed all elements
     if (kv_items_.empty())
       return std::make_pair(mapreduce::data::ByteData(), mapreduce::data::ByteData());

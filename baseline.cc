@@ -13,13 +13,11 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
-int main()
-{
+int main() {
   std::ofstream ofs("outputs.txt");
   std::map<std::string, long> counter;
 
-  for (auto &path: fs::directory_iterator("./inputs"))
-  {
+  for (auto &path: fs::directory_iterator("./inputs")) {
     if (!path.is_regular_file())
       continue;
 
@@ -39,8 +37,7 @@ int main()
   }
 
   /// Write key and value(count) to the output file
-  for (auto it = counter.begin(); it != counter.end(); ++it)
-  {
+  for (auto it = counter.begin(); it != counter.end(); ++it) {
     ofs << it->first << " " << it->second << '\n';
   }
 

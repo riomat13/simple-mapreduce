@@ -16,8 +16,7 @@ template <typename /* Input key data type */    IKeyType,
           typename /* input value data type */  IValueType,
           typename /* Output key data type */   OKeyType,
           typename /* Output value data type */ OValueType>
-class Mapper : public mapreduce::base::MapTask
-{
+class Mapper : public mapreduce::base::MapTask {
  public:
   /**
    * Main Map function.
@@ -41,20 +40,12 @@ class Mapper : public mapreduce::base::MapTask
   /**
    * Get const Context data writer.
    */
-  std::unique_ptr<mapreduce::Context<OKeyType, OValueType>> get_context()
-  {
-    std::unique_ptr<mapreduce::proc::MQWriter> writer = std::make_unique<mapreduce::proc::MQWriter>(get_mq());
-    return std::make_unique<mapreduce::Context<OKeyType, OValueType>>(std::move(writer));
-  }
+  std::unique_ptr<mapreduce::Context<OKeyType, OValueType>> get_context();
 
   /**
    * Get const Shuffle instance.
    */
-  std::unique_ptr<mapreduce::proc::ShuffleJob> get_shuffle() override
-  {
-    std::unique_ptr<mapreduce::proc::ShuffleJob> shuffle = std::make_unique<mapreduce::proc::Shuffle<OKeyType, OValueType>>(get_mq(), conf_);
-    return shuffle;
-  };
+  std::unique_ptr<mapreduce::proc::ShuffleJob> get_shuffle() override;
 
   /**
    * Run map task
@@ -67,6 +58,6 @@ class Mapper : public mapreduce::base::MapTask
 
 }  // namespace mapreduce
 
-#include "simplemapreduce/mapper.tcc"
+#include "simplemapreduce/mapper-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_MAPPER_H_

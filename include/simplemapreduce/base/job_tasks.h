@@ -13,8 +13,7 @@
 namespace mapreduce {
 namespace base {
 
-class JobTask
-{
+class JobTask {
  public:
   /**
    * Set MapReduce job configuration.
@@ -27,12 +26,10 @@ class JobTask
   virtual void run() {};
 };
 
-class MapTask : public JobTask
-{
+class MapTask : public JobTask {
  public:
 
-  MapTask()
-  {
+  MapTask() {
     mq_ = std::make_shared<mapreduce::data::MessageQueue>(mapreduce::data::MessageQueue());
   }
 
@@ -56,8 +53,7 @@ class MapTask : public JobTask
   std::shared_ptr<mapreduce::data::MessageQueue> mq_ = nullptr;
 };
 
-class ReduceTask : public JobTask
-{
+class ReduceTask : public JobTask {
  public:
   /**
    * Run Reduce process.

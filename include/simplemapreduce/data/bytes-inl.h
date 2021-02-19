@@ -4,23 +4,20 @@ namespace mapreduce {
 namespace data {
 
 template <typename T>
-void ByteData::set_bytes(char* data, const size_t& size)
-{
+void ByteData::set_bytes(char* data, const size_t& size) {
   data_ = std::vector<char>(data, data + size);
   size_ = size / sizeof(T);
 }
 
 template <typename T>
-void ByteData::set_data_(T& data)
-{
+void ByteData::set_data_(T& data) {
   data_.clear();
   char* buff = reinterpret_cast<char*>(&data);
   data_ = std::vector<char>(buff, buff + sizeof(T));
 }
 
 template <typename T>
-void ByteData::set_data_(T* data, const size_t& size)
-{
+void ByteData::set_data_(T* data, const size_t& size) {
   data_.clear();
   char* buff = reinterpret_cast<char*>(data);
   data_ = std::vector<char>(buff, buff + sizeof(T) * size);
@@ -28,8 +25,7 @@ void ByteData::set_data_(T* data, const size_t& size)
 }
 
 template <typename T>
-T ByteData::get_data_() const
-{
+T ByteData::get_data_() const {
   T data;
   /// Only used on the same machine so no need to consider endianness
   size_ ? std::memcpy(&data, data_.data(), sizeof(T) * size_)
@@ -39,8 +35,7 @@ T ByteData::get_data_() const
 }
 
 template <typename T>
-void ByteData::push_back_(T& data)
-{
+void ByteData::push_back_(T& data) {
   char* buff = reinterpret_cast<char*>(&data);
   data_.insert(data_.end(), buff, buff + sizeof(T));
   ++size_;

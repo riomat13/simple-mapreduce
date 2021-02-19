@@ -26,19 +26,15 @@ using namespace mapreduce::proc;
  * The key type is string and value type is any non-array datatype.
  */
 template <typename T>
-class BinFileReader
-{
+class BinFileReader {
  public:
-  BinFileReader(const fs::path& path)
-  {
+  BinFileReader(const fs::path& path) {
     ifs.open(path, std::ios::binary | std::ios::in);
   }
   ~BinFileReader() { ifs.close(); }
 
-  void read_binary(std::vector<BytePair>& items)
-  {
-    while (true)
-    {
+  void read_binary(std::vector<BytePair>& items) {
+    while (true) {
       size_t keysize;
       ifs.read(reinterpret_cast<char*>(&keysize), sizeof(size_t));
       if(ifs.eof())
@@ -68,17 +64,14 @@ class BinFileReader
  *  @param container   vector to store key-value pair read from files
  */
 template <typename K, typename V>
-void read_all_data(std::vector<fs::path>& files, std::vector<BytePair>& container)
-{
-  for (auto& file: files)
-  {
+void read_all_data(std::vector<fs::path>& files, std::vector<BytePair>& container) {
+  for (auto& file: files) {
     BinFileReader<V> reader(file);
     reader.read_binary(container);
   }
 }
 
-TEST_CASE("Shuffle", "[shuffle]")
-{
+TEST_CASE("Shuffle", "[shuffle]") {
   typedef MessageQueue MQ;
 
   std::shared_ptr<JobConf> conf = std::make_shared<JobConf>();
@@ -86,8 +79,7 @@ TEST_CASE("Shuffle", "[shuffle]")
   fs::remove_all(conf->tmpdir);
   fs::create_directories(conf->tmpdir);
 
-  SECTION("string/int")
-  {
+  SECTION("string/int") {
     conf->worker_rank = 0;
     conf->worker_size = 2;
     conf->n_groups = 5;  // this will be equal to a number of output files
@@ -124,8 +116,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
-  SECTION("string/long")
-  {
+  SECTION("string/long") {
     conf->worker_rank = 1;
     conf->worker_size = 2;
     conf->n_groups = 4;  // this will be equal to a number of output files
@@ -162,8 +153,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
-  SECTION("string/float")
-  {
+  SECTION("string/float") {
 
     conf->worker_rank = 3;
     conf->worker_size = 5;
@@ -201,8 +191,7 @@ TEST_CASE("Shuffle", "[shuffle]")
     REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
-  SECTION("string/double")
-  {
+  SECTION("string/double") {
     conf->worker_rank = 0;
     conf->worker_size = 3;
     conf->n_groups = 2;  // this will be equal to a number of output files

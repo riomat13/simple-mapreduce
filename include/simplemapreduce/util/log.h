@@ -30,8 +30,7 @@ namespace util {
     DISABLE,
   };
 
-  class LogBuffer
-  {
+  class LogBuffer {
    public:
     ~LogBuffer() { oss.clear(); }
 
@@ -55,8 +54,7 @@ namespace util {
    *  >>> logger.info("sample log: ", 10);
    *    => "[INFO] [%Y-%m-%s %H-%M-%S.%s] sample log: 10"
    */
-  class Logger
-  {
+  class Logger {
    public:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
@@ -135,8 +133,7 @@ namespace util {
     void log_stderr(LogBuffer&, T&, Args...);
 
     /** Get log level reference to update or check the current status */
-    LogLevel& get_log_level()
-    {
+    LogLevel& get_log_level() {
       static LogLevel log_level = LogLevel::INFO;
       return log_level;
     }
@@ -147,6 +144,6 @@ namespace util {
 } // namespace util
 } // namespace mapreduce
 
-#include "simplemapreduce/util/log.tcc"
+#include "simplemapreduce/util/log-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_UTIL_LOG_H_

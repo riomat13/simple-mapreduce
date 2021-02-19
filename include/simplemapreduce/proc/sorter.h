@@ -18,8 +18,7 @@ namespace proc {
  * Sort operating class
  */
 template <typename K, typename V>
-class Sorter
-{
+class Sorter {
  public:
   /**
    * Constructor of Sorter class.
@@ -47,6 +46,6 @@ class Sorter
 }  // namespace proc
 }  // namespace mapreduce
 
-#include "simplemapreduce/proc/sorter.tcc"
+#include "simplemapreduce/proc/sorter-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_PROC_SORTER_H_

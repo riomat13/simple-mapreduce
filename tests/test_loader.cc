@@ -24,14 +24,12 @@ using namespace mapreduce::proc;
 
 typedef MessageQueue MQ;
 
-TEST_CASE("load_data", "[binary][read][file]")
-{
+TEST_CASE("load_data", "[binary][read][file]") {
   fs::path dirpath{tmpdir / "test_loader"};
   fs::create_directories(dirpath);
   fs::path fpath{dirpath / "tmp_bin"};
 
-  SECTION("int")
-  {
+  SECTION("int") {
     std::vector<int> targets{1, 3, 7};
     std::vector<int> res;
 
@@ -47,18 +45,17 @@ TEST_CASE("load_data", "[binary][read][file]")
     {
       std::ifstream ifs(fpath, std::ios::binary);
       ByteData data;
+
       while (!(data = load_byte_data<int>(ifs)).empty())
-      {
         res.push_back(data.get_data<int>());
-      }
+
       ifs.close();
     }
 
     REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
   }
 
-  SECTION("long")
-  {
+  SECTION("long") {
     std::vector<long> targets{987654321, 33201958, -7};
     std::vector<long> res;
 
@@ -74,18 +71,17 @@ TEST_CASE("load_data", "[binary][read][file]")
     {
       std::ifstream ifs(fpath, std::ios::binary);
       ByteData data;
+
       while (!(data = load_byte_data<long>(ifs)).empty())
-      {
         res.push_back(data.get_data<long>());
-      }
+
       ifs.close();
     }
 
     REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
   }
 
-  SECTION("float")
-  {
+  SECTION("float") {
     std::vector<float> targets{987.4321, 33.0195, -1.237};
     std::vector<float> res;
 
@@ -101,18 +97,17 @@ TEST_CASE("load_data", "[binary][read][file]")
     {
       std::ifstream ifs(fpath, std::ios::binary);
       ByteData data;
+
       while (!(data = load_byte_data<float>(ifs)).empty())
-      {
         res.push_back(data.get_data<float>());
-      }
+
       ifs.close();
     }
 
     REQUIRE_THAT(res, Catch::Matchers::Equals(targets));
   }
 
-  SECTION("double")
-  {
+  SECTION("double") {
     std::vector<double> targets{987.432123456, -3553.220195, -3410.237077};
     std::vector<double> res;
 
@@ -128,10 +123,10 @@ TEST_CASE("load_data", "[binary][read][file]")
     {
       std::ifstream ifs(fpath, std::ios::binary);
       ByteData data;
+
       while (!(data = load_byte_data<double>(ifs)).empty())
-      {
         res.push_back(data.get_data<double>());
-      }
+
       ifs.close();
     }
 
@@ -141,8 +136,7 @@ TEST_CASE("load_data", "[binary][read][file]")
   fs::remove_all(tmpdir);
 }
 
-TEST_CASE("DataLoader", "[data_loader]")
-{
+TEST_CASE("DataLoader", "[data_loader]") {
   /// Target key-value pairs
   std::vector<BytePair> targets{
     {ByteData("test"), ByteData(1)},
@@ -156,14 +150,14 @@ TEST_CASE("DataLoader", "[data_loader]")
 
   std::vector<BytePair> res;
   BytePair data;
+
   while (!(data = loader->get_item()).first.empty())
     res.push_back(std::move(data));
 
   REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
 }
 
-TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
-{
+TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]") {
   std::shared_ptr<JobConf> conf = std::make_shared<JobConf>();
   conf->n_groups = 1;
   conf->worker_rank = 0;
@@ -175,8 +169,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
   clear_file(conf->tmpdir / fname);
 
-  SECTION("string/int")
-  {
+  SECTION("string/int") {
     std::vector<std::string> keys{"test", "example", "sort"};
 
     /// Used for value check
@@ -187,8 +180,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     {
       BinaryFileWriter<std::string, int> writer(conf->tmpdir / fname);
 
-      for (auto& key: keys)
-      {
+      for (auto& key: keys) {
         int val1 = 1;
         int val2 = 4321;
         int val3 = 1234;
@@ -216,8 +208,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  SECTION("int/long")
-  {
+  SECTION("int/long") {
     std::vector<int> keys{123, 234, 345};
 
     /// Used for value check
@@ -228,8 +219,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     {
       BinaryFileWriter<int, long> writer(conf->tmpdir / fname);
 
-      for (auto& key: keys)
-      {
+      for (auto& key: keys) {
         long val1 = 1;
         long val2 = 123456789l;
         long val3 = 123456789l;
@@ -253,11 +243,11 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
 
     for (auto& key: keys)
       target_keys.emplace_back(key);
+
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  SECTION("string/float")
-  {
+  SECTION("string/float") {
     std::vector<std::string> keys{"test", "example", "sort"};
 
     /// Used for value check
@@ -268,8 +258,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     {
       BinaryFileWriter<std::string, float> writer(conf->tmpdir / fname);
 
-      for (auto& key: keys)
-      {
+      for (auto& key: keys) {
         float val1 = 0.1;
         float val2 = 10.987;
         float val3 = 0.1234;
@@ -297,8 +286,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     REQUIRE(check_map_items<ByteData, ByteData>(res, target_keys, target_values));
   }
 
-  SECTION("long/double")
-  {
+  SECTION("long/double") {
     std::vector<long> keys{123, 234, 345};
 
     /// Used for value check
@@ -309,8 +297,7 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
     {
       BinaryFileWriter<long, double> writer(conf->tmpdir / fname);
 
-      for (auto& key: keys)
-      {
+      for (auto& key: keys) {
         double val1 = 0.5;
         double val2 = 1.23456789;
         double val3 = 9.87654321;
@@ -341,22 +328,19 @@ TEST_CASE("BinaryFileDataLoader", "[data_loader][binary]")
   fs::remove_all(tmpdir);
 }
 
-TEST_CASE("MQDataLoader", "[data_loader][mq]")
-{
+TEST_CASE("MQDataLoader", "[data_loader][mq]") {
   std::shared_ptr<MQ> mq = std::make_shared<MQ>();
   std::unique_ptr<DataLoader> loader =
       std::make_unique<MQDataLoader>(mq);
 
-  SECTION("string/int")
-  {
+  SECTION("string/int") {
     std::vector<BytePair> targets{
       {ByteData(std::string{"test"}), ByteData(10)},
       {ByteData(std::string{"example"}), ByteData(-5)},
       {ByteData(std::string{"test"}), ByteData(20)}
     };
 
-    for (auto& kv: targets)
-    {
+    for (auto& kv: targets) {
       ByteData key(kv.first), value(kv.second);
       mq->send(std::make_pair(key, value));
     }
@@ -365,8 +349,7 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
     /// Get all data from loader
     std::vector<BytePair> res;
     BytePair data = loader->get_item();
-    while (!(data.first.empty()))
-    {
+    while (!(data.first.empty())) {
       res.push_back(std::move(data));
       data = loader->get_item();
     }
@@ -375,8 +358,7 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]")
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
   }
 
-  SECTION("string/long")
-  {
+  SECTION("string/long") {
     std::vector<BytePair> targets{
       {ByteData(std::string{"test"}), ByteData(1357902468l)},
       {ByteData(std::string{"example"}), ByteData(-54019283l)},

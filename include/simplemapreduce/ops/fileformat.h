@@ -7,8 +7,7 @@
 
 namespace mapreduce {
 
-class FileFormat final
-{
+class FileFormat final {
  public:
   FileFormat() {};
   ~FileFormat() {};

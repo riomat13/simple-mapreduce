@@ -7,13 +7,11 @@ namespace util {
 
   std::string LogBuffer::to_string() { return oss.str(); }
 
-  void Logger::set_log_level(LogLevel&& level)
-  {
+  void Logger::set_log_level(LogLevel&& level) {
     get_log_level() = std::move(level);
   }
 
-  void Logger::log_append_time_tag(LogBuffer& buff)
-  {
+  void Logger::log_append_time_tag(LogBuffer& buff) {
     auto curr = std::chrono::system_clock::now();
     std::time_t tm = std::chrono::system_clock::to_time_t(curr);
 

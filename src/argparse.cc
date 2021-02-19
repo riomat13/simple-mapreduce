@@ -10,8 +10,7 @@ namespace fs = std::filesystem;
 namespace mapreduce {
 namespace util {
 
-ArgParser::ArgParser(int& argc, char* argv[]) 
-{
+ArgParser::ArgParser(int& argc, char* argv[]) {
   const struct option longopts[] = {
     {"input", 1, 0, 'i'},
     {"output", 1, 0, 'o'},
@@ -42,8 +41,7 @@ ArgParser::ArgParser(int& argc, char* argv[])
   }
 }
 
-std::string ArgParser::get_option(const std::string& key)
-{
+std::string ArgParser::get_option(const std::string& key) {
   auto search = optvalues_.find(key);
   if (search == optvalues_.end())
     return std::string{};

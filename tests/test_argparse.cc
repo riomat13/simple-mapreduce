@@ -7,13 +7,11 @@
 using namespace mapreduce;
 using namespace mapreduce::util;
 
-TEST_CASE("ArgParser", "[argparse][options][config]")
-{
+TEST_CASE("ArgParser", "[argparse][options][config]") {
   /// Reset getopt
   optind = 0;
 
-  SECTION("Input directory")
-  {
+  SECTION("Input directory") {
     int argc = 3;
     char name[]{"test_argparse"};
     char opt[]{"--input"};
@@ -24,8 +22,7 @@ TEST_CASE("ArgParser", "[argparse][options][config]")
     REQUIRE(parser.get_option("input") == "./inputs");
   }
 
-  SECTION("Input directories")
-  {
+  SECTION("Input directories") {
     int argc = 3;
     char name[]{"test_argparse"};
     char opt[]{"--input"};
@@ -36,8 +33,7 @@ TEST_CASE("ArgParser", "[argparse][options][config]")
     REQUIRE(parser.get_option("input") == "./inputs1,./inputs2,./inputs3");
   }
 
-  SECTION("Output directory")
-  {
+  SECTION("Output directory") {
     int argc = 3;
     char name[]{"test_argparse"};
     char opt[]{"--output"};

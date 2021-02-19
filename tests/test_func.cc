@@ -4,8 +4,7 @@
 
 #include "catch.hpp"
 
-TEST_CASE("REDUCE_SUM", "[sum][reduce]")
-{
+TEST_CASE("REDUCE_SUM", "[sum][reduce]") {
   std::vector<int> values_i{1, 2, 3, 4, 5, -3};
   REQUIRE(REDUCE_SUM(values_i) == 12);
 
@@ -19,8 +18,7 @@ TEST_CASE("REDUCE_SUM", "[sum][reduce]")
   REQUIRE(REDUCE_SUM(values_d) == Approx(1947.669543600012));
 }
 
-TEST_CASE("REDUCE_AVE", "[average][reduce]")
-{
+TEST_CASE("REDUCE_AVE", "[average][reduce]") {
   std::vector<int> values_i{3, 2, 1, -2, -3};
   REQUIRE(REDUCE_MEAN(values_i) == Approx(0.2d));
 
