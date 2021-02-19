@@ -14,8 +14,7 @@
 namespace mapreduce {
 namespace proc {
 
-class ShuffleJob
-{
+class ShuffleJob {
  public:
   virtual ~ShuffleJob() {}
 
@@ -29,8 +28,7 @@ class ShuffleJob
  * Shuffle process handler object.
  */
 template <typename K, typename V>
-class Shuffle : public ShuffleJob
-{
+class Shuffle : public ShuffleJob {
  public:
   /**
    * Shuffle constructor
@@ -70,6 +68,6 @@ class Shuffle : public ShuffleJob
 }  // namespace proc
 }  // namespace mapreduce
 
-#include "simplemapreduce/proc/shuffle.tcc"
+#include "simplemapreduce/proc/shuffle-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_PROC_SHUFFLE_H_

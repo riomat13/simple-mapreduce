@@ -8,8 +8,7 @@
 namespace mapreduce {
 namespace data {
 
-class ByteData
-{
+class ByteData {
  public:
   ByteData() {}
   explicit ByteData(int);
@@ -126,6 +125,6 @@ using BytePair =  std::pair<ByteData, ByteData>;
 }  // namespace data
 }  // namespace mapreduce
 
-#include "simplemapreduce/data/bytes.tcc"
+#include "simplemapreduce/data/bytes-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_DATA_BYTES_H_

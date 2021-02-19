@@ -33,8 +33,7 @@ template <typename T>
 void write_output(std::ofstream&, const T&);
 
 /** Base class to write data used by context. */
-class Writer
-{
+class Writer {
  public:
   virtual ~Writer() = default;
 
@@ -42,14 +41,14 @@ class Writer
 };
 
 /**
- * Wrapper class to write intermediate result to a file.
+ * Wrapper class to write intermediate key/value data to a file.
  * This is used to write intermediate state after map process is applied.
+ * The input data must be formatted in mapreduce::data::ByteData.
  * 
  * This is for RAII to handle long opened file descriptor.
  */
 template <typename K, typename V>
-class BinaryFileWriter : public Writer
-{
+class BinaryFileWriter : public Writer {
  public:
   /**
    * Constructor Binary data writing class.
@@ -73,8 +72,11 @@ class BinaryFileWriter : public Writer
   std::ofstream fout_;
 };
 
-class MQWriter : public Writer
-{
+/**
+ * Write key/value data to MessageQueue.
+ * The input data must be formatted in mapreduce::data::ByteData.
+ */
+class MQWriter : public Writer {
  public:
 
   MQWriter(std::shared_ptr<mapreduce::data::MessageQueue> mq) : mq_(mq) {};
@@ -88,12 +90,12 @@ class MQWriter : public Writer
 };
 
 /**
- * Wrapper class to write output result to a file.
+ * Wrapper class to write output key/value result to a file.
+ * The input data must be formatted in mapreduce::data::ByteData.
  * This is for RAII to handle long opened file descriptor.
  */
 template <typename K, typename V>
-class OutputWriter : public Writer
-{
+class OutputWriter : public Writer {
  public:
   /**
    * Constructor
@@ -114,6 +116,6 @@ class OutputWriter : public Writer
 }  // namespace proc
 }  // namespace mapreduce
 
-#include "simplemapreduce/proc/writer.tcc"
+#include "simplemapreduce/proc/writer-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_PROC_WRITER_H_

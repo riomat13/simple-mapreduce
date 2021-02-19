@@ -6,8 +6,7 @@
 namespace mapreduce {
 
 template <class Mapper>
-void Job::set_mapper()
-{
+void Job::set_mapper() {
   if (!std::is_base_of<mapreduce::base::MapTask, Mapper>::value)
     throw std::runtime_error("Invalid Mapper Class");
 
@@ -16,8 +15,7 @@ void Job::set_mapper()
 }
 
 template <class Combiner>
-void Job::set_combiner()
-{
+void Job::set_combiner() {
   if (!std::is_base_of<mapreduce::base::ReduceTask, Combiner>::value)
     throw std::runtime_error("Invalid Combiner Class");
 
@@ -26,8 +24,7 @@ void Job::set_combiner()
 }
 
 template <class Reducer>
-void Job::set_reducer()
-{
+void Job::set_reducer() {
   if (!std::is_base_of<mapreduce::base::ReduceTask, Reducer>::value)
     throw std::runtime_error("Invalid Reducer Class");
 
@@ -36,18 +33,15 @@ void Job::set_reducer()
 }
 
 template <typename T>
-void Job::set_config(const std::string &key, T&& value)
-{
-  if (key == "n_groups")
-  {
-    if (value > conf_->worker_size || value < 0)
-    {
+void Job::set_config(const std::string &key, T&& value) {
+  if (key == "n_groups") {
+    if (value > conf_->worker_size || value < 0) {
       /// Group size can be at most the number of workers
       conf_->n_groups = conf_->worker_size;
-      if (conf_->worker_rank == 0)
-      {
-        if (value > 0)
+      if (conf_->worker_rank == 0) {
+        if (value > 0) {
           mapreduce::util::logger.warning("Group size exceeds the number of worker nodes. Use the number of worker nodes instead.");
+        }
         mapreduce::util::logger.info("[Master] Config: ", key, "=", conf_->worker_size);
       }
       return;
@@ -55,9 +49,9 @@ void Job::set_config(const std::string &key, T&& value)
       conf_->n_groups = value;
     }
   }
-  else if (key == "log_level")
+  else if (key == "log_level") {
     mapreduce::util::logger.set_log_level(mapreduce::util::LogLevel(value));
-  else {
+  } else {
     if (conf_->worker_rank == 0)
       mapreduce::util::logger.warning("Invalid parameter key: ", key);
     return;

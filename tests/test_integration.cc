@@ -31,18 +31,14 @@ template<> long convert_key(const std::string& key) { return std::stol(key); }
 template<> std::string convert_key(const std::string& key) { return std::string(key); }
 
 template <typename K, typename V>
-class TestMapper: public Mapper<std::string, long, K, V>
-{
+class TestMapper: public Mapper<std::string, long, K, V> {
  public:
-  void map(const std::string& ikey, const long&, const Context<K, V>& context)
-  {
+  void map(const std::string& ikey, const long&, const Context<K, V>& context) {
     std::string line, word;
     std::istringstream iss(ikey);
-    while (std::getline(iss, line))
-    {
+    while (std::getline(iss, line)) {
       std::istringstream linestream(line);
-      while (linestream >> word)
-      {
+      while (linestream >> word) {
         K key = convert_key<K>(word);
         V value = 1;
         context.write(key, value);
@@ -52,11 +48,9 @@ class TestMapper: public Mapper<std::string, long, K, V>
 };
 
 template <typename K, typename V>
-class TestCombiner: public Reducer<K, V, K, V>
-{
+class TestCombiner: public Reducer<K, V, K, V> {
  public:
-  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context)
-  {
+  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context) {
     K key(ikey);
     /// In reducer, only counts length of vector
     /// so that the result on this process does not affect the result
@@ -66,11 +60,9 @@ class TestCombiner: public Reducer<K, V, K, V>
 };
 
 template <typename K, typename V>
-class TestReducer: public Reducer<K, V, K, V>
-{
+class TestReducer: public Reducer<K, V, K, V> {
  public:
-  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context)
-  {
+  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context) {
     K key(ikey);
     /// For testing, only returns vector size
     V value = static_cast<V>(ivalues.size());
@@ -86,18 +78,15 @@ class TestReducer: public Reducer<K, V, K, V>
  *  @param count&         number of times to generate data per key
  */
 template <typename K, typename V>
-void test_runner(std::vector<K>& target_keys, const unsigned int& count)
-{
+void test_runner(std::vector<K>& target_keys, const unsigned int& count) {
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
-  FileFormat ffmt;
-  ffmt.add_input_path(input_dir);
-  ffmt.set_output_path(output_dir);
-
   /// Setup MapReduce Job
   Job job;
-  job.set_file_format(ffmt);
+  job.add_input_path(input_dir);
+  job.set_output_path(output_dir);
+
   job.set_config("log_level", 4);
 
   job.template set_mapper<TestMapper<K, V>>();
@@ -107,8 +96,7 @@ void test_runner(std::vector<K>& target_keys, const unsigned int& count)
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   /// Test only on root node
-  if (rank == 0)
-  {
+  if (rank == 0) {
     /// Setup input files
     fs::remove_all(input_dir);
     fs::create_directories(input_dir);
@@ -117,8 +105,7 @@ void test_runner(std::vector<K>& target_keys, const unsigned int& count)
     std::vector<K> res;
 
     /// Write input data
-    for (unsigned int i = 0; i < count; ++i)
-    {
+    for (unsigned int i = 0; i < count; ++i) {
       std::ofstream ofs(input_dir / std::to_string(i));
       for (auto& key: target_keys)
         ofs << key << " ";
@@ -131,14 +118,12 @@ void test_runner(std::vector<K>& target_keys, const unsigned int& count)
     REQUIRE(fs::is_directory(output_dir));
 
     /// Parse output data
-    for (auto& path: fs::directory_iterator(output_dir))
-    {
+    for (auto& path: fs::directory_iterator(output_dir)) {
       std::ifstream ifs(path.path());
       std::string line;
       K key;
       V value;
-      while (std::getline(ifs, line))
-      {
+      while (std::getline(ifs, line)) {
         std::istringstream iss(line);
         iss >> key >> value;
         res.push_back(std::move(key));
@@ -164,18 +149,14 @@ void test_runner(std::vector<K>& target_keys, const unsigned int& count)
  *  @param count&         number of times to generate data per key
  */
 template <typename K, typename V>
-void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& count)
-{
+void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& count) {
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
-  FileFormat ffmt;
-  ffmt.add_input_path(input_dir);
-  ffmt.set_output_path(output_dir);
-
   /// Setup MapReduce Job
   Job job;
-  job.set_file_format(ffmt);
+  job.add_input_path(input_dir);
+  job.set_output_path(output_dir);
   job.set_config("log_level", 4);
 
   job.template set_mapper<TestMapper<K, V>>();
@@ -186,8 +167,7 @@ void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& 
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   /// Test only on root node
-  if (rank == 0)
-  {
+  if (rank == 0) {
     /// Setup input files
     fs::remove_all(input_dir);
     fs::create_directories(input_dir);
@@ -196,8 +176,7 @@ void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& 
     std::vector<K> res;
 
     /// Write input data
-    for (unsigned int i = 0; i < count; ++i)
-    {
+    for (unsigned int i = 0; i < count; ++i) {
       std::ofstream ofs(input_dir / std::to_string(i));
       for (auto& key: target_keys)
         ofs << key << " ";
@@ -215,14 +194,12 @@ void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& 
     --target_count;
 
     /// Parse output data
-    for (auto& path: fs::directory_iterator(output_dir))
-    {
+    for (auto& path: fs::directory_iterator(output_dir)) {
       std::ifstream ifs(path.path());
       std::string line;
       K key;
       V value;
-      while (std::getline(ifs, line))
-      {
+      while (std::getline(ifs, line)) {
         std::istringstream iss(line);
         iss >> key >> value;
         res.push_back(std::move(key));
@@ -241,25 +218,21 @@ void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& 
   }
 }
 
-TEST_CASE("Integration Test", "[job][mapreduce][integrate]")
-{
+TEST_CASE("Integration Test", "[job][mapreduce][integrate]") {
   #ifdef INTEGRATION1
-  SECTION("Job:string/int")
-  {
+  SECTION("Job:string/int") {
     std::vector<std::string> keys{"test", "example", "mapreduce"};
     test_runner<std::string, int>(keys, 3);
   }
   #endif  // INTEGRATION1
   #ifdef INTEGRATION2
-  SECTION("Job:int/double")
-  {
+  SECTION("Job:int/double") {
     std::vector<int> keys{100, 200, 300};
     test_runner<int, double>(keys, 5);
   }
   #endif  // INTEGRATION2
   #ifdef INTEGRATION3
-  SECTION("Job:long/int")
-  {
+  SECTION("Job:long/int") {
     std::vector<long> keys{100000, 200000, 300000};
     test_runner<long, int>(keys, 10);
   }
@@ -267,25 +240,21 @@ TEST_CASE("Integration Test", "[job][mapreduce][integrate]")
   fs::remove_all(tmpdir);
 }
 
-TEST_CASE("Integration Test with Combiner", "[job][mapreduce][combiner][integrate]")
-{
+TEST_CASE("Integration Test with Combiner", "[job][mapreduce][combiner][integrate]") {
   #ifdef INTEGRATION4
-  SECTION("Job:string/int")
-  {
+  SECTION("Job:string/int") {
     std::vector<std::string> keys{"test", "example", "mapreduce"};
     test_runner_with_combiner<std::string, int>(keys, 3);
   }
   #endif  // INTEGRATION4
   #ifdef INTEGRATION5
-  SECTION("Job:int/double")
-  {
+  SECTION("Job:int/double") {
     std::vector<int> keys{100, 200, 300};
     test_runner_with_combiner<int, double>(keys, 5);
   }
   #endif  // INTEGRATION5
   #ifdef INTEGRATION6
-  SECTION("Job:long/int")
-  {
+  SECTION("Job:long/int") {
     std::vector<long> keys{100000, 200000, 300000};
     test_runner_with_combiner<long, int>(keys, 10);
   }

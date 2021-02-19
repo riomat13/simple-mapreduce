@@ -29,7 +29,7 @@ install:
 script:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
   - cmake -DSIMPLEMR_BUILD_TEST=ON .
-  - make VERBOSE=1 -j
+  - make VERBOSE=1 -j 2
   - ctest -VV
 
 branches:
@@ -38,5 +38,4 @@ branches:
     - master
 
 notifications:
-  email:
-    on_success: never
+  email: false

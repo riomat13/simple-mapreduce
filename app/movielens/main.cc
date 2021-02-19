@@ -16,28 +16,20 @@ using namespace mapreduce;
 //  The objective is calculating rating mean per movie,
 //  thus, key is movieId (here, use the id as long value to save memory consumption instead of string)
 
-class RatingMeanMapper : public Mapper<std::string, long, long, double>
-{
+class RatingMeanMapper : public Mapper<std::string, long, long, double> {
  public:
   void map(const std::string&, const long&, const Context<long, double>&);
 };
 
-class RatingMeanReducer : public Reducer<long, double, long, double>
-{
+class RatingMeanReducer : public Reducer<long, double, long, double> {
  public:
     void reduce(const long &,
                 const std::vector<double> &,
                 const Context<long, double> &);
 };
 
-int main(int argc, char *argv[])
-{
-  FileFormat fmt;
-  fmt.add_input_path("./inputs");
-  fmt.set_output_path("./outputs");
-
+int main(int argc, char *argv[]) {
   Job job{argc, argv};
-  job.set_file_format(fmt);
   job.set_config("log_level", mapreduce::util::LogLevel::INFO);
   job.set_mapper<RatingMeanMapper>();
   job.set_reducer<RatingMeanReducer>();
@@ -50,8 +42,7 @@ int main(int argc, char *argv[])
 /* --------------------------------------------------
  *   Implementation
  * -------------------------------------------------- */
-void RatingMeanMapper::map(const std::string &input, const long &, const Context<long, double> &context)
-{
+void RatingMeanMapper::map(const std::string &input, const long &, const Context<long, double> &context) {
   long tmp, movie_id;
   double rating;
   std::string line;
@@ -60,8 +51,7 @@ void RatingMeanMapper::map(const std::string &input, const long &, const Context
   /// Skip title row
   std::getline(iss, line);
 
-  while (std::getline(iss, line))
-  {
+  while (std::getline(iss, line)) {
     std::replace(line.begin(), line.end(), ',', ' ');
     std::istringstream linestream(line);
     /// Format: index, user_id, movie_id, rating, timestamp
@@ -72,8 +62,7 @@ void RatingMeanMapper::map(const std::string &input, const long &, const Context
 
 void RatingMeanReducer::reduce(const long &key,
                                const std::vector<double> &values,
-                               const Context<long, double> &context)
-{
+                               const Context<long, double> &context) {
   long key_(key);
   double value = REDUCE_MEAN(values);
   context.write(key_, value);

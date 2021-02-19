@@ -13,14 +13,12 @@ ByteData::ByteData(double data) { set_data_<double>(data); }
 ByteData::ByteData(std::string&& data) { set_data(std::move(data)); }
 
 /// Copy
-ByteData::ByteData(const ByteData& rhs)
-{
+ByteData::ByteData(const ByteData& rhs) {
   this->data_ = rhs.data_;
   this->size_ = rhs.size_;
 }
 
-ByteData& ByteData::operator=(const ByteData& rhs)
-{
+ByteData& ByteData::operator=(const ByteData& rhs) {
   if (this == &rhs)
     return *this;
 
@@ -30,14 +28,12 @@ ByteData& ByteData::operator=(const ByteData& rhs)
 }
 
 /// Move
-ByteData::ByteData(ByteData&& rhs)
-{
+ByteData::ByteData(ByteData&& rhs) {
   this->data_ = std::move(rhs.data_);
   this->size_ = rhs.size_;
 }
 
-ByteData& ByteData::operator=(ByteData&& rhs)
-{
+ByteData& ByteData::operator=(ByteData&& rhs) {
   this->data_ = std::move(rhs.data_);
   this->size_ = rhs.size_;
   return *this;
@@ -67,28 +63,24 @@ template<> std::string ByteData::get_data() const { return std::string(data_.beg
 
 /// Array
 template<>
-std::vector<int> ByteData::get_data() const
-{
+std::vector<int> ByteData::get_data() const {
   std::vector<int> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(int));
   return out;
 }
 template<>
-std::vector<long> ByteData::get_data() const
-{
+std::vector<long> ByteData::get_data() const {
   std::vector<long> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(long));
   return out;
 }
-template<> std::vector<float> ByteData::get_data() const
-{
+template<> std::vector<float> ByteData::get_data() const {
   std::vector<float> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(float));
   return out;
 }
 template<>
-std::vector<double> ByteData::get_data() const
-{
+std::vector<double> ByteData::get_data() const {
   std::vector<double> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(double));
   return out;

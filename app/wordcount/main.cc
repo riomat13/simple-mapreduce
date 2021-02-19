@@ -16,38 +16,28 @@
 // key words.
 //
 
-class WordCountMapper : public mapreduce::Mapper<std::string, long, std::string, long>
-{
+class WordCountMapper : public mapreduce::Mapper<std::string, long, std::string, long> {
  public:
   void map(const std::string&, const long&, const mapreduce::Context<std::string, long>&);
 };
 
 class WordCountReducer
-  : public mapreduce::Reducer<std::string, long, std::string, long>
-{
+  : public mapreduce::Reducer<std::string, long, std::string, long> {
  public:
     void reduce(const std::string &,
                 const std::vector<long> &,
                 const mapreduce::Context<std::string, long> &);
 };
 
-int main(int argc, char *argv[])
-{
-  /// Set directory paths to handle data
-  mapreduce::FileFormat fmt{};
-  fmt.add_input_path("./inputs");
-  fmt.set_output_path("./outputs");
-
+int main(int argc, char *argv[]) {
   mapreduce::Job job{argc, argv};
-
-  job.set_file_format(fmt);        // Notify target directories
   job.set_config("n_groups", -1);  // Number of workers to run reduced task
                                    // This will be a number of output files
                                    // (Note: even if this is set to small value,
                                    //  all workers will be used for other processes)
                                    // -1 for using all workers
   job.set_config("log_level", mapreduce::util::LogLevel::INFO);
-                                   // DEBUG, INFO, WARNING, ERROR, CRITICAL, DISABLE
+                                   // Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL, DISABLE
                                    // Disable logs which levels are less than it
 
   job.set_mapper<WordCountMapper>();
@@ -63,13 +53,11 @@ int main(int argc, char *argv[])
 /* --------------------------------------------------
  *   Implementation
  * -------------------------------------------------- */
-void WordCountMapper::map(const std::string &input, const long &, const mapreduce::Context<std::string, long> &context)
-{
+void WordCountMapper::map(const std::string &input, const long &, const mapreduce::Context<std::string, long> &context) {
   std::string line;
   std::istringstream iss(input);
 
-  while (std::getline(iss, line))
-  {
+  while (std::getline(iss, line)) {
     /// Remove all punctuations
     std::replace_if(line.begin(), line.end(),
                     [](unsigned char c){ return std::ispunct(c); }, ' ');
@@ -80,8 +68,7 @@ void WordCountMapper::map(const std::string &input, const long &, const mapreduc
 
     /// Tokenize only by spliting by space/tab
     /// No lower cased nor any stemming, lemmatizing
-    while (linestream >> word)
-    {
+    while (linestream >> word) {
       context.write(word, count);
     }
   }
@@ -89,8 +76,7 @@ void WordCountMapper::map(const std::string &input, const long &, const mapreduc
 
 void WordCountReducer::reduce(const std::string &key,
                               const std::vector<long> &values,
-                              const mapreduce::Context<std::string, long> &context)
-{
+                              const mapreduce::Context<std::string, long> &context) {
   std::string keyitem(key);
 
   /// Aggregate word count

@@ -11,10 +11,9 @@
 
 using namespace mapreduce::data;
 
-TEST_CASE("MessageQueue", "[mq]")
-{
-  SECTION("string/int")
-  {
+TEST_CASE("MessageQueue", "[mq]") {
+
+  SECTION("string/int") {
     size_t count = 3;
     MessageQueue mq;
 
@@ -28,8 +27,7 @@ TEST_CASE("MessageQueue", "[mq]")
 
     mq.end();
 
-    for (size_t i = 0; i < count; ++i)
-    {
+    for (size_t i = 0; i < count; ++i) {
       BytePair pair = mq.receive();
       REQUIRE(pair.first.get_data<std::string>() == target_key);
       REQUIRE(pair.second.get_data<int>() == target_value);
@@ -39,8 +37,7 @@ TEST_CASE("MessageQueue", "[mq]")
     REQUIRE(pair.first.empty());
   }
 
-  SECTION("string/double")
-  {
+  SECTION("string/double") {
     size_t count = 3;
     MessageQueue mq;
 
@@ -54,8 +51,7 @@ TEST_CASE("MessageQueue", "[mq]")
 
     mq.end();
 
-    for (size_t i = 0; i < count; ++i)
-    {
+    for (size_t i = 0; i < count; ++i) {
       BytePair pair = mq.receive();
       REQUIRE(pair.first.get_data<std::string>() == target_key);
       REQUIRE(pair.second.get_data<double>() == target_value);
@@ -66,19 +62,16 @@ TEST_CASE("MessageQueue", "[mq]")
   }
 }
 
-TEST_CASE("MessageQueue with threads", "[mq][threads]")
-{
+TEST_CASE("MessageQueue with threads", "[mq][threads]") {
   std::vector<std::thread> threads;
   MessageQueue mq;
 
   unsigned int sum = 0;
 
-  for (unsigned int i = 0; i < 2; ++i)
-  {
+  for (unsigned int i = 0; i < 2; ++i) {
     threads.emplace_back([&mq](int num){
       /// Each thread pushes a pair 10 times
-      for (unsigned int i = 0; i < 10; ++i)
-      {
+      for (unsigned int i = 0; i < 10; ++i) {
         ByteData key("test");
         ByteData value(long(num+1));
         mq.send(std::make_pair(key, value));
@@ -95,8 +88,7 @@ TEST_CASE("MessageQueue with threads", "[mq][threads]")
   mq.end();
 
   unsigned int res = 0;
-  while (true)
-  {
+  while (true) {
     BytePair pair = mq.receive();
     if (pair.first.empty())
       break;

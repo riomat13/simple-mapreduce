@@ -5,6 +5,20 @@ set(SIMPLEMR_VERSION 0.0.1)
 project(SimpleMapReduce VERSION ${SIMPLEMR_VERSION} LANGUAGES CXX)
 message(STATUS "Build SimpleMapReduce: v${SIMPLEMR_VERSION}")
 
+if(UNIX AND NOT APPLE)
+  set(USED_OS "Linux")
+elseif(APPLE)
+  set(USED_OS "MacOS")
+elseif(UNIX)
+  set(USED_OS "Unix")
+elseif(WIN32)
+  set(USED_OS "Win32")
+endif()
+
+if(NOT USED_OS STREQUAL "Linux")
+  message(SEND_ERROR "Currently only work on Linux")
+endif()
+
 set(BUILD_LIBRARY ON)
 
 # library name

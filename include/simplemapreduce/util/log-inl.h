@@ -4,38 +4,36 @@ namespace mapreduce {
 namespace util {
 
   template <typename Arg>
-  LogBuffer& LogBuffer::operator<<(Arg&& arg)
-  {
+  LogBuffer& LogBuffer::operator<<(Arg&& arg) {
     oss << arg;
     return *this;
   }
 
   /// Reference: https://stackoverflow.com/a/50923834
   template <typename ...Args>
-  std::unique_ptr<LogBuffer> Logger::log(const LogLevel& log_level, Args&&... args)
-  {
-    if (log_level == LogLevel::INFO)
-      return info(args...);
-    else if (log_level == LogLevel::DEBUG)
-      return debug(args...);
-    else if (log_level == LogLevel::WARNING)
-      return warning(args...);
-    else if (log_level == LogLevel::ERROR)
-      return error(args...);
-    else if (log_level == LogLevel::CRITICAL)
-      return critical(args...);
-    else
-    {
-      std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
-      log_stdout_root(*buff, args...);
-      return buff;
+  std::unique_ptr<LogBuffer> Logger::log(const LogLevel& log_level, Args&&... args) {
+    switch (log_level) {
+      case LogLevel::INFO:
+        return info(args...);
+      case LogLevel::DEBUG:
+        return debug(args...);
+      case LogLevel::WARNING:
+        return warning(args...);
+      case LogLevel::ERROR:
+        return error(args...);
+      case LogLevel::CRITICAL:
+        return critical(args...);
+      default:
+        std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
+        log_stdout_root(*buff, args...);
+        return buff;
     }
   }
 
   template <typename ...Args>
-  std::unique_ptr<LogBuffer> Logger::info(Args&&... args)
-  {
-    if (get_log_level() > LogLevel::INFO) return nullptr;
+  std::unique_ptr<LogBuffer> Logger::info(Args&&... args) {
+    if (get_log_level() > LogLevel::INFO)
+      return nullptr;
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
@@ -46,9 +44,9 @@ namespace util {
   }
 
   template <typename ...Args>
-  std::unique_ptr<LogBuffer> Logger::debug(Args&&... args)
-  {
-    if (get_log_level() > LogLevel::DEBUG) return nullptr;
+  std::unique_ptr<LogBuffer> Logger::debug(Args&&... args) {
+    if (get_log_level() > LogLevel::DEBUG)
+      return nullptr;
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
@@ -59,9 +57,9 @@ namespace util {
   }
 
   template <typename ...Args>
-  std::unique_ptr<LogBuffer> Logger::warning(Args&&... args)
-  {
-    if (get_log_level() > LogLevel::WARNING) return nullptr;
+  std::unique_ptr<LogBuffer> Logger::warning(Args&&... args) {
+    if (get_log_level() > LogLevel::WARNING)
+      return nullptr;
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
@@ -72,9 +70,9 @@ namespace util {
   }
 
   template <typename ...Args>
-  std::unique_ptr<LogBuffer> Logger::error(Args&&... args)
-  {
-    if (get_log_level() > LogLevel::ERROR) return nullptr;
+  std::unique_ptr<LogBuffer> Logger::error(Args&&... args) {
+    if (get_log_level() > LogLevel::ERROR)
+      return nullptr;
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
@@ -85,9 +83,9 @@ namespace util {
   }
 
   template <typename ...Args>
-  std::unique_ptr<LogBuffer> Logger::critical(Args&&... args)
-  {
-    if (get_log_level() > LogLevel::CRITICAL) return nullptr;
+  std::unique_ptr<LogBuffer> Logger::critical(Args&&... args) {
+    if (get_log_level() > LogLevel::CRITICAL)
+      return nullptr;
 
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
@@ -98,8 +96,7 @@ namespace util {
   }
 
   template <typename ...Args>
-  void Logger::log_stdout_root(LogBuffer &buff, Args&&... args)
-  {
+  void Logger::log_stdout_root(LogBuffer &buff, Args&&... args) {
     /// add timestamp to log stream
     log_append_time_tag(buff);
 
@@ -110,8 +107,7 @@ namespace util {
   }
 
   template <typename ...Args>
-  void Logger::log_stderr_root(LogBuffer &buff, Args&&... args)
-  {
+  void Logger::log_stderr_root(LogBuffer &buff, Args&&... args) {
     /// add timestamp to log stream
     log_append_time_tag(buff);
 
@@ -122,27 +118,23 @@ namespace util {
   }
 
   template <typename T>
-  void Logger::log_stdout(LogBuffer &buff, T &t)
-  {
+  void Logger::log_stdout(LogBuffer &buff, T &t) {
     buff << t;
   }
 
   template <typename T, typename ...Args>
-  void Logger::log_stdout(LogBuffer &buff, T &t, Args&&... args)
-  {
+  void Logger::log_stdout(LogBuffer &buff, T &t, Args&&... args) {
     buff << t;
     log_stdout(buff, args...);
   }
 
   template <typename T>
-  void Logger::log_stderr(LogBuffer &buff, T &t)
-  {
+  void Logger::log_stderr(LogBuffer &buff, T &t) {
     buff << t;
   }
 
   template <typename T, typename ...Args>
-  void Logger::log_stderr(LogBuffer &buff, T &t, Args... args)
-  {
+  void Logger::log_stderr(LogBuffer &buff, T &t, Args... args) {
     buff << t;
     log_stderr(buff, args...);
   }

@@ -5,13 +5,11 @@
 namespace mapreduce {
 namespace data {
 
-MessageQueue::MessageQueue(const MessageQueue& rhs)
-{
+MessageQueue::MessageQueue(const MessageQueue& rhs) {
   this->queue_ = std::move(rhs.queue_);
 }
 
-BytePair MessageQueue::receive()
-{
+BytePair MessageQueue::receive() {
   std::unique_lock<std::mutex> lock{mq_mutex_};
   cond_.wait(lock, [this] { return !queue_.empty(); });
 
@@ -21,13 +19,11 @@ BytePair MessageQueue::receive()
   return data;
 }
 
-void MessageQueue::send(ByteData&& key, ByteData&& value)
-{
+void MessageQueue::send(ByteData&& key, ByteData&& value) {
   this->send(std::make_pair(std::move(key), std::move(value)));
 }
 
-void MessageQueue::send(BytePair&& data)
-{
+void MessageQueue::send(BytePair&& data) {
   std::lock_guard<std::mutex> lock{mq_mutex_};
 
   /// Data is stored with format encoded by context
@@ -35,8 +31,7 @@ void MessageQueue::send(BytePair&& data)
   cond_.notify_one();
 }
 
-void MessageQueue::end()
-{
+void MessageQueue::end() {
   std::lock_guard<std::mutex> lock{mq_mutex_};
 
   /// Send empty data to tell the end of the process

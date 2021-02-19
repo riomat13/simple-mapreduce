@@ -21,8 +21,12 @@ namespace proc {
 template <typename T>
 mapreduce::data::ByteData load_byte_data(std::ifstream&);
 
-class DataLoader
-{
+/**
+ * Base abstract class of data loader.
+ * The data is pair of mapreduce::data::ByteData,
+ * which represents key/value data.
+ */
+class DataLoader {
  public:
   virtual ~DataLoader() {}
 
@@ -34,11 +38,11 @@ class DataLoader
 };
 
 /**
- * Helper class to load data from intermediate state files
+ * Helper class to load data from intermediate state files.
+ * The data is pair of mapreduce::data::ByteData.
  */
 template <typename K, typename V>
-class BinaryFileDataLoader : public DataLoader
-{
+class BinaryFileDataLoader : public DataLoader {
  public:
   BinaryFileDataLoader(std::shared_ptr<mapreduce::JobConf>);
   ~BinaryFileDataLoader()
@@ -72,8 +76,11 @@ class BinaryFileDataLoader : public DataLoader
   std::shared_ptr<mapreduce::JobConf> conf_;
 };
 
-class MQDataLoader : public DataLoader
-{
+/**
+ * Data extractor from MessageQueue.
+ * The data is pair of mapreduce::data::ByteData.
+ */
+class MQDataLoader : public DataLoader {
  public:
   MQDataLoader() {}
   MQDataLoader(std::shared_ptr<mapreduce::data::MessageQueue> mq) : mq_(mq) {}
@@ -97,6 +104,6 @@ class MQDataLoader : public DataLoader
 }  // namespace proc
 }  // namespace mapreduce
 
-#include "simplemapreduce/proc/loader.tcc"
+#include "simplemapreduce/proc/loader-inl.h"
 
 #endif  // SIMPLEMAPREDUCE_PROC_LOADER_H_

@@ -17,8 +17,7 @@ namespace data {
 /**
  * FIFO queue to store key/value byte data.
  */
-class MessageQueue
-{
+class MessageQueue {
  public:
   MessageQueue() {};
   MessageQueue(const MessageQueue&);
