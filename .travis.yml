@@ -1,33 +1,52 @@
-language: cpp
-compiler: g++
 sudo: required
+language: cpp
 
-matrix:
-  include:
-    - os: linux
-      dist: xenial
-    - os: linux
-      dist: bionic
-
-addopns:
+addons: &gcc9
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
+      - g++-9
       - cmake
       - libopenmpi-dev
       - openmpi-bin
       - openmpi-common
+    sources:
+      - ubuntu-toolchain-r-test
+
+addons: &gcc10
+  apt:
+    packages:
+      - g++-10
+      - cmake
+      - libopenmpi-dev
+      - openmpi-bin
+      - openmpi-common
+    sources:
+      - ubuntu-toolchain-r-test
+
+matrix:
+  include:
+    - env: GCC_VERSION=9
+      os: linux
+      dist: xenial
+      addons: *gcc9
+    - env: GCC_VERSION=9
+      os: linux
+      dist: bionic
+      addons: *gcc9
+    - env: GCC_VERSION=10
+      os: linux
+      dist: bionic
+      addons: *gcc10
 
 before_install:
   - sudo apt-get -qq update
   - test -n $CXX && unset CXX
 
-install:
-  - sudo apt-get install -y g++-9
+before_script:
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 10
+  - export CXX="g++-${GCC_VERSION}" CC="gcc-${GCC_VERSION}"
 
 script:
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
   - cmake -DSIMPLEMR_BUILD_TEST=ON .
   - make VERBOSE=1 -j 2
   - ctest -VV
