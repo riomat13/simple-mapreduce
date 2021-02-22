@@ -33,9 +33,6 @@ int main(int argc, char *argv[]) {
 
   mapreduce::Job job{argc, argv};
 
-  //job.add_input_path("../data/inputs-reviews-double");
-  //job.set_output_path("./outputs");
-
   job.set_config("n_groups", -1);
   job.set_config("log_level", mapreduce::util::LogLevel::INFO);
 

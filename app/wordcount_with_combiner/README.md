@@ -14,5 +14,5 @@ $ mkdir -p build && cd build
 $ cmake -DSIMPLEMR_BUILD_APP_TYPE=wordcount-with-combiner ..
 $ make -j
 $ cd ..
-$ mpirun [options] ./run_task
+$ mpirun [options] ./run_task -i [input directory] -o [output directory]
 ```
