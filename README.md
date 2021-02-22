@@ -127,10 +127,10 @@ $ cd ../..
 $ ./run_task --help
 
 # set input/output directories with -i/--input and -o/--output options
-$ mpirun [options] ./run_task --input ./inputs --output ./outputs
+$ mpirun [MPI options] ./run_task --input ./inputs --output ./outputs
 
 # if there are multiple input directories, separate by commas
-$ mpirun [options] ./run_task -i ./inputs1,./inputs2,./inputs3 -o ./outputs
+$ mpirun [MPI options] ./run_task -i ./inputs1,./inputs2,./inputs3 -o ./outputs
 
 # for instance,
 # use all node on the local machine
@@ -188,14 +188,11 @@ The structure is following:
 
 using namespace mapreduce;
 
-class SomeMapper : public Mapper<in_key_type,
-                                 in_value_type,
-                                 out_key_type,
-                                 out_value_type>
-{
+class SomeMapper
+    : public Mapper<in_key_type, in_value_type, out_key_type, out_value_type> {
  public:
-  void map(const in_key_type &key, const in_value_type &value, const Context<out_key_type, out_value_type> &context)
-  {
+  void map(const in_key_type &key, const in_value_type &value,
+           const Context<out_key_type, out_value_type> &context) {
     out_key_type out_key;
     out_value_type out_value;
 
@@ -205,22 +202,18 @@ class SomeMapper : public Mapper<in_key_type,
     context.write(out_key, out_value);  // this is for sending data
   }
 
-class SomeReducer : public Reducer<in_key_type,
-                                   in_value_type,
-                                   out_key_type,
-                                   out_value_type>
-{
+class SomeReducer
+    : public Reducer<in_key_type, in_value_type, out_key_type, out_value_type> {
  public:
   void reduce(const in_key_type &key, const std::vector<in_value_type> &value,
-              const Context<out_key_type, out_value_type> &context)
-  {
+              const Context<out_key_type, out_value_type> &context) {
     out_key_type out_key;
     out_value_type out_value;
 
     /// do something
 
     /// for summation or calculating mean
-    /// RESUCE_SUM() and REDUCE_MEAN() can be used respectively
+    /// REDUCE_SUM() and REDUCE_MEAN() can be used respectively
     /// See `app/word_count.cc` as an example
 
     /// output the result via context.write(out_key_type, out_value_type)
@@ -228,8 +221,7 @@ class SomeReducer : public Reducer<in_key_type,
   }
 }
 
-int main(int &, char *[])
-{
+int main(int &, char *[]) {
   Job job{};
 
   /// Set input/output directories, if you would like to set on source file.
