@@ -329,6 +329,9 @@ The details is described in [link](./app/movielens/README.md).
 ## <a name="5-todo"></a>5 TODO
 
 - Add configurations
+- Logging configuration
+  - Write logs to files
+- Run on distributed memory
 
 ## <a name="6-references"></a>6 References
 

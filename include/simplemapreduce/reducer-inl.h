@@ -1,6 +1,16 @@
 namespace mapreduce {
 
 template <typename IK, typename IV, typename OK, typename OV>
+std::filesystem::path Reducer<IK, IV, OK, OV>::get_output_filepath() {
+  /// Set file path named by current worker rank and join with the output directory
+  std::ostringstream oss;
+  oss << std::setw(5) << std::setfill('0') << conf_->worker_rank;
+  std::filesystem::path fname = oss.str();
+
+  return conf_->output_dirpath / fname;
+}
+
+template <typename IK, typename IV, typename OK, typename OV>
 std::unique_ptr<mapreduce::Context<IK, IV>> Reducer<IK, IV, OK, OV>::get_context(const std::string& path) {
   std::unique_ptr<mapreduce::proc::OutputWriter<IK, IV>> writer = std::make_unique<mapreduce::proc::OutputWriter<IK, IV>>(path);
   return std::make_unique<mapreduce::Context<IK, IV>>(std::move(writer));
@@ -27,7 +37,7 @@ std::unique_ptr<mapreduce::proc::Sorter<IK, IV>> Reducer<IK, IV, OK, OV>::get_so
 template <typename IK, typename IV, typename OK, typename OV>
 void Reducer<IK, IV, OK, OV>::run() {
   if (mq_ == nullptr)
-    this->run_(this->conf_->output_fpath);
+    this->run_(get_output_filepath());
   else
     this->run_(mq_);
 }

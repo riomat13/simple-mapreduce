@@ -1,4 +1,3 @@
-#include <stdexcept>
 #include <type_traits>
 
 #include "simplemapreduce/util/log.h"
@@ -7,29 +6,28 @@ namespace mapreduce {
 
 template <class Mapper>
 void Job::set_mapper() {
-  if (!std::is_base_of<mapreduce::base::MapTask, Mapper>::value)
-    throw std::runtime_error("Invalid Mapper Class");
+  static_assert(std::is_base_of<mapreduce::base::MapTask, Mapper>::value,
+                "Invalid Mapper Class");
 
-  mapper_ = std::make_unique<Mapper>();
-  mapper_->set_conf(conf_);
+  runner_->set_mapper(std::make_unique<Mapper>());
+  has_mapper_ = true;
 }
 
 template <class Combiner>
 void Job::set_combiner() {
-  if (!std::is_base_of<mapreduce::base::ReduceTask, Combiner>::value)
-    throw std::runtime_error("Invalid Combiner Class");
+  static_assert(std::is_base_of<mapreduce::base::ReduceTask, Combiner>::value,
+                "Invalid Combiner Class");
 
-  combiner_ = std::make_unique<Combiner>();
-  combiner_->set_conf(conf_);
+  runner_->set_combiner(std::make_unique<Combiner>());
 }
 
 template <class Reducer>
 void Job::set_reducer() {
-  if (!std::is_base_of<mapreduce::base::ReduceTask, Reducer>::value)
-    throw std::runtime_error("Invalid Reducer Class");
+  static_assert(std::is_base_of<mapreduce::base::ReduceTask, Reducer>::value,
+                "Invalid Reducer Class");
 
-  reducer_ = std::make_unique<Reducer>();
-  reducer_->set_conf(conf_);
+  runner_->set_reducer(std::make_unique<Reducer>());
+  has_reducer_ = true;
 }
 
 template <typename T>

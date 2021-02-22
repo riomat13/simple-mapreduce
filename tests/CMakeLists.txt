@@ -165,6 +165,8 @@ if(SIMPLEMR_TEST_INTEGRATION)
     set(ITEST_SOURCES
       # main source files
       ${PROJECT_SOURCE_DIR}/../src/job.cc
+      ${PROJECT_SOURCE_DIR}/../src/job_runner.cc
+      ${PROJECT_SOURCE_DIR}/../src/local_runner.cc
       # test source files
       ${PROJECT_SOURCE_DIR}/main.cc
       ${PROJECT_SOURCE_DIR}/test_integration.cc
@@ -173,7 +175,6 @@ if(SIMPLEMR_TEST_INTEGRATION)
 
     add_executable(${ITEST_NAME} ${LIB_SOURCES} ${ITEST_SOURCES})
     target_compile_definitions(${ITEST_NAME} PRIVATE "INTEGRATION${type}")
-    target_compile_definitions(${UTEST_NAME} PRIVATE IS_LINUX)
     setup_test(${ITEST_NAME} ON)
     add_test(NAME ${ITEST_NAME} COMMAND ${MPIEXEC} -np 2 ./${ITEST_NAME})
   endforeach()

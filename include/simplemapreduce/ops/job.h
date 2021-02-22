@@ -9,31 +9,13 @@
 #include <mpi.h>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/base/job_runner.h"
 #include "simplemapreduce/base/job_tasks.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/fileformat.h"
 
 namespace mapreduce {
-
-/**
- * Current task types.
- * Used for tag to send/recv messages.
- */
-enum TaskType {
-  start,
-  ready,
-  map_data,
-  map_start,
-  map_end,
-  shuffle_start,
-  shuffle_end,
-  sort_start,
-  sort_end,
-  reduce_start,
-  reduce_end,
-  end,
-};
 
 /**
  * Job class to handle and manage all mapreduce process
@@ -116,17 +98,6 @@ class Job {
   void setup_output_dir();
 
   /**
-   * Get file path of the last state
-   * based on provided output path.
-   */
-  std::filesystem::path get_output_file_path();
-
-  /**
-   * Receive file path to process with Mapper from master node.
-   */
-  std::string receive_filepath();
-
-  /**
    * Search available worker except master and return the worker ID as MPI_Rank.
    * If not node is available, return -1
    */
@@ -154,26 +125,6 @@ class Job {
   void start_reducer_tasks();
 
   /**
-   * Execute tasks on child nodes
-   */
-  void run_child_tasks();
-
-  /**
-   * Execute map tasks on child nodes
-   */
-  void run_map_tasks();
-
-  /**
-   * Execute shuffle tasks on child nodes
-   */
-  void run_shuffle_tasks();
-
-  /**
-   * Execute reduce tasks on child nodes
-   */
-  void run_reduce_tasks();
-
-  /**
    * Clean up temporary data
    */
   void cleanup_temps();
@@ -183,17 +134,15 @@ class Job {
   /// which is when -h/--help option is passed.
   bool is_valid_{true};
 
+  /// Whether mapper/reducer are set
+  bool has_mapper_{false};
+  bool has_reducer_{false};
+
   /// Job parameters
   std::shared_ptr<mapreduce::JobConf> conf_ = std::make_shared<mapreduce::JobConf>();
 
-  /// Mapper instance
-  std::unique_ptr<mapreduce::base::MapTask> mapper_ = nullptr;
-
-  /// Combiner instance
-  std::unique_ptr<mapreduce::base::ReduceTask> combiner_ = nullptr;
-
-  /// Reducer instance
-  std::unique_ptr<mapreduce::base::ReduceTask> reducer_ = nullptr;
+  /// Child job runner
+  std::unique_ptr<mapreduce::base::JobRunner> runner_;
 
   /// FileFormat instance
   mapreduce::FileFormat file_fmt_{};
