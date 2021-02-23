@@ -166,6 +166,7 @@ if(SIMPLEMR_TEST_INTEGRATION)
       # main source files
       ${PROJECT_SOURCE_DIR}/../src/job.cc
       ${PROJECT_SOURCE_DIR}/../src/job_runner.cc
+      ${PROJECT_SOURCE_DIR}/../src/local_manager.cc
       ${PROJECT_SOURCE_DIR}/../src/local_runner.cc
       # test source files
       ${PROJECT_SOURCE_DIR}/main.cc

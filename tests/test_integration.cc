@@ -259,4 +259,5 @@ TEST_CASE("Integration Test with Combiner", "[job][mapreduce][combiner][integrat
     test_runner_with_combiner<long, int>(keys, 10);
   }
 #endif  // INTEGRATION6
+  fs::remove_all(tmpdir);
 }

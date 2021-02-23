@@ -9,6 +9,7 @@
 #include <mpi.h>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/base/job_manager.h"
 #include "simplemapreduce/base/job_runner.h"
 #include "simplemapreduce/base/job_tasks.h"
 #include "simplemapreduce/ops/conf.h"
@@ -98,31 +99,9 @@ class Job {
   void setup_output_dir();
 
   /**
-   * Search available worker except master and return the worker ID as MPI_Rank.
-   * If not node is available, return -1
-   */
-  int find_available_worker();
-
-  /**
    * Run master node to handle map/reduce tasks on child nodes
    */
   void start_master_node();
-
-  /**
-   * Send signal to start mapper tasks
-   */
-  void start_mapper_tasks();
-
-  /**
-   * Manage worker node run on master node.
-   * Each function takes responsible for one worker.
-   */
-  void handle_mapper_worker();
-
-  /**
-   * Send signal to start reducer tasks
-   */
-  void start_reducer_tasks();
 
   /**
    * Clean up temporary data
@@ -134,6 +113,9 @@ class Job {
   /// which is when -h/--help option is passed.
   bool is_valid_{true};
 
+  /// Used if the current worker run job manger
+  bool is_master_{false};
+
   /// Whether mapper/reducer are set
   bool has_mapper_{false};
   bool has_reducer_{false};
@@ -141,11 +123,15 @@ class Job {
   /// Job parameters
   std::shared_ptr<mapreduce::JobConf> conf_ = std::make_shared<mapreduce::JobConf>();
 
-  /// Child job runner
-  std::unique_ptr<mapreduce::base::JobRunner> runner_;
+  /// Job manager running on master node
+  std::unique_ptr<mapreduce::base::JobManager> job_manager_;
 
-  /// FileFormat instance
-  mapreduce::FileFormat file_fmt_{};
+  /// Child job runner
+  std::unique_ptr<mapreduce::base::JobRunner> job_runner_;
+
+  /// Input file handler
+  /// This will be used for Job Manager
+  std::unique_ptr<mapreduce::FileFormat> file_fmt_ = std::make_unique<mapreduce::FileFormat>();
 
   /// Network parameters and statuses
   std::vector<MPI_Request> mpi_reqs;
