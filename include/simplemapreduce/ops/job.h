@@ -9,12 +9,12 @@
 #include <mpi.h>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/base/fileformat.h"
 #include "simplemapreduce/base/job_manager.h"
 #include "simplemapreduce/base/job_runner.h"
 #include "simplemapreduce/base/job_tasks.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/ops/context.h"
-#include "simplemapreduce/ops/fileformat.h"
 
 namespace mapreduce {
 
@@ -131,7 +131,7 @@ class Job {
 
   /// Input file handler
   /// This will be used for Job Manager
-  std::unique_ptr<mapreduce::FileFormat> file_fmt_ = std::make_unique<mapreduce::FileFormat>();
+  std::unique_ptr<mapreduce::base::FileFormat> file_fmt_;
 
   /// Network parameters and statuses
   std::vector<MPI_Request> mpi_reqs;

@@ -3,8 +3,8 @@
 
 #include <memory>
 
+#include "simplemapreduce/base/fileformat.h"
 #include "simplemapreduce/ops/conf.h"
-#include "simplemapreduce/ops/fileformat.h"
 
 namespace mapreduce {
 namespace base {
@@ -15,12 +15,12 @@ class JobManager {
 
   void set_conf(std::shared_ptr<mapreduce::JobConf> conf) { conf_ = conf; }
 
-  void set_file_format(std::unique_ptr<mapreduce::FileFormat> file_fmt) { file_fmt_ = std::move(file_fmt); };
+  void set_file_format(std::unique_ptr<mapreduce::base::FileFormat> file_fmt) { file_fmt_ = std::move(file_fmt); };
 
  protected:
   std::shared_ptr<mapreduce::JobConf> conf_ = nullptr;
 
-  std::unique_ptr<mapreduce::FileFormat> file_fmt_ = nullptr;
+  std::unique_ptr<mapreduce::base::FileFormat> file_fmt_ = nullptr;
 };
 
 }  // namespace base

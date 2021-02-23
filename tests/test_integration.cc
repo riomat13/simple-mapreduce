@@ -14,7 +14,6 @@
 #include "simplemapreduce/mapper.h"
 #include "simplemapreduce/reducer.h"
 #include "simplemapreduce/ops/context.h"
-#include "simplemapreduce/ops/fileformat.h"
 
 namespace fs = std::filesystem;
 

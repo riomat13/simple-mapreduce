@@ -53,8 +53,8 @@ set(UTEST_NAME simplemr-utests)
 set(LIB_SOURCES
   ${PROJECT_SOURCE_DIR}/../src/argparse.cc
   ${PROJECT_SOURCE_DIR}/../src/bytes.cc
-  ${PROJECT_SOURCE_DIR}/../src/fileformat.cc
   ${PROJECT_SOURCE_DIR}/../src/loader.cc
+  ${PROJECT_SOURCE_DIR}/../src/local_fileformat.cc
   ${PROJECT_SOURCE_DIR}/../src/log.cc
   ${PROJECT_SOURCE_DIR}/../src/parser.cc
   ${PROJECT_SOURCE_DIR}/../src/queue.cc
@@ -74,9 +74,9 @@ else()
       test_argparse.cc
       test_bytes.cc
       test_context.cc
-      test_fileformat.cc
       test_func.cc
       test_loader.cc
+      test_local_fileformat.cc
       test_log.cc
       test_parser.cc
       test_queue.cc
@@ -98,8 +98,11 @@ else()
         list(APPEND srcs ${PROJECT_SOURCE_DIR}/../src/argparse.cc)
       elseif(${name} STREQUAL "bytes")
         list(APPEND srcs ${PROJECT_SOURCE_DIR}/../src/bytes.cc)
-      elseif(${name} STREQUAL "fileformat")
-        list(APPEND srcs ${PROJECT_SOURCE_DIR}/../src/fileformat.cc)
+      elseif(${name} STREQUAL "local_fileformat")
+        list(APPEND srcs
+          ${PROJECT_SOURCE_DIR}/../src/local_fileformat.cc
+          ${PROJECT_SOURCE_DIR}/../src/log.cc
+        )
       elseif(${name} STREQUAL "loader")
         list(APPEND srcs
           ${PROJECT_SOURCE_DIR}/../src/bytes.cc
@@ -126,7 +129,6 @@ else()
     endforeach()
 
     list(REMOVE_DUPLICATES srcs)
-    message(STATUS "Sources: ${srcs}")
 
     set(UTEST_SOURCES
       main.cc
@@ -159,7 +161,7 @@ if(SIMPLEMR_TEST_INTEGRATION)
     message(STATUS "Processor Count: ${N_PROC}")
   endif()
 
-  foreach(type 1 2 3 4 5 6)
+  foreach(type RANGE 1 6)
     set(ITEST_NAME simplemr-itests${type})
 
     set(ITEST_SOURCES

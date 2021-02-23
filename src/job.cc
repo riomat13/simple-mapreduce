@@ -9,6 +9,7 @@
 #include <type_traits>
 
 #include "simplemapreduce/data/bytes.h"
+#include "simplemapreduce/local/fileformat.h"
 #include "simplemapreduce/local/manager.h"
 #include "simplemapreduce/local/runner.h"
 #include "simplemapreduce/proc/writer.h"
@@ -21,6 +22,7 @@ namespace fs = std::filesystem;
 using namespace mapreduce::base;
 using namespace mapreduce::commons;
 using namespace mapreduce::data;
+using namespace mapreduce::local;
 using namespace mapreduce::proc;
 using namespace mapreduce::util;
 
@@ -30,6 +32,9 @@ namespace mapreduce {
  *   Constructor/Destructor
  * -------------------------------------------------- */
 Job::Job() {
+  /// TODO: set local/distributed
+  file_fmt_ = std::make_unique<LocalFileFormat>();
+
   /// Start networking
   MPI_Init(nullptr, nullptr);
   start_up();
@@ -43,6 +48,9 @@ Job::Job(int &argc, char *argv[]) {
     is_valid_ = false;
     return;
   }
+
+  /// TODO: set local/distributed
+  file_fmt_ = std::make_unique<LocalFileFormat>();
 
   /// Start networking
   MPI_Init(&argc, &argv);
@@ -71,11 +79,14 @@ void Job::start_up() {
   if (mpi_rank == 0) {
     /// Set up master node
     is_master_ = true;
-    job_manager_ = std::make_unique<mapreduce::local::LocalJobManager>();
+
+    /// TODO: set local/distributed
+    job_manager_ = std::make_unique<LocalJobManager>();
     job_manager_->set_conf(conf_);
   } else {
     /// Set up worker nodes
-    job_runner_ = std::make_unique<mapreduce::local::LocalJobRunner>();
+    /// TODO: set local/distributed
+    job_runner_ = std::make_unique<LocalJobRunner>();
     job_runner_->set_conf(conf_);
 
     /// Exclude master node as a count of workers

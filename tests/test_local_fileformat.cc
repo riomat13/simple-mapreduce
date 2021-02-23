@@ -1,8 +1,9 @@
-#include "simplemapreduce/ops/fileformat.h"
+#include "simplemapreduce/local/fileformat.h"
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <vector>
 
 #include "catch.hpp"
@@ -11,7 +12,8 @@
 
 namespace fs = std::filesystem;
 
-using namespace mapreduce;
+using namespace mapreduce::base;
+using namespace mapreduce::local;
 
 /** Create test empty files */
 void create_test_files(fs::path& dirpath, unsigned int n) {
@@ -21,12 +23,12 @@ void create_test_files(fs::path& dirpath, unsigned int n) {
   }
 }
 
-TEST_CASE("FileFormat", "[file]") {
-  FileFormat ffmt;
+TEST_CASE("LocalFileFormat", "[file]") {
+  std::unique_ptr<FileFormat> ffmt = std::make_unique<LocalFileFormat>();
 
   SECTION("add_input_path") {
     unsigned int count = 10;
-    fs::path testdir = tmpdir / "test_fileformat";
+    fs::path testdir = tmpdir / "test_local_fileformat";
     fs::create_directories(testdir);
 
     std::vector<fs::path> dirs{fs::path{"testdir1"}, fs::path{"testdir2"}};
@@ -43,7 +45,7 @@ TEST_CASE("FileFormat", "[file]") {
         targets.push_back(directory / std::to_string(i));
       
       /// Register multiple directories
-      ffmt.add_input_path(directory);
+      ffmt->add_input_path(directory);
 
       /// Dummy directories
       /// These paths should be ignored
@@ -53,7 +55,7 @@ TEST_CASE("FileFormat", "[file]") {
 
     std::vector<std::string> paths;
 
-    for (auto&& p = ffmt.get_filepath(); !p.empty(); p = ffmt.get_filepath())
+    for (auto&& p = ffmt->get_filepath(); !p.empty(); p = ffmt->get_filepath())
       paths.push_back(std::move(p));
 
     /// Check two vectors contains the same paths
@@ -62,9 +64,9 @@ TEST_CASE("FileFormat", "[file]") {
 
     /// Reset and take one more time
     paths.clear();
-    ffmt.reset_input_paths();
+    ffmt->reset_input_paths();
 
-    for (auto&& p = ffmt.get_filepath(); !p.empty(); p = ffmt.get_filepath())
+    for (auto&& p = ffmt->get_filepath(); !p.empty(); p = ffmt->get_filepath())
       paths.push_back(std::move(p));
 
     /// Check two vectors contains the same paths
@@ -76,7 +78,7 @@ TEST_CASE("FileFormat", "[file]") {
 
   SECTION("add_input_paths") {
     unsigned int count = 10;
-    fs::path testdir = tmpdir / "test_fileformat";
+    fs::path testdir = tmpdir / "test_local_fileformat";
     fs::create_directories(testdir);
 
     std::vector<std::string> dirs{"testdir1", "testdir2"};
@@ -100,11 +102,11 @@ TEST_CASE("FileFormat", "[file]") {
     }
 
     /// Register multiple directories at once
-    ffmt.add_input_paths(inputs);
+    ffmt->add_input_paths(inputs);
 
     std::vector<std::string> paths;
 
-    for (auto&& p = ffmt.get_filepath(); !p.empty(); p = ffmt.get_filepath())
+    for (auto&& p = ffmt->get_filepath(); !p.empty(); p = ffmt->get_filepath())
       paths.push_back(std::move(p));
 
     /// Check two vectors contains the same paths
@@ -113,9 +115,9 @@ TEST_CASE("FileFormat", "[file]") {
 
     /// Reset and take one more time
     paths.clear();
-    ffmt.reset_input_paths();
+    ffmt->reset_input_paths();
 
-    for (auto&& p = ffmt.get_filepath(); !p.empty(); p = ffmt.get_filepath())
+    for (auto&& p = ffmt->get_filepath(); !p.empty(); p = ffmt->get_filepath())
       paths.push_back(std::move(p));
 
     /// Check two vectors contains the same paths
@@ -127,12 +129,12 @@ TEST_CASE("FileFormat", "[file]") {
 
   SECTION("output_directory_path") {
     fs::path outdir{"testout"};
-    ffmt.set_output_path(outdir);
+    ffmt->set_output_path(outdir);
 
-    REQUIRE(ffmt.get_output_path() == outdir);
+    REQUIRE(ffmt->get_output_path() == outdir);
 
     /// Disallow override
-    ffmt.set_output_path("notvalid");
-    REQUIRE(ffmt.get_output_path() == outdir);
+    ffmt->set_output_path("notvalid");
+    REQUIRE(ffmt->get_output_path() == outdir);
   }
 }
