@@ -13,6 +13,25 @@
 namespace mapreduce {
 namespace base {
 
+/**
+ * Current task types.
+ * Used for tag to send/recv messages.
+ */
+enum TaskType {
+  start,
+  ready,
+  map_data,
+  map_start,
+  map_end,
+  shuffle_start,
+  shuffle_end,
+  sort_start,
+  sort_end,
+  reduce_start,
+  reduce_end,
+  end,
+};
+
 class JobTask {
  public:
   /**

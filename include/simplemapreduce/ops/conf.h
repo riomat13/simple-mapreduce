@@ -11,12 +11,9 @@ namespace mapreduce {
   struct JobConf {
     /* # of groups to split tasks */ int n_groups{10};
     /* Temporary directory path */   std::filesystem::path tmpdir{"./_tmp"};
-    /* Output file path */           std::filesystem::path output_fpath;
-    /* # of nodes */                 int mpi_size;
-    /* Current rank in mpi */        int mpi_rank;
-    /* # of worker to run tasks */   int worker_size;
-    /* Current worker rank */        int worker_rank{-1};
-    /* Logger level */               int log_level{0};
+    /* Output file path */           std::filesystem::path output_dirpath;
+    /* # of worker to run tasks */   int worker_size{0};
+    /* Current worker rank */        int worker_rank{0};
   };
 
 }  // namespace mapreduce

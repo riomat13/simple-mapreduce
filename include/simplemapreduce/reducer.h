@@ -41,6 +41,12 @@ class Reducer : public mapreduce::base::ReduceTask {
   /// Used to create tasks with Mapper state
   friend class mapreduce::Job;
 
+  /**
+   * Set file path to write data and return it.
+   * The file name will be defined based on worker rank.
+   */
+  std::filesystem::path get_output_filepath();
+
   /** Run main reduce task. */
   void run() override;
 

@@ -1,6 +1,9 @@
 #include "simplemapreduce/data/bytes.h"
 
 #include <cstring>
+#include <fstream>
+
+namespace fs = std::filesystem;
 
 namespace mapreduce {
 namespace data {
@@ -54,6 +57,22 @@ void ByteData::set_data(int* data, const size_t& size) { set_data_<int>(data, si
 void ByteData::set_data(long* data, const size_t& size) { set_data_<long>(data, size); }
 void ByteData::set_data(float* data, const size_t& size) { set_data_<float>(data, size); }
 void ByteData::set_data(double* data, const size_t& size) { set_data_<double>(data, size); }
+
+void ByteData::read_file(const std::string& path) {
+  auto data_size = fs::file_size(path);
+  data_ = std::vector<char>(data_size);
+  std::ifstream ifs(path);
+  ifs.read(data_.data(), data_size);
+  size_ = data_size;
+}
+
+void ByteData::read_file(const fs::path& path) {
+  auto data_size = fs::file_size(path);
+  data_ = std::vector<char>(data_size);
+  std::ifstream ifs(path);
+  ifs.read(data_.data(), data_size);
+  size_ = data_size;
+}
 
 template<> int ByteData::get_data() const { return get_data_<int>(); }
 template<> long ByteData::get_data() const { return get_data_<long>(); }

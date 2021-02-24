@@ -1,6 +1,7 @@
 #ifndef SIMPLEMAPREDUCE_DATA_BYTES_H_
 #define SIMPLEMAPREDUCE_DATA_BYTES_H_
 
+#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -64,6 +65,15 @@ class ByteData {
    */
   template <typename T>
   void set_bytes(char*, const size_t&);
+
+  /**
+   * Read and set data from a file.
+   * All data will be assumed as char type.
+   *
+   *  @param path   read data from a file
+   */
+  void read_file(const std::string&);
+  void read_file(const std::filesystem::path&);
 
   /**
    * Get data as given type.

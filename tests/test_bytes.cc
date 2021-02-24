@@ -1,10 +1,15 @@
 #include "simplemapreduce/data/bytes.h"
 
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
 #include "catch.hpp"
 
+#include "utils.h"
+
+namespace fs = std::filesystem;
 using namespace mapreduce::data;
 
 TEST_CASE("ByteData", "[byte][data]") {
@@ -127,6 +132,24 @@ TEST_CASE("ByteData", "[byte][data]") {
     std::vector<double> res = bdata1.get_data<std::vector<double>>();
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
   }
+}
+
+TEST_CASE("ByteData File", "[byte][data][file]") {
+  fs::path fpath = tmpdir / "test_bytes" / "file";
+  fs::create_directories(fpath.parent_path());
+
+  /// Write sample test data to file
+  {
+    std::ofstream ofs(fpath);
+    ofs << "filetest";
+    ofs.close();
+  }
+
+  ByteData bdata;
+  bdata.read_file(fpath);
+  REQUIRE(bdata.get_data<std::string>() == "filetest");
+
+  fs::remove_all(tmpdir);
 }
 
 TEST_CASE("ByteData Modification", "[byte][data]") {

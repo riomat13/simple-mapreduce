@@ -1,51 +1,45 @@
-#ifndef SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H_
-#define SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H_
+#ifndef SIMPLEMAPREDUCE_BASE_FILE_FORMAT_H_
+#define SIMPLEMAPREDUCE_BASE_FILE_FORMAT_H_
 
 #include <filesystem>
 #include <string>
 #include <vector>
 
 namespace mapreduce {
+namespace base {
 
-class FileFormat final {
+class FileFormat {
  public:
-  FileFormat() {};
-  ~FileFormat() {};
-
-  FileFormat& operator=(const FileFormat&);
-
-  /// not allowed to copy nor move constructor/assignments
-  /// since there is no useful cases
-  FileFormat(const FileFormat&) = delete;
-  FileFormat& operator=(FileFormat&&) = delete;
+  // FileFormat() {}
+  virtual ~FileFormat() {};
 
   /**
    * Add directory path containing input files.
    *
    *  @param path   input directory path
    */
-  void add_input_path(const std::string&);
+  virtual void add_input_path(const std::string&) = 0;
 
   /**
    * Add multiple directory paths containing input files.
    *
    *  @param paths  input directory paths
    */
-  void add_input_paths(const std::vector<std::string>&);
+  virtual void add_input_paths(const std::vector<std::string>&) = 0;
 
   /** Get next file. */
-  std::string get_filepath();
+  virtual std::string get_filepath() = 0;
 
   /** Reset input file path extraction. */
   void reset_input_paths() { input_idx_ = 0; };
 
   /** Set target directory path to save output files */
-  void set_output_path(const std::string& path);
+  virtual void set_output_path(const std::string& path) = 0;
 
   /** Get target output path */
-  std::filesystem::path get_output_path() const { return output_path_; }
+  virtual std::filesystem::path get_output_path() const = 0;
 
- private:
+ protected:
   /// Current input file path index in input_dirs_
   size_t input_idx_{0};
 
@@ -59,6 +53,7 @@ class FileFormat final {
   std::filesystem::path output_path_;
 };
 
+} // namespace base
 } // namespace mapreduce
 
-#endif  // SIMPLEMAPREDUCE_OPS_FILE_FORMAT_H_
+#endif  // SIMPLEMAPREDUCE_BASE_FILE_FORMAT_H_
