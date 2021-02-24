@@ -1,7 +1,6 @@
 #include "simplemapreduce/local/runner.h"
 
 #include <future>
-#include <sstream>
 #include <string>
 
 #include <mpi.h>
@@ -84,19 +83,11 @@ void LocalJobRunner::run_map_tasks() {
     logger.debug("[Worker] Assigned a file: \"", target_path, "\" to worker ", conf_->worker_rank);
 
     /// Read data from text file
-    {
-      std::ifstream ifs(target_path);
-      std::ostringstream oss;
-      oss << ifs.rdbuf();
-      ifs.close();
+    ByteData key, value{1l};
+    key.read_file(target_path);
 
-      /// Read data from text file
-      ByteData key{oss.str()}, value{1l};
-      oss.clear();
-
-      /// Start map task
-      mapper_->run(key, value);
-    }
+    /// Start map task
+    mapper_->run(key, value);
 
     /// Notify the map task is finished
     MPI_Send("\1", 1, MPI_CHAR, 0, TaskType::map_end, MPI_COMM_WORLD);
