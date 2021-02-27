@@ -132,7 +132,7 @@ bool ByteData::operator!=(const ByteData& rhs) const {
 }
 
 bool ByteData::operator<(const ByteData& rhs) const {
-  if (size_ == 1) {
+  if (size_ == 1 && rhs.size() == 1 && data_.size() == rhs.bsize()) {
     if (data_.size() == 2) {
       return get_data<Int16>() < rhs.get_data<Int16>();
     } else if (data_.size() == 4) {
@@ -146,7 +146,7 @@ bool ByteData::operator<(const ByteData& rhs) const {
 }
 
 bool ByteData::operator>(const ByteData& rhs) const {
-  if (size_ == 1) {
+  if (size_ == 1 && rhs.size() == 1 && data_.size() == rhs.bsize()) {
     if (data_.size() == 2) {
       return get_data<Int16>() > rhs.get_data<Int16>();
     } else if (data_.size() == 4) {
