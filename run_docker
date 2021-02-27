@@ -59,7 +59,7 @@ if __name__ == '__main__':
       --mount type=bind,source={input_dir},destination=/home/smruser/inputs \
       --mount type=bind,source={out_dir},destination=/home/smruser/outputs \
       simple-mr \
-      bash -c "mpirun ./run_task"
+      bash -c "mpirun ./run_task -i inputs -o outputs"
 
     echo "======================================================================"
 
