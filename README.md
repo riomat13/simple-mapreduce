@@ -65,8 +65,9 @@ If you use alternatives such as `MPICH`, check their website and install it manu
 ### 2.2 Network settings
 This project is run with 2 PCs to check performance. The result is described at [section4](#4-performance).
 
-If you want to connect other machines, use `NFS` and set the shared directory, then run from there.
-However, this requires additional tasks for network settings or configurations, such as SSH settings. Documentation says MPI uses arbitorary ports so to make it easier, temporarily turn off firewall.
+If you would like to run as distributed system, use *Network File System(NFS)*.
+This requires additional tasks for network settings or configurations, such as SSH settings.
+Documentation says MPI uses arbitorary ports so to make it easier, temporarily turn off firewall or open for the machines.
 (for OPEN-MPI, see [FAQ](https://www.open-mpi.org/faq/?category=running))
 
 Once conneced machines to the same network, need to set host machines.
@@ -240,7 +241,13 @@ int main(int &, char *[]) {
 }
 ```
 
-Note that currently `string`, `int`, `long`, `float` and `double` can be used as key and value data type.
+Data type can be chosen from `String`, `Int16`, `Int`/`Int32`, `Long`/`Int64`, `Float`, `Double` in `mapreduce::type` as both key and value.
+For instance,
+```
+using namespace mapreduce::type;
+
+class SomeMapper : Mapper<String, Long, Long, Double> {...}
+```
 
 Put every scripts in `./app` directory,
 and update `app/sourcelist.cmake` like the following:
@@ -332,6 +339,7 @@ The details is described in [link](./app/movielens/README.md).
 - Logging configuration
   - Write logs to files
 - Run on distributed memory
+- Composite key
 
 ## <a name="6-references"></a>6 References
 

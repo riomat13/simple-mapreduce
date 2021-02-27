@@ -132,7 +132,7 @@ void Job::setup_output_dir() {
     }
   } else {
     /// create a new one if not exist
-    fs::create_directory(file_fmt_->get_output_path());
+    fs::create_directories(file_fmt_->get_output_path());
   }
 }
 

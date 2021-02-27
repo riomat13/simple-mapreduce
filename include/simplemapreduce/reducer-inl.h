@@ -63,7 +63,7 @@ void Reducer<IK, IV, OK, OV>::run_(const std::filesystem::path& outpath) {
 
   auto context = this->get_context(outpath);
 
-  for (const auto [key, values] : container)
+  for (const auto& [key, values] : container)
     reduce(key, values, *(context));
 }
 

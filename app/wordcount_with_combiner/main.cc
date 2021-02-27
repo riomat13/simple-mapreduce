@@ -5,6 +5,9 @@
 
 #include "simplemapreduce.h"
 
+using namespace mapreduce;
+using namespace mapreduce::type;
+
 // This is an example app using mapreduce to count each word appeared in texts.
 //
 // The map operation consts of:
@@ -15,23 +18,21 @@
 //
 // In addition to this, added Combiner layer before shuffle process to optimize.
 
-class WordCountMapper : public mapreduce::Mapper<std::string, long, std::string, long> {
+class WordCountMapper : public Mapper<String, Long, String, Long> {
  public:
-  void map(const std::string&, const long&, const mapreduce::Context<std::string, long>&);
+  void map(const String&, const Long&, const Context<String, Long>&);
 };
 
-class WordCountReducer
-  : public mapreduce::Reducer<std::string, long, std::string, long> {
+class WordCountReducer : public Reducer<String, Long, String, Long> {
  public:
-    void reduce(const std::string &,
-                const std::vector<long> &,
-                const mapreduce::Context<std::string, long> &);
+    void reduce(const String&, const std::vector<Long>&,
+                const Context<String, Long>&);
 };
 
 int main(int argc, char *argv[]) {
   /// Set directory paths to handle data
 
-  mapreduce::Job job{argc, argv};
+  Job job{argc, argv};
 
   job.set_config("n_groups", -1);
   job.set_config("log_level", mapreduce::util::LogLevel::INFO);
@@ -47,11 +48,10 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-
 /* --------------------------------------------------
  *   Implementation
  * -------------------------------------------------- */
-void WordCountMapper::map(const std::string &input, const long &, const mapreduce::Context<std::string, long> &context) {
+void WordCountMapper::map(const String& input, const Long&, const Context<String, Long>& context) {
   std::string line;
   std::istringstream iss(input);
 
@@ -60,8 +60,8 @@ void WordCountMapper::map(const std::string &input, const long &, const mapreduc
     std::replace_if(line.begin(), line.end(),
                     [](unsigned char c){ return std::ispunct(c); }, ' ');
 
-    long count{1};
-    std::string word;
+    Long count{1};
+    String word;
     std::istringstream linestream(line);
 
     /// Tokenize only by spliting by space/tab
@@ -72,15 +72,12 @@ void WordCountMapper::map(const std::string &input, const long &, const mapreduc
   }
 }
 
-void WordCountReducer::reduce(const std::string &key,
-                              const std::vector<long> &values,
-                              const mapreduce::Context<std::string, long> &context) {
-  std::string keyitem(key);
+void WordCountReducer::reduce(const String& key, const std::vector<Long>& values,
+                              const Context<String, Long>& context) {
+  String keyitem(key);
 
   /// Aggregate word count
-  /// values.size() should be faster since it is O(1),
-  /// but for reduce operation, use summation instead.
-  long count = REDUCE_SUM(values);
+  Long count = REDUCE_SUM(values);
 
   context.write(keyitem, count);
 }

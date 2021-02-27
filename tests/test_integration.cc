@@ -13,11 +13,13 @@
 #include "utils.h"
 #include "simplemapreduce/mapper.h"
 #include "simplemapreduce/reducer.h"
+#include "simplemapreduce/data/type.h"
 #include "simplemapreduce/ops/context.h"
 
 namespace fs = std::filesystem;
 
 using namespace mapreduce;
+using namespace mapreduce::type;
 
 /**
  * Helper function to process key data in mapper.
@@ -30,9 +32,9 @@ template<> long convert_key(const std::string& key) { return std::stol(key); }
 template<> std::string convert_key(const std::string& key) { return std::string(key); }
 
 template <typename K, typename V>
-class TestMapper: public Mapper<std::string, long, K, V> {
+class TestMapper: public Mapper<String, Long, K, V> {
  public:
-  void map(const std::string& ikey, const long&, const Context<K, V>& context) {
+  void map(const String& ikey, const Long&, const Context<K, V>& context) {
     std::string line, word;
     std::istringstream iss(ikey);
     while (std::getline(iss, line)) {
@@ -70,14 +72,14 @@ class TestReducer: public Reducer<K, V, K, V> {
 };
 
 /**
- * Integration test runner.
+ * Integration test.
  * This will test with given types.
  *
  *  @param target_keys&   data used as key
  *  @param count&         number of times to generate data per key
  */
 template <typename K, typename V>
-void test_runner(std::vector<K>& target_keys, const unsigned int& count) {
+void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
@@ -141,14 +143,14 @@ void test_runner(std::vector<K>& target_keys, const unsigned int& count) {
 }
 
 /**
- * Integration test runner.
+ * Integration test.
  * This will test with given types.
  *
  *  @param target_keys&   data used as key
  *  @param count&         number of times to generate data per key
  */
 template <typename K, typename V>
-void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& count) {
+void test_mapreduce_with_combiner(std::vector<K>& target_keys, const unsigned int& count) {
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
@@ -219,21 +221,21 @@ void test_runner_with_combiner(std::vector<K>& target_keys, const unsigned int& 
 
 TEST_CASE("Integration Test", "[job][mapreduce][integrate]") {
 #ifdef INTEGRATION1
-  SECTION("Job:string/int") {
-    std::vector<std::string> keys{"test", "example", "mapreduce"};
-    test_runner<std::string, int>(keys, 3);
+  SECTION("Job:String/Int") {
+    std::vector<String> keys{"test", "example", "mapreduce"};
+    test_mapreduce<String, Int>(keys, 3);
   }
 #endif  // INTEGRATION1
 #ifdef INTEGRATION2
-  SECTION("Job:int/double") {
-    std::vector<int> keys{100, 200, 300};
-    test_runner<int, double>(keys, 5);
+  SECTION("Job:Int/Double") {
+    std::vector<Int> keys{100, 200, 300};
+    test_mapreduce<Int, Double>(keys, 5);
   }
 #endif  // INTEGRATION2
 #ifdef INTEGRATION3
-  SECTION("Job:long/int") {
-    std::vector<long> keys{100000, 200000, 300000};
-    test_runner<long, int>(keys, 10);
+  SECTION("Job:Long/Int") {
+    std::vector<Long> keys{100000, 200000, 300000};
+    test_mapreduce<Long, Int>(keys, 10);
   }
 #endif  // INTEGRATION3
   fs::remove_all(tmpdir);
@@ -241,21 +243,21 @@ TEST_CASE("Integration Test", "[job][mapreduce][integrate]") {
 
 TEST_CASE("Integration Test with Combiner", "[job][mapreduce][combiner][integrate]") {
 #ifdef INTEGRATION4
-  SECTION("Job:string/int") {
-    std::vector<std::string> keys{"test", "example", "mapreduce"};
-    test_runner_with_combiner<std::string, int>(keys, 3);
+  SECTION("Job:String/Int") {
+    std::vector<String> keys{"test", "example", "mapreduce"};
+    test_mapreduce_with_combiner<String, Int>(keys, 3);
   }
 #endif  // INTEGRATION4
 #ifdef INTEGRATION5
-  SECTION("Job:int/double") {
-    std::vector<int> keys{100, 200, 300};
-    test_runner_with_combiner<int, double>(keys, 5);
+  SECTION("Job:Int/Double") {
+    std::vector<Int> keys{100, 200, 300};
+    test_mapreduce_with_combiner<Int, Double>(keys, 5);
   }
 #endif  // INTEGRATION5
 #ifdef INTEGRATION6
-  SECTION("Job:long/int") {
-    std::vector<long> keys{100000, 200000, 300000};
-    test_runner_with_combiner<long, int>(keys, 10);
+  SECTION("Job:Long/Int") {
+    std::vector<Long> keys{100000, 200000, 300000};
+    test_mapreduce_with_combiner<Long, Int>(keys, 10);
   }
 #endif  // INTEGRATION6
   fs::remove_all(tmpdir);
