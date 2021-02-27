@@ -1,8 +1,21 @@
-README.md
-run_docker.sh
-baseline.cc
 .gitignore
+run_docker
 
+# documents
+**/README.md
+
+# development
+.ipynb_checkpoints/
+.vscode/
+*.ipynb
+.travis.yml
+baseline.cc
+
+# build
 **/build
-**/inputs
-**/outputs
+*.o
+*.so
+
+# dataset
+inputs
+outputs
