@@ -6,56 +6,63 @@
 #include <utility>
 #include <vector>
 
+#include "simplemapreduce/data/type.h"
+
 namespace mapreduce {
 namespace data {
 
 class ByteData {
  public:
   ByteData() {}
-  explicit ByteData(int);
-  explicit ByteData(long);
-  explicit ByteData(float);
-  explicit ByteData(double);
+  explicit ByteData(mapreduce::type::Int16);
+  explicit ByteData(mapreduce::type::Int);
+  explicit ByteData(mapreduce::type::Long);
+  explicit ByteData(mapreduce::type::Float);
+  explicit ByteData(mapreduce::type::Double);
   /// Only reference is accepted to avoid copy
-  ByteData(std::string&&);
+  ByteData(mapreduce::type::String&&);
 
   ByteData(const ByteData&);
   ByteData &operator=(const ByteData&);
   ByteData(ByteData&&);
   ByteData &operator=(ByteData&&);
 
-  bool operator==(const ByteData& rhs) const { return data_ == rhs.data_; }
-  bool operator<(const ByteData& rhs) const { return data_ < rhs.data_; }
-  bool operator>(const ByteData& rhs) const { return data_ > rhs.data_; }
+  bool operator==(const ByteData& rhs) const;
+  bool operator!=(const ByteData& rhs) const;
+  bool operator<(const ByteData& rhs) const;
+  bool operator>(const ByteData& rhs) const;
 
   /**
    * Set data.
    *
-   *  @param data   input data (int, long, float, double, string)
+   *  @param data   input data
+   *    valid types: Int16, Int(Int32), Long(Int64), Float, Double, string
    */
-  void set_data(int) noexcept;
-  void set_data(long) noexcept;
-  void set_data(float) noexcept;
-  void set_data(double) noexcept;
+  void set_data(mapreduce::type::Int16) noexcept;
+  void set_data(mapreduce::type::Int) noexcept;
+  void set_data(mapreduce::type::Long) noexcept;
+  void set_data(mapreduce::type::Float) noexcept;
+  void set_data(mapreduce::type::Double) noexcept;
   /// Only reference is accepted to avoid copy
-  void set_data(std::string&&) noexcept;
+  void set_data(mapreduce::type::String&&) noexcept;
 
   /**
    * Set array data.
    *  (e.g. vector)
    * 
    *  Example:
-   *    std::vector<int> arr{1, 2, 3};
+   *    std::vector<Int> arr{1, 2, 3};
    *    ByteData bdata;
    *    bdata.set_data(arr.data(), arr.size());
    *
    *  @param data   pointer to a target array
    *  @param size   size of the array in the data type
    */
-  void set_data(int*, const size_t&);
-  void set_data(long*, const size_t&);
-  void set_data(float*, const size_t&);
-  void set_data(double*, const size_t&);
+  void set_data(mapreduce::type::Int16*, const size_t&);
+  void set_data(mapreduce::type::Int*, const size_t&);
+  void set_data(mapreduce::type::Long*, const size_t&);
+  void set_data(mapreduce::type::Float*, const size_t&);
+  void set_data(mapreduce::type::Double*, const size_t&);
 
   /**
    * Set data from bytes.
@@ -126,7 +133,6 @@ class ByteData {
   std::vector<char> data_;
 
   /// Length of values in the original data type.
-  /// If the data is single primitive type, the size is set as 0.
   size_t size_{0};
 };
 

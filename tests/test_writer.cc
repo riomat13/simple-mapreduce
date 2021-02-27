@@ -1,5 +1,6 @@
 #include "simplemapreduce/proc/writer.h"
 
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -12,11 +13,14 @@
 #include "utils.h"
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
+#include "simplemapreduce/data/type.h"
 
 namespace fs = std::filesystem;
 
+using UINT = std::uint64_t;
 using namespace mapreduce::data;
 using namespace mapreduce::proc;
+using namespace mapreduce::type;
 
 /**
  * Abstract wrapper class of file stream for read.
@@ -103,8 +107,8 @@ T read_binary(std::ifstream& fs) {
 
 /** Read binary data as string from file. */
 std::string read_string_binary(std::ifstream& fs) {
-  size_t data_size;
-  fs.read(reinterpret_cast<char*>(&data_size), sizeof(size_t));
+  UINT data_size;
+  fs.read(reinterpret_cast<char*>(&data_size), sizeof(UINT));
 
   char data[data_size];
   fs.read(data, sizeof(char) * data_size);
@@ -112,218 +116,230 @@ std::string read_string_binary(std::ifstream& fs) {
 }
 
 TEST_CASE("write_binary", "[write][binary]") {
-  fs::path testdir = tmpdir / "writer";
-  fs::create_directories(testdir);
-  fs::path fpath{"write_binary"};
+  fs::path fpath{tmpdir / "test_writer" / "write_binary"};
+  fs::create_directories(fpath.parent_path());
 
-  SECTION("ByteData(string)") {
+  SECTION("ByteData(String)") {
     std::string target{"test"};
     {
-      FileOStream fos{testdir / fpath};
-      ByteData bdata{std::string(target)};
+      FileOStream fos{fpath};
+      ByteData bdata{String(target)};
       write_binary(fos.get_stream(), std::move(bdata));
     }
     {
-      FileIStream fis{testdir / fpath};
+      FileIStream fis{fpath};
       auto res = read_string_binary(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
-  SECTION("ByteData(int)") {
-    int target{1234};
+  SECTION("ByteData(Int16)") {
+    Int16 target{123};
     {
-      FileOStream fos{testdir / fpath};
+      FileOStream fos{fpath};
       ByteData bdata{target};
       write_binary(fos.get_stream(), std::move(bdata));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<int>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Int16>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
-  SECTION("ByteData(long)") {
-    long target{123456789l};
+  SECTION("ByteData(Int)") {
+    Int target{1234};
     {
-      FileOStream fos{testdir / fpath};
+      FileOStream fos{fpath};
       ByteData bdata{target};
       write_binary(fos.get_stream(), std::move(bdata));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<long>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Int>(fis.get_stream());
+      REQUIRE(res == target);
+    }
+  }
+
+  SECTION("ByteData(Long)") {
+    Long target{123456789l};
+    {
+      FileOStream fos{fpath};
+      ByteData bdata{target};
+      write_binary(fos.get_stream(), std::move(bdata));
+    }
+    {
+      FileIStream fis{fpath};
+      auto res = read_binary<Long>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
   SECTION("ByteData(float)") {
-    float target{0.12345f};
+    Float target{0.12345f};
     {
-      FileOStream fos{testdir / fpath};
+      FileOStream fos{fpath};
       ByteData bdata{target};
       write_binary(fos.get_stream(), std::move(bdata));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<float>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Float>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
   SECTION("ByteData(double)") {
-    double target{12340.123456789};
+    Double target{12340.123456789};
     {
-      FileOStream fos{testdir / fpath};
+      FileOStream fos{fpath};
       ByteData bdata{target};
       write_binary(fos.get_stream(), std::move(bdata));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<double>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Double>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
   SECTION("string") {
-    std::string target{"test"};
+    String target{"test"};
     {
-      FileOStream fos{testdir / fpath};
-      ByteData bdata{std::string(target)};
+      FileOStream fos{fpath};
+      ByteData bdata{String(target)};
       write_binary(fos.get_stream(), std::move(bdata));
     }
     {
-      FileIStream fis{testdir / fpath};
+      FileIStream fis{fpath};
       auto res = read_string_binary(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
-  SECTION("int") {
-    int target{1234};
+  SECTION("Int") {
+    Int target{1234};
     {
-      FileOStream fos{testdir / fpath};
-      write_binary(fos.get_stream(), int(target));
+      FileOStream fos{fpath};
+      write_binary(fos.get_stream(), Int(target));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<int>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Int>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
-  SECTION("long") {
-    long target{123456789l};
+  SECTION("Long") {
+    Int64 target{123456789l};
     {
-      FileOStream fos{testdir / fpath};
-      write_binary(fos.get_stream(), long(target));
+      FileOStream fos{fpath};
+      write_binary(fos.get_stream(), Long(target));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<long>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Long>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
-  SECTION("float") {
-    float target{0.12345f};
+  SECTION("Float") {
+    Float target{0.12345f};
     {
-      FileOStream fos{testdir / fpath};
-      write_binary(fos.get_stream(), float(target));
+      FileOStream fos{fpath};
+      write_binary(fos.get_stream(), Float(target));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<float>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Float>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 
-  SECTION("double") {
-    double target{12340.123456789};
+  SECTION("Double") {
+    Double target{12340.123456789};
     {
-      FileOStream fos{testdir / fpath};
-      write_binary(fos.get_stream(), double(target));
+      FileOStream fos{fpath};
+      write_binary(fos.get_stream(), Double(target));
     }
     {
-      FileIStream fis{testdir / fpath};
-      auto res = read_binary<double>(fis.get_stream());
+      FileIStream fis{fpath};
+      auto res = read_binary<Double>(fis.get_stream());
       REQUIRE(res == target);
     }
   }
 }
 
 TEST_CASE("BinaryFileWriter", "[writer]") {
-  fs::path testdir = tmpdir / "writer";
-  fs::create_directories(testdir);
-  fs::path fpath{"binout"};
+  fs::path fpath{tmpdir / "test_writer" / "binout"};
+  fs::create_directories(fpath.parent_path());
 
   std::string key{"binary"};
 
-  SECTION("write_string/int") {
-    int val = 1;
+  SECTION("write String/Int") {
+    Int32 val = 1;
     {
-      BinaryFileWriter<std::string, int> writer(testdir / fpath);
-      writer.write(ByteData{std::string(key)}, ByteData{val});
+      BinaryFileWriter<String, Int> writer(fpath);
+      writer.write(ByteData{String(key)}, ByteData{val});
     }
 
     /// Check read key and value pair matchs items writtin by the writer
-    BinFileIStream fis(testdir / fpath);
+    BinFileIStream fis(fpath);
     std::string k = read_string_binary(fis.get_stream());
-    int v = read_binary<int>(fis.get_stream());
+    int v = read_binary<Int>(fis.get_stream());
     REQUIRE(k == key);
     REQUIRE(v == val);
   }
 
-  SECTION("write_string/long") {
-    long val = 123456789l;
+  SECTION("write String/Long") {
+    Long val = 123456789l;
     {
-      BinaryFileWriter<std::string, long> writer(testdir / fpath);
-      ByteData key_{std::string(key)}, value_(val);
+      BinaryFileWriter<std::string, Long> writer(fpath);
+      ByteData key_{String(key)}, value_(val);
       writer.write(std::move(key_), std::move(value_));
     }
 
     /// Check read key and value pair matchs items writtin by the writer
-    BinFileIStream fis(testdir / fpath);
+    BinFileIStream fis(fpath);
     std::string k = read_string_binary(fis.get_stream());
-    long v = read_binary<long>(fis.get_stream());
+    auto v = read_binary<Long>(fis.get_stream());
     REQUIRE(k == key);
     REQUIRE(v == val);
   }
 
-  SECTION("write_string/float") {
-    float val = 0.1;
+  SECTION("write String/Float") {
+    Float val = 0.1;
     {
-      BinaryFileWriter<std::string, float> writer(testdir / fpath);
-      ByteData key_{std::string(key)}, value_(val);
+      BinaryFileWriter<String, Float> writer(fpath);
+      ByteData key_{String(key)}, value_(val);
       writer.write(std::move(key_), std::move(value_));
     }
 
     /// Check read key and value pair matchs items writtin by the writer
-    BinFileIStream fis(testdir / fpath);
+    BinFileIStream fis(fpath);
     std::string k = read_string_binary(fis.get_stream());
-    float v = read_binary<float>(fis.get_stream());
+    auto v = read_binary<Float>(fis.get_stream());
     REQUIRE(k == key);
     REQUIRE(v == val);
   }
 
-  SECTION("write_string/double") {
-    double val = 1.23456789;
+  SECTION("write String/Double") {
+    Double val = 1.23456789;
     {
-      BinaryFileWriter<std::string, double> writer(testdir / fpath);
-      ByteData key_{std::string(key)}, value_(val);
+      BinaryFileWriter<String, Double> writer(fpath);
+      ByteData key_{String(key)}, value_(val);
       writer.write(std::move(key_), std::move(value_));
     }
 
     /// Check read key and value pair matchs items writtin by the writer
-    BinFileIStream fis(testdir / fpath);
+    BinFileIStream fis(fpath);
     std::string k = read_string_binary(fis.get_stream());
-    double v = read_binary<double>(fis.get_stream());
+    Double v = read_binary<Double>(fis.get_stream());
     REQUIRE(k == key);
     REQUIRE(v == val);
   }
 
-  fs::remove_all(testdir);
+  fs::remove_all(tmpdir);
 }
 
 template <typename Writer, typename MQ, typename K, typename V>
@@ -354,47 +370,46 @@ TEST_CASE("MQWriter", "[writer]") {
   std::shared_ptr<MQ> mq = std::make_shared<MQ>();
   MQWriter writer(mq);
 
-  SECTION("write_string/int") {
-    std::vector<int> values{1, 2, 4};
+  SECTION("write String/Int") {
+    std::vector<Int> values{1, 2, 4};
     REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 
-  SECTION("write_string/long") {
-    std::vector<long> values{123019, -223910, 45555};
+  SECTION("write String/Long") {
+    std::vector<Long> values{123019, -223910, 45555};
     REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 
-  SECTION("write_string/float") {
-    std::vector<float> values{-1.12, 10.595, 3.14};
+  SECTION("write String/Float") {
+    std::vector<Float> values{-1.12, 10.595, 3.14};
     REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 
-  SECTION("write_string/double") {
-    std::vector<double> values{-1.12, 10.595, 3.14};
+  SECTION("write String/Double") {
+    std::vector<Double> values{-1.12, 10.595, 3.14};
     REQUIRE(mqwriter_test(writer, mq, keys, values));
   }
 }
 
 TEST_CASE("OutputWriter", "[writer]") {
-  fs::path testdir = tmpdir / "writer";
-  fs::create_directories(testdir);
-  std::string fname{"tmpout"};
+  fs::path fpath = tmpdir / "writer" / "tmpout";
+  fs::create_directories(fpath.parent_path());
   std::string key{"test"};
 
-  SECTION("write_string/int") {
-    int value = 1;
+  SECTION("write String/Int") {
+    Int value = 1;
 
     {
-      OutputWriter<std::string, int> writer(testdir / fname);
-      ByteData key_{std::string(key)}, value_(value);
+      OutputWriter<String, Int> writer(fpath);
+      ByteData key_{String(key)}, value_(value);
       writer.write(std::move(key_), std::move(value_));
     }
 
-    FileIStream fis(testdir / fname);
+    FileIStream fis(fpath);
     std::string line;
     while (std::getline(fis.get_stream(), line)) {
-      std::string k;
-      int v;
+      String k;
+      Int v;
       std::istringstream linestream(line);
       linestream >> k >> v;
       REQUIRE(k == key);
@@ -402,20 +417,20 @@ TEST_CASE("OutputWriter", "[writer]") {
     }
   }
 
-  SECTION("write_string/long") {
-    long value = 123456789l;
+  SECTION("write String/Long") {
+    Long value = 123456789l;
 
     {
-      OutputWriter<std::string, long> writer(testdir / fname);
-      ByteData key_{std::string(key)}, value_(value);
+      OutputWriter<String, Long> writer(fpath);
+      ByteData key_{String(key)}, value_(value);
       writer.write(std::move(key_), std::move(value_));
     }
 
-    FileIStream fis(testdir / fname);
+    FileIStream fis(fpath);
     std::string line;
     while (std::getline(fis.get_stream(), line)) {
-      std::string k;
-      long v;
+      String k;
+      Long v;
       std::istringstream linestream(line);
       linestream >> k >> v;
       REQUIRE(k == key);
@@ -423,47 +438,47 @@ TEST_CASE("OutputWriter", "[writer]") {
     }
   }
 
-  SECTION("write_string/float") {
-    float value = 0.9;
+  SECTION("write String/Float") {
+    Float value = 0.9;
 
     {
-      OutputWriter<std::string, float> writer(testdir / fname);
-      ByteData key_{std::string(key)}, value_(value);
+      OutputWriter<String, Float> writer(fpath);
+      ByteData key_{String(key)}, value_(value);
       writer.write(std::move(key_), std::move(value_));
     }
 
-    FileIStream fis(testdir / fname);
+    FileIStream fis(fpath);
     std::string line;
     while (std::getline(fis.get_stream(), line)) {
-      std::string k;
-      float v;
+      String k;
+      Float v;
       std::istringstream linestream(line);
       linestream >> k >> v;
       REQUIRE(k == key);
-      REQUIRE(v == value);
+      REQUIRE(v == Approx(value));
     }
   }
 
-  SECTION("write_string/double") {
-    double value = 10.123456789012345;
+  SECTION("write String/Double") {
+    Double value = 10.123456789012345;
 
     {
-      OutputWriter<std::string, double> writer(testdir / fname);
-      ByteData key_{std::string(key)}, value_(value);
+      OutputWriter<String, Double> writer(fpath);
+      ByteData key_{String(key)}, value_(value);
       writer.write(std::move(key_), std::move(value_));
     }
 
-    FileIStream fis(testdir / fname);
+    FileIStream fis(fpath);
     std::string line;
     while (std::getline(fis.get_stream(), line)) {
-      std::string k;
-      double v;
+      String k;
+      Double v;
       std::istringstream linestream(line);
       linestream >> k >> v;
       REQUIRE(k == key);
-      REQUIRE(v == value);
+      REQUIRE(v == Approx(value));
     }
   }
 
-  fs::remove_all(testdir);
+  fs::remove_all(tmpdir);
 }

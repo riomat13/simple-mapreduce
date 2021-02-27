@@ -14,6 +14,7 @@ void ByteData::set_data_(T& data) {
   data_.clear();
   char* buff = reinterpret_cast<char*>(&data);
   data_ = std::vector<char>(buff, buff + sizeof(T));
+  size_ = 1;
 }
 
 template <typename T>

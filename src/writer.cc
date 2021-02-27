@@ -6,75 +6,90 @@
 #include <thread>
 #include <utility>
 
+#include "simplemapreduce/commons.h"
 #include "simplemapreduce/data/bytes.h"
-
-using lim_float = std::numeric_limits<float>;
-using lim_double = std::numeric_limits<double>;
+#include "simplemapreduce/data/type.h"
 
 using namespace mapreduce::data;
+using namespace mapreduce::type;
+
+using lim_float = std::numeric_limits<Float>;
+using lim_double = std::numeric_limits<Double>;
 
 namespace mapreduce {
 namespace proc {
 
 template<>
 void write_binary(std::ofstream& fout, ByteData&& bdata) {
-  if (bdata.size() > 0) {
-    size_t data_size = bdata.size();
-    fout.write(reinterpret_cast<char*>(&data_size), sizeof(size_t));
+  /// Write size for array type (e.g. vector, string)
+  /// TODO: find better way to detect string(char array)
+  if (bdata.size() > 1 || bdata.bsize() == 1) {
+    Size_t data_size = bdata.bsize();
+    fout.write(reinterpret_cast<char*>(&data_size), sizeof(Size_t));
   }
   fout.write(bdata.get_byte(), bdata.bsize());
 }
 
 template<>
-void write_binary(std::ofstream& fout, const std::string& data) {
+void write_binary(std::ofstream& fout, const String& data) {
   /// Store string size and the chars
-  size_t data_size = data.size();
-  fout.write(reinterpret_cast<char*>(&data_size), sizeof(size_t));
+  Size_t data_size = data.size();
+  fout.write(reinterpret_cast<char*>(&data_size), sizeof(Size_t));
   fout.write(data.c_str(), data_size);
 }
 
 template<>
-void write_binary(std::ofstream& fout, int&& data) {
-  fout.write(reinterpret_cast<char*>(const_cast<int*>(&data)), sizeof(int));
+void write_binary(std::ofstream& fout, Int16&& data) {
+  fout.write(reinterpret_cast<char*>(const_cast<Int16*>(&data)), sizeof(Int16));
 }
 
 template<>
-void write_binary(std::ofstream& fout, long&& data) {
-  fout.write(reinterpret_cast<char*>(const_cast<long*>(&data)), sizeof(long));
+void write_binary(std::ofstream& fout, Int&& data) {
+  fout.write(reinterpret_cast<char*>(const_cast<Int*>(&data)), sizeof(Int));
 }
 
 template<>
-void write_binary(std::ofstream& fout, float&& data) {
-  fout.write(reinterpret_cast<char*>(const_cast<float*>(&data)), sizeof(float));
+void write_binary(std::ofstream& fout, Long&& data) {
+  fout.write(reinterpret_cast<char*>(const_cast<Long*>(&data)), sizeof(Long));
 }
 
 template<>
-void write_binary(std::ofstream& fout, double&& data) {
-  fout.write(reinterpret_cast<char*>(const_cast<double*>(&data)), sizeof(double));
+void write_binary(std::ofstream& fout, Float&& data) {
+  fout.write(reinterpret_cast<char*>(const_cast<Float*>(&data)), sizeof(Float));
 }
 
 template<>
-void write_output(std::ofstream& fout, const std::string& data) {
+void write_binary(std::ofstream& fout, Double&& data) {
+  fout.write(reinterpret_cast<char*>(const_cast<Double*>(&data)), sizeof(Double));
+}
+
+template<>
+void write_output(std::ofstream& fout, const String& data) {
   fout << std::left << std::setw(10) << data;
 }
 
 template<>
-void write_output(std::ofstream& fout, const int& data) {
+void write_output(std::ofstream& fout, const Int16& data) {
   fout << std::right << std::setw(6) << data;
 }
 
 template<>
-void write_output(std::ofstream& fout, const long& data) {
+void write_output(std::ofstream& fout, const Int& data) {
+  fout << std::right << std::setw(6) << data;
+}
+
+template<>
+void write_output(std::ofstream& fout, const Long& data) {
   fout << std::right << std::setw(10) << data;
 }
 
 template<>
-void write_output(std::ofstream& fout, const float& data) {
+void write_output(std::ofstream& fout, const Float& data) {
   fout << std::right << std::fixed << std::setprecision(lim_float::max_digits10) << data;
 }
 
 template<>
-void write_output(std::ofstream& fout, const double& data) {
+void write_output(std::ofstream& fout, const Double& data) {
   fout << std::right << std::fixed << std::setprecision(lim_double::max_digits10) << data;
 }
 

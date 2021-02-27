@@ -3,6 +3,7 @@
 #include "simplemapreduce.h"
 
 using namespace mapreduce;
+using namespace mapreduce::type;
 
 // This is an example app using mapreduce to calculate average value from csv files.
 //
@@ -16,16 +17,15 @@ using namespace mapreduce;
 //  The objective is calculating rating mean per movie,
 //  thus, key is movieId (here, use the id as long value to save memory consumption instead of string)
 
-class RatingMeanMapper : public Mapper<std::string, long, long, double> {
+class RatingMeanMapper : public Mapper<String, Long, Long, Double> {
  public:
-  void map(const std::string&, const long&, const Context<long, double>&);
+  void map(const String&, const Long&, const Context<Long, Double>&);
 };
 
-class RatingMeanReducer : public Reducer<long, double, long, double> {
+class RatingMeanReducer : public Reducer<Long, Double, Long, Double> {
  public:
-    void reduce(const long &,
-                const std::vector<double> &,
-                const Context<long, double> &);
+    void reduce(const Long&, const std::vector<Double>&,
+                const Context<Long, Double>&);
 };
 
 int main(int argc, char *argv[]) {
@@ -42,9 +42,9 @@ int main(int argc, char *argv[]) {
 /* --------------------------------------------------
  *   Implementation
  * -------------------------------------------------- */
-void RatingMeanMapper::map(const std::string &input, const long &, const Context<long, double> &context) {
-  long tmp, movie_id;
-  double rating;
+void RatingMeanMapper::map(const String& input, const Long&, const Context<Long, Double>& context) {
+  Long tmp, movie_id;
+  Double rating;
   std::string line;
   std::istringstream iss(input);
 
@@ -60,10 +60,10 @@ void RatingMeanMapper::map(const std::string &input, const long &, const Context
   }
 }
 
-void RatingMeanReducer::reduce(const long &key,
-                               const std::vector<double> &values,
-                               const Context<long, double> &context) {
-  long key_(key);
-  double value = REDUCE_MEAN(values);
+void RatingMeanReducer::reduce(const Long& key,
+                               const std::vector<Double>& values,
+                               const Context<Long, Double>& context) {
+  Long key_(key);
+  Double value = REDUCE_MEAN(values);
   context.write(key_, value);
 }

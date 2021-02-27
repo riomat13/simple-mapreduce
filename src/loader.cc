@@ -2,53 +2,65 @@
 
 #include <string>
 
+#include "simplemapreduce/commons.h"
+#include "simplemapreduce/data/type.h"
+
 using namespace mapreduce::data;
+using namespace mapreduce::type;
 
 namespace mapreduce {
 namespace proc {
 
 template <typename T>
 inline ByteData load_byte_data_(std::ifstream& fin) {
-  T value;
-  fin.read(reinterpret_cast<char*>(&value), sizeof(T));
+  char buffer[sizeof(T)];
+  fin.read(&buffer[0], sizeof(T));
   if (fin.eof())
     return ByteData();
-  return ByteData(value);
-}
-
-template<>
-ByteData load_byte_data<int>(std::ifstream& fin) {
-  return load_byte_data_<int>(fin);
-}
-
-template<>
-ByteData load_byte_data<long>(std::ifstream& fin) {
-  return load_byte_data_<long>(fin);
-}
-
-template<>
-ByteData load_byte_data<float>(std::ifstream& fin) {
-  return load_byte_data_<float>(fin);
-}
-
-template<>
-ByteData load_byte_data<double>(std::ifstream& fin) {
-  return load_byte_data_<double>(fin);
-}
-
-template<>
-ByteData load_byte_data<std::string>(std::ifstream& fin) {
-  size_t key_size;
-  fin.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
-
-  if (fin.eof())
-    return ByteData();
-
-  char keydata[key_size];
-  fin.read(keydata, sizeof(char) * key_size);
 
   ByteData data;
-  data.set_bytes<std::string>(&keydata[0], key_size);
+  data.set_bytes<T>(buffer, sizeof(T));
+  return data;
+}
+
+template<>
+ByteData load_byte_data<Int16>(std::ifstream& fin) {
+  return load_byte_data_<Int16>(fin);
+}
+
+template<>
+ByteData load_byte_data<Int>(std::ifstream& fin) {
+  return load_byte_data_<Int>(fin);
+}
+
+template<>
+ByteData load_byte_data<Long>(std::ifstream& fin) {
+  return load_byte_data_<Long>(fin);
+}
+
+template<>
+ByteData load_byte_data<Float>(std::ifstream& fin) {
+  return load_byte_data_<Float>(fin);
+}
+
+template<>
+ByteData load_byte_data<Double>(std::ifstream& fin) {
+  return load_byte_data_<Double>(fin);
+}
+
+template<>
+ByteData load_byte_data<String>(std::ifstream& fin) {
+  Size_t data_size;
+  fin.read(reinterpret_cast<char*>(&data_size), sizeof(Size_t));
+
+  if (fin.eof())
+    return ByteData();
+
+  char buffer[data_size];
+  fin.read(buffer, sizeof(char) * data_size);
+
+  ByteData data;
+  data.set_bytes<String>(&buffer[0], data_size);
   return data;
 }
 
