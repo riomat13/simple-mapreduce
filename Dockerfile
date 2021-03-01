@@ -1,5 +1,6 @@
 ARG BASE_IMAGE=ubuntu:20.04
 ARG USERNAME=smruser
+ARG APPNAME=wordcount
 
 FROM ${BASE_IMAGE} AS build
 
@@ -8,7 +9,7 @@ ENV DEBIAN_FRONTEND="noninteractive"
 ARG USERNAME
 ENV USERNAME=${USERNAME}
 
-RUN echo "username: ${USERNAME}"
+ARG APPNAME
 
 RUN apt-get -qq update \
   && apt-get install -y \
@@ -25,7 +26,7 @@ ADD . .
 
 RUN mkdir -p build \
   && cd build \
-  && cmake -DSIMPLEMR_BUILD_APP=ON .. \
+  && cmake -DSIMPLEMR_BUILD_APP=ON -DSIMPLEMR_BUILD_APP_TYPE=${APPNAME} .. \
   && make -j
 
 FROM ${BASE_IMAGE}
