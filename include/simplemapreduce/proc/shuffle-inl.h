@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <sstream>
 
+#include "simplemapreduce/util/log.h"
+using namespace mapreduce::util;
+
 namespace mapreduce {
 namespace proc {
 
@@ -39,11 +42,19 @@ void Shuffle<K, V>::run() {
   /// Run until all processed and receive empty when finished the process
   while (!data.first.empty()) {
     int id = hash(data.first.get_data<K>());
-    fouts_[id]->write(std::move(data.first), std::move(data.second));
+    if (id == conf_->worker_rank) {
+      /// data processed on the same worker node at reduce will be stored back to MessageQueue
+      /// and retrieve it later
+      mq_->send(std::move(data));
+    } else {
+      fouts_[id]->write(std::move(data.first), std::move(data.second));
+    }
 
     /// Get new one after processed
     data = mq_->receive();
   }
+
+  mq_->end();
 }
 
 }  // namespace proc

@@ -98,17 +98,24 @@ else()
         list(APPEND srcs ${PROJECT_SOURCE_DIR}/../src/argparse.cc)
       elseif(${name} STREQUAL "bytes")
         list(APPEND srcs ${PROJECT_SOURCE_DIR}/../src/bytes.cc)
-      elseif(${name} STREQUAL "local_fileformat")
+      elseif(${name} STREQUAL "context")
         list(APPEND srcs
-          ${PROJECT_SOURCE_DIR}/../src/local_fileformat.cc
-          ${PROJECT_SOURCE_DIR}/../src/log.cc
+            ${PROJECT_SOURCE_DIR}/../src/bytes.cc
+            ${PROJECT_SOURCE_DIR}/../src/queue.cc
+            ${PROJECT_SOURCE_DIR}/../src/writer.cc
         )
+      elseif(${name} STREQUAL "func")
       elseif(${name} STREQUAL "loader")
         list(APPEND srcs
           ${PROJECT_SOURCE_DIR}/../src/bytes.cc
           ${PROJECT_SOURCE_DIR}/../src/loader.cc
           ${PROJECT_SOURCE_DIR}/../src/queue.cc
           ${PROJECT_SOURCE_DIR}/../src/writer.cc
+        )
+      elseif(${name} STREQUAL "local_fileformat")
+        list(APPEND srcs
+          ${PROJECT_SOURCE_DIR}/../src/local_fileformat.cc
+          ${PROJECT_SOURCE_DIR}/../src/log.cc
         )
       elseif(${name} STREQUAL "log")
         list(APPEND srcs ${PROJECT_SOURCE_DIR}/../src/log.cc)
@@ -117,6 +124,18 @@ else()
       elseif(${name} STREQUAL "queue")
         list(APPEND srcs
           ${PROJECT_SOURCE_DIR}/../src/bytes.cc
+          ${PROJECT_SOURCE_DIR}/../src/queue.cc
+        )
+      elseif(${name} STREQUAL "shuffle")
+        list(APPEND srcs
+          ${PROJECT_SOURCE_DIR}/../src/bytes.cc
+          ${PROJECT_SOURCE_DIR}/../src/queue.cc
+          ${PROJECT_SOURCE_DIR}/../src/writer.cc
+        )
+      elseif(${name} STREQUAL "sorter")
+        list(APPEND srcs
+          ${PROJECT_SOURCE_DIR}/../src/bytes.cc
+          ${PROJECT_SOURCE_DIR}/../src/loader.cc
           ${PROJECT_SOURCE_DIR}/../src/queue.cc
         )
       elseif(${name} STREQUAL "writer")

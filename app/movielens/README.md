@@ -39,7 +39,7 @@ The performance result is:
 
 | Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) |
 |--|--|--|
-|14.230 sec. | 13.151 sec. | 8.354 sec. |
+|14.230 sec. | 12.883 sec. | 8.242 sec. |
 
 Note that the baseline (pandas ver.) includes time for loading data and writing the result to a csv file to be fair.
 

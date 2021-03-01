@@ -7,8 +7,8 @@ std::unique_ptr<mapreduce::Context<OK, OV>> Mapper<IK, IV, OK, OV>::get_context(
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-std::unique_ptr<mapreduce::proc::ShuffleJob> Mapper<IK, IV, OK, OV>::get_shuffle() {
-  std::unique_ptr<mapreduce::proc::ShuffleJob> shuffle = std::make_unique<mapreduce::proc::Shuffle<OK, OV>>(get_mq(), conf_);
+std::unique_ptr<mapreduce::proc::ShuffleTask> Mapper<IK, IV, OK, OV>::get_shuffle() {
+  std::unique_ptr<mapreduce::proc::ShuffleTask> shuffle = std::make_unique<mapreduce::proc::Shuffle<OK, OV>>(get_mq(), conf_);
   return shuffle;
 };
 

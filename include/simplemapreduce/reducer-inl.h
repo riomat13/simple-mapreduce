@@ -35,36 +35,49 @@ std::unique_ptr<mapreduce::proc::Sorter<IK, IV>> Reducer<IK, IV, OK, OV>::get_so
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-void Reducer<IK, IV, OK, OV>::run() {
-  if (mq_ == nullptr)
-    this->run_(get_output_filepath());
-  else
-    this->run_(mq_);
+void Reducer<IK, IV, OK, OV>::set_shuffle(std::unique_ptr<mapreduce::proc::ShuffleTask> shuffle) {
+  shuffle_ = std::unique_ptr<mapreduce::proc::Shuffle<IK, IV>>(static_cast<mapreduce::proc::Shuffle<IK, IV>*>(shuffle.get()));
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-void Reducer<IK, IV, OK, OV>::run_(std::shared_ptr<mapreduce::data::MessageQueue> mq) {
+void Reducer<IK, IV, OK, OV>::run() {
+  if (is_combiner_)
+    this->run_();
+  else
+    this->run_(get_output_filepath());
+}
+
+template <typename IK, typename IV, typename OK, typename OV>
+void Reducer<IK, IV, OK, OV>::run_() {
   /// Grouping data by the keys from mapped data
-  auto sorter = this->get_sorter(mq);
-  std::map<IK, std::vector<IV>> container = sorter->run();
+  auto sorter = this->get_sorter(mq_);
+  auto container = sorter->run();
 
-  auto context = this->get_context(mq);
+  auto context = this->get_context(mq_);
 
-  for (const auto [key, values] : container)
-    reduce(key, values, *(context));
-  mq->end();
+  for (const auto& [key, values] : *container)
+    reduce(key, values, *context);
+  mq_->end();
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
 void Reducer<IK, IV, OK, OV>::run_(const std::filesystem::path& outpath) {
   /// Grouping data by the keys from shuffled data
   auto sorter = this->get_sorter();
-  std::map<IK, std::vector<IV>> container = sorter->run();
+
+  std::map<IK, std::vector<IV>> container_;
+  auto data = mq_->receive();
+  while (!data.first.empty()) {
+    container_[data.first.get_data<IK>()].push_back(data.second.get_data<IV>());
+    data = mq_->receive();
+  }
+  sorter->set_container(std::make_unique<std::map<IK, std::vector<IV>>>(container_));
+  auto container = sorter->run();
 
   auto context = this->get_context(outpath);
 
-  for (const auto& [key, values] : container)
-    reduce(key, values, *(context));
+  for (const auto& [key, values] : *container)
+    reduce(key, values, *context);
 }
 
 }  // namespace mapreduce

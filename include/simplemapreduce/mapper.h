@@ -27,16 +27,7 @@ class Mapper : public mapreduce::base::MapTask {
    */
   virtual void map(const IKeyType&, const IValueType&, const Context<OKeyType, OValueType>&) = 0;
 
-  /**
-   * Run before executing mapper.
-   * Override this if need to configure.
-   */
-  void setup(mapreduce::Context<OKeyType, OValueType>&) {};
-
  private:
-  /// Used to create tasks with Mapper state
-  friend class Job;
-
   /**
    * Get const Context data writer.
    */
@@ -45,7 +36,7 @@ class Mapper : public mapreduce::base::MapTask {
   /**
    * Get const Shuffle instance.
    */
-  std::unique_ptr<mapreduce::proc::ShuffleJob> get_shuffle() override;
+  std::unique_ptr<mapreduce::proc::ShuffleTask> get_shuffle() override;
 
   /**
    * Run map task

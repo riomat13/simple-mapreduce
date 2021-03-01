@@ -4,7 +4,7 @@ This is a project to build simple *mapreduce*[[1](#ref1)] app with *C++* using *
 
 ### Disclaimer
 
-Mapreduce built at this project may not be a right structured.
+Mapreduce built in this project may not be a right structured.
 This is built based on paper [[2](#ref1)], but I may take wrong some parts.
 Additionally, this is tested with several texts with word counting tasks
 but not fully tested, so it may have bugs.
@@ -277,21 +277,23 @@ The data size is in total 132.0 MB.
 
 ### 4.1 Preprocessing
 
-In order to utilize parallel processing, merged several files into a file by following rules:
+In order to utilize parallel processing, merged several files into a file by taking steps:
 
   - make groups in each group(train/test) and each category(pos/neg/unsup)
   - group files by the first letter (e.g. `1*.txt` will be group 1)
+  - copy the dataset (tested with double and quadruple dataset)
 
-In short, files in pos groups in train dataset starting with "5" is going to be `train_pos_5.txt`,
-therefore, some files has large size, and some are small such as starting with "0".
+In short, files in "pos" groups in train dataset starting with "5" is going to be merged as the same one file,
+therefore, some files has large size, and some are small.
 
-Now, in total, there are 50 files (pos/neg/unsup in train and pos/neg in test with 10 files each).
+Now, there are 50 original files (pos/neg/unsup in train and pos/neg in test with 10 files each) and copied them.
+The total data size is *264.0MB*(double) and *528.0MB*(quadruple).
 
 ### 4.2 Environment
 For testing, following two machines are used.
 
-  - Ubuntu 20.04, Intel Xeon E5-1620, 16GB RAM (Master, Workers)
-  - Ubuntu 20.04, Intel core i5-3550, 8GB RAM (Workers)
+  - Ubuntu 20.04, Intel Xeon E5-1620 3.60GHz, 16GB RAM (Master, Workers)
+  - Ubuntu 20.04, Intel core i5-3550 3.30GHz, 8GB RAM (Workers)
 
 For baseline, used the first machine, and for MapReduce version, machines are conencted with ethernet cables through same switch.
 The script used for baseline is `./baseline.cc` and compiled with `g++-9`.
@@ -300,33 +302,38 @@ Additionally, made sure other processes were idle or ran few processes which wou
 
 ### 4.3 Result
 
-The performance is tested with original dataset (100K files) and preprocessed dataset (50 files, see section 4.1).
+The performance is tested with original dataset (100K files) and preprocessed them (200 files, see section 4.1).
 The tests are run three times each and took the middle.
-Time score can be very vary so that this is just an example result.
+Time score can be vary so that this is just an example result.
 
-The first table shows results from original dataset.
+The first table shows results from original dataset without copy.
 
 | Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) |
 |--|--|--|
-| 23.733 sec. | 12.266 sec. | 12.013 sec. |
+| 23.733 sec. | 12.223 sec. | 10.499 sec. |
 
 and the following one is from preprocessed dataset.
 
-| Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) | SimpleMapReduce</br>with Combiner</br>(2 PCs, 1 master, 7 workers)
+| Baseline | SimpleMapReduce</br>(1 PC, 1 master, 3 workers) | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) | SimpleMapReduce</br>with Combiner</br>(2 PCs, 1 master, 7 workers) |
 |--|--|--|--|
-| 22.295 sec. | 11.137 sec. | 7.532 sec. | 4.585 sec. |
+| 41.412 sec. | 22.530 sec. | 13.925 sec. | 8.271 sec. |
 
-The process time in baseline becomes slightly faster after preprocessed,
-because the task have to open much less files than the original one.
-However, it still took relatively long time, whereas MapReduce versions took less time.
-
-With *Combiner*, the processing becomes ***4.86x*** faster than baseline.
+With *264.0MB* dataset, processing with combiner could acheive ***5.01x*** faster than sequential processing.
 (The code is located at `app/wordcount_with_combiner/main.cc`)
 
 When reading 100K files, it involves many network communications which are overhead for this process,
-so that running on 1 PC finished faster.
+so that it does not have big improvement to use multiple machines.
 
-Whereas with preprocessed files, it has less communications so that it becomes the fastest.
+Whereas with preprocessed files, it has less communications so that it could utilize the parallel processing.
+
+Additionally, tested with more doubled dataset (in total *528.0MB*).
+
+| Baseline | SimpleMapReduce</br>(2 PCs, 1 master, 7 workers) | SimpleMapReduce</br>with Combiner</br>(2 PCs, 1 master, 7 workers)
+|--|--|--|
+| 82.990 sec. | 30.747 sec. | 15.457 sec. |
+
+With *Combiner*, the processing becomes ***5.37x*** faster than baseline.
+Thus, the larger the original dataset, the more it can utilize.
 
 ### 4.4 Another example
 As an another example, calculate movie rating mean using *MovieLens 20M dataset*[[4](#ref4)].

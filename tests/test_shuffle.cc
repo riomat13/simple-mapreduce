@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/data/queue.h"
+#include "simplemapreduce/data/type.h"
 #include "simplemapreduce/ops/conf.h"
 
 namespace fs = std::filesystem;
@@ -20,6 +21,7 @@ namespace fs = std::filesystem;
 using namespace mapreduce;
 using namespace mapreduce::data;
 using namespace mapreduce::proc;
+using namespace mapreduce::type;
 
 /**
  * Read binary file.
@@ -71,7 +73,8 @@ void read_all_data(std::vector<fs::path>& files, std::vector<BytePair>& containe
   }
 }
 
-TEST_CASE("Shuffle", "[shuffle]") {
+template <typename K, typename V>
+void test_shuffle(std::vector<BytePair>& dataset) {
   typedef MessageQueue MQ;
 
   std::shared_ptr<JobConf> conf = std::make_shared<JobConf>();
@@ -79,153 +82,91 @@ TEST_CASE("Shuffle", "[shuffle]") {
   fs::remove_all(conf->tmpdir);
   fs::create_directories(conf->tmpdir);
 
-  SECTION("string/int") {
-    conf->worker_rank = 0;
-    conf->worker_size = 2;
-    conf->n_groups = 5;  // this will be equal to a number of output files
+  conf->worker_rank = 0;
+  conf->worker_size = 2;
+  conf->n_groups = 5;  // this will be equal to a number of output files
 
-    /// Target key-value dataset
-    std::vector<BytePair> dataset{
-      {ByteData("test"), ByteData(10)},
-      {ByteData("test"), ByteData(-1234)},
-      {ByteData("example"), ByteData(5000)},
-      {ByteData("example"), ByteData(-76543)}
-    };
+  /// Store all shuffled results
+  std::vector<BytePair> kv_items;
 
-    {
-      std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, int> shuffle(mq, conf);
+  {
+    std::shared_ptr<MQ> mq = std::make_shared<MQ>();
+    Shuffle<K, V> shuffle(mq, conf);
 
-      /// Store all data to MessageQueue
-      for (auto& data: dataset)
-        mq->send(std::pair(data));
-      mq->end();
+    /// Store all data to MessageQueue
+    for (auto& data: dataset)
+      mq->send(std::pair(data));
+    mq->end();
 
-      shuffle.run();
+    shuffle.run();
+
+    /// Take all data stored for the same worker node,
+    auto data = mq->receive();
+    while (!data.first.empty()) {
+      kv_items.emplace_back(std::move(data.first), std::move(data.second));
     }
-
-    /// Total file counts after processed by shuffler
-    std::vector<fs::path> bin_files;
-    extract_files(conf->tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf->n_groups);
-
-    std::vector<BytePair> kv_items;
-    read_all_data<std::string, int>(bin_files, kv_items);
-
-    /// Check original data and stored data are the same
-    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
   }
 
-  SECTION("string/long") {
-    conf->worker_rank = 1;
-    conf->worker_size = 2;
-    conf->n_groups = 4;  // this will be equal to a number of output files
+  /// Total file counts after processed by shuffler
+  std::vector<fs::path> bin_files;
+  extract_files(conf->tmpdir, bin_files);
+  REQUIRE(bin_files.size() == conf->n_groups);
+
+  read_all_data<K, V>(bin_files, kv_items);
+
+  /// Check original data and stored data are the same
+  REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
+}
+
+TEST_CASE("Shuffle", "[shuffle]") {
+
+  SECTION("String/Int") {
 
     /// Target key-value dataset
     std::vector<BytePair> dataset{
-      {ByteData("test"), ByteData(198765432l)},
-      {ByteData("test"), ByteData(-123456789l)},
-      {ByteData("example"), ByteData(50005000l)},
-      {ByteData("example"), ByteData(-76543l)}
+      {ByteData{String{"test"}}, ByteData{Int{10}}},
+      {ByteData{String{"test"}}, ByteData{Int{-1234}}},
+      {ByteData{String{"example"}}, ByteData{Int{5000}}},
+      {ByteData{String{"example"}}, ByteData{Int{-76543}}}
     };
 
-    {
-      std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, long> shuffle(mq, conf);
-
-      /// Store all data to MessageQueue
-      for (auto& data: dataset)
-        mq->send(std::pair(data));
-      mq->end();
-
-      shuffle.run();
-    }
-
-    /// Total file counts after processed by shuffler
-    std::vector<fs::path> bin_files;
-    extract_files(conf->tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf->n_groups);
-
-    std::vector<BytePair> kv_items;
-    read_all_data<std::string, long>(bin_files, kv_items);
-
-    /// Check original data and stored data are the same
-    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
+    test_shuffle<String, Int>(dataset);
   }
 
-  SECTION("string/float") {
-
-    conf->worker_rank = 3;
-    conf->worker_size = 5;
-    conf->n_groups = 3;  // this will be equal to a number of output files
-
+  SECTION("String/Long") {
     /// Target key-value dataset
     std::vector<BytePair> dataset{
-      {ByteData("test"), ByteData(1.2345f)},
-      {ByteData("test"), ByteData(-5.4321f)},
-      {ByteData("example"), ByteData(102.5987f)},
-      {ByteData("example"), ByteData(-980.7628f)}
+      {ByteData{String{"test"}}, ByteData{Long{198765432l}}},
+      {ByteData{String{"test"}}, ByteData{Long{-123456789l}}},
+      {ByteData{String{"example"}}, ByteData{Long{50005000l}}},
+      {ByteData{String{"example"}}, ByteData{Long{-76543l}}}
     };
 
-    {
-      std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, float> shuffle(mq, conf);
-
-      /// Store all data to MessageQueue
-      for (auto& data: dataset)
-        mq->send(std::pair(data));
-      mq->end();
-
-      shuffle.run();
-    }
-
-    /// Total file counts after processed by shuffler
-    std::vector<fs::path> bin_files;
-    extract_files(conf->tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf->n_groups);
-
-    std::vector<BytePair> kv_items;
-    read_all_data<std::string, float>(bin_files, kv_items);
-
-    /// Check original data and stored data are the same
-    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
+    test_shuffle<String, Long>(dataset);
   }
 
-  SECTION("string/double") {
-    conf->worker_rank = 0;
-    conf->worker_size = 3;
-    conf->n_groups = 2;  // this will be equal to a number of output files
-
+  SECTION("String/Float") {
     /// Target key-value dataset
     std::vector<BytePair> dataset{
-      {ByteData("test"), ByteData(1.23456789012345)},
-      {ByteData("test"), ByteData(-5.43210987654321)},
-      {ByteData("example"), ByteData(50987.5987)},
-      {ByteData("example"), ByteData(-22902.1023072)}
+      {ByteData{String{"test"}}, ByteData{Float{1.2345f}}},
+      {ByteData{String{"test"}}, ByteData{Float{-5.4321f}}},
+      {ByteData{String{"example"}}, ByteData{Float{102.5987f}}},
+      {ByteData{String{"example"}}, ByteData{Float{-980.7628f}}}
     };
 
-    {
-      std::shared_ptr<MQ> mq = std::make_shared<MQ>();
-      Shuffle<std::string, double> shuffle(mq, conf);
+    test_shuffle<String, Float>(dataset);
+  }
 
-      /// Store all data to MessageQueue
-      for (auto& data: dataset)
-        mq->send(std::pair(data));
-      mq->end();
+  SECTION("String/Double") {
+    /// Target key-value dataset
+    std::vector<BytePair> dataset{
+      {ByteData{String{"test"}}, ByteData{Double{1.23456789012345}}},
+      {ByteData{String{"test"}}, ByteData{Double{-5.43210987654321}}},
+      {ByteData{String{"example"}}, ByteData{Double{50987.5987}}},
+      {ByteData{String{"example"}}, ByteData{Double{-22902.1023072}}}
+    };
 
-      shuffle.run();
-    }
-
-    /// Total file counts after processed by shuffler
-    std::vector<fs::path> bin_files;
-    extract_files(conf->tmpdir, bin_files);
-    REQUIRE(bin_files.size() == conf->n_groups);
-
-    std::vector<BytePair> kv_items;
-    read_all_data<std::string, double>(bin_files, kv_items);
-
-    /// Check original data and stored data are the same
-    REQUIRE_THAT(kv_items, Catch::Matchers::UnorderedEquals(dataset));
+    test_shuffle<String, Double>(dataset);
   }
 
   fs::remove_all(tmpdir);

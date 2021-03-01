@@ -8,11 +8,13 @@
 #include "catch.hpp"
 
 #include "simplemapreduce/data/bytes.h"
+#include "simplemapreduce/data/type.h"
 #include "simplemapreduce/proc/writer.h"
 
 using namespace mapreduce;
 using namespace mapreduce::data;
 using namespace mapreduce::proc;
+using namespace mapreduce::type;
 
 /** Helper writer to test Context. */
 class TestWriter : public Writer {
@@ -28,9 +30,9 @@ class TestWriter : public Writer {
   std::vector<BytePair>& vec_;
 };
 
-/** Test runner for Context. */
+/** Test for Context. */
 template <typename K, typename V>
-void context_test_runner(K key, std::vector<V> values) {
+void test_context(K key, std::vector<V> values) {
   std::vector<BytePair> vec;
   std::unique_ptr<TestWriter> writer = std::make_unique<TestWriter>(vec);
 
@@ -54,39 +56,39 @@ void context_test_runner(K key, std::vector<V> values) {
 
 TEST_CASE("Context", "[context]") {
 
-  SECTION("string/int") {
-    std::string key{"test"};
-    std::vector<int> values{1022, 345, -950, 0, 5578};
-    context_test_runner(key, values);
+  SECTION("String/Int") {
+    String key{"test"};
+    std::vector<Int> values{1022, 345, -950, 0, 5578};
+    test_context(key, values);
   }
 
-  SECTION("string/long") {
-    std::string key{"test"};
-    std::vector<long> values{123456789l, -123456789l, 0l, 3531509l, -6911024l};
-    context_test_runner(key, values);
+  SECTION("String/Long") {
+    String key{"test"};
+    std::vector<Long> values{123456789l, -123456789l, 0l, 3531509l, -6911024l};
+    test_context(key, values);
   }
 
-  SECTION("string/float") {
-    std::string key{"test"};
-    std::vector<float> values{1022.844, 345.2, -950.45, 0, 5578.029};
-    context_test_runner(key, values);
+  SECTION("String/Float") {
+    String key{"test"};
+    std::vector<Float> values{1022.844, 345.2, -950.45, 0, 5578.029};
+    test_context(key, values);
   }
 
-  SECTION("string/double") {
-    std::string key{"test"};
-    std::vector<double> values{0.123456789012345, -0.123456789012345, 140.98710222, 35315.0000913, -6911024.2345};
-    context_test_runner(key, values);
+  SECTION("String/Double") {
+    String key{"test"};
+    std::vector<Double> values{0.123456789012345, -0.123456789012345, 140.98710222, 35315.0000913, -6911024.2345};
+    test_context(key, values);
   }
 
-  SECTION("int/float") {
-    int key{123};
-    std::vector<float> values{1022.844, 345.2, -950.45, 0, 5578.029};
-    context_test_runner(key, values);
+  SECTION("Int/Float") {
+    Int key{123};
+    std::vector<Float> values{1022.844, 345.2, -950.45, 0, 5578.029};
+    test_context(key, values);
   }
 
-  SECTION("long/double") {
-    long key{100000};
-    std::vector<double> values{0.123456789012345, -0.123456789012345, 140.98710222, 35315.0000913, -6911024.2345};
-    context_test_runner(key, values);
+  SECTION("Long/Double") {
+    Long key{100000};
+    std::vector<Double> values{0.123456789012345, -0.123456789012345, 140.98710222, 35315.0000913, -6911024.2345};
+    test_context(key, values);
   }
 }
