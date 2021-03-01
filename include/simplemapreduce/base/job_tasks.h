@@ -52,7 +52,7 @@ class MapTask : public JobTask {
     mq_ = std::make_shared<mapreduce::data::MessageQueue>(mapreduce::data::MessageQueue());
   }
 
-  virtual std::unique_ptr<mapreduce::proc::ShuffleJob> get_shuffle() = 0;
+  virtual std::unique_ptr<mapreduce::proc::ShuffleTask> get_shuffle() = 0;
 
   /**
    * Run Map process.
@@ -80,10 +80,20 @@ class ReduceTask : public JobTask {
   virtual void run() = 0;
 
   /**
+   * Set a ShuffleTask object for reduce.
+   * This should have initial data in container which is not shuffled
+   * because it would be processed by the same worker and directly stored to the container.
+   */
+  virtual void set_shuffle(std::unique_ptr<mapreduce::proc::ShuffleTask>) = 0;
+
+  /**
    * Set a MessageQueue object for combiner.
    * If this is set, the Reducer will be seen as Combiner.
    */
   virtual void set_mq(std::shared_ptr<mapreduce::data::MessageQueue>) = 0;
+
+  /** If called, this object will be used as Combiner. */
+  virtual void as_combiner() = 0;
 };
 
 }  // namespace base

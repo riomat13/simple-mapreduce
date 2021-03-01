@@ -9,6 +9,7 @@
 
 #include "simplemapreduce/commons.h"
 #include "simplemapreduce/base/job_tasks.h"
+#include "simplemapreduce/base/job_runner.h"
 #include "simplemapreduce/data/queue.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/ops/job.h"
@@ -31,16 +32,7 @@ class Reducer : public mapreduce::base::ReduceTask {
    */
   virtual void reduce(const IKeyType&, const std::vector<IValueType>&, const Context<OKeyType, OValueType>&) = 0;
 
-  /**
-   * Run before executing reduce.
-   * Override this if need to configure.
-   */
-  void setup(mapreduce::Context<OKeyType, OValueType>&) {};
-
  private:
-  /// Used to create tasks with Mapper state
-  friend class mapreduce::Job;
-
   /**
    * Set file path to write data and return it.
    * The file name will be defined based on worker rank.
@@ -57,18 +49,23 @@ class Reducer : public mapreduce::base::ReduceTask {
    */
   inline void run_(const std::filesystem::path&);
 
+  /** Run reduce task as combiner. */
+  inline void run_();
+
   /**
-   * Run reduce task for combiner.
-   *
-   *  @param mq     MessageQueue to store output data
+   * Set a ShuffleTask object for reduce.
+   * This should have initial data in container which is not shuffled
+   * because it would be processed by the same worker and directly stored to the container.
    */
-  inline void run_(std::shared_ptr<mapreduce::data::MessageQueue>);
+  void set_shuffle(std::unique_ptr<mapreduce::proc::ShuffleTask> shuffle) override;
 
   /**
    * Set a MessageQueue object for combiner.
    * If this is set, the Reducer will be seen as Combiner.
    */
   void set_mq(std::shared_ptr<mapreduce::data::MessageQueue> mq) override { mq_ = mq; };
+
+  void as_combiner() override { is_combiner_ = true; }
 
   /**
    * Create output data writer.
@@ -95,7 +92,15 @@ class Reducer : public mapreduce::base::ReduceTask {
   std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter(std::shared_ptr<mapreduce::data::MessageQueue>);
 
   /// MessageQueue to store data
+  std::unique_ptr<mapreduce::proc::Shuffle<IKeyType, IValueType>> shuffle_ = nullptr;
+
+  /// Container to store shuffled key/value data
+  std::unique_ptr<std::map<IKeyType, std::vector<IValueType>>> container_ = nullptr;
+
+  /// MessageQueue to store data
   std::shared_ptr<mapreduce::data::MessageQueue> mq_ = nullptr;
+
+  bool is_combiner_{false};
 };
 
 } // namespace mapreduce

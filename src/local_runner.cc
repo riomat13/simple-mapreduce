@@ -100,15 +100,17 @@ void LocalJobRunner::run_map_tasks() {
     logger.debug("[Worker] Running Combiner on worker ", conf_->worker_rank);
     /// Wait until Combiner end and send signal to notify the end of the process
     combiner_ftr.get();
-    mq->end();
   }
+
+  reducer_->set_mq(mq);
 
   logger.debug("[Worker] Finished Map on worker ", conf_->worker_rank);
 }
 
 void LocalJobRunner::run_shuffle_tasks() {
-  auto shuffler = mapper_->get_shuffle();
-  shuffler->run();
+  auto shuffle = mapper_->get_shuffle();
+  shuffle->run();
+  reducer_->set_shuffle(std::move(shuffle));
 }
 
 void LocalJobRunner::run_reduce_tasks() {

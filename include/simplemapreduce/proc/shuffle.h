@@ -1,8 +1,8 @@
 #ifndef SIMPLEMAPREDUCE_PROC_SHUFFLE_H_
 #define SIMPLEMAPREDUCE_PROC_SHUFFLE_H_
 
+#include <map>
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "simplemapreduce/commons.h"
@@ -14,9 +14,9 @@
 namespace mapreduce {
 namespace proc {
 
-class ShuffleJob {
+class ShuffleTask {
  public:
-  virtual ~ShuffleJob() {}
+  virtual ~ShuffleTask() {}
 
   /**
    * Run shuffle process.
@@ -28,7 +28,7 @@ class ShuffleJob {
  * Shuffle process handler object.
  */
 template <typename K, typename V>
-class Shuffle : public ShuffleJob {
+class Shuffle : public ShuffleTask {
  public:
   /**
    * Shuffle constructor

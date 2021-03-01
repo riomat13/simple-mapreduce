@@ -3,7 +3,6 @@
 
 #include <map>
 #include <memory>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -11,6 +10,7 @@
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/proc/loader.h"
 #include "simplemapreduce/ops/conf.h"
+
 namespace mapreduce {
 namespace proc {
 
@@ -35,9 +35,17 @@ class Sorter {
    * 
    *  @return   map of vectors grouped by sorting process
    */
-  std::map<K, std::vector<V>> run();
+  std::unique_ptr<std::map<K, std::vector<V>>> run();
+
+  /**
+   * Set initial container to be used for sorting task.
+   * If this is not run, construct new map in run().
+   */
+  void set_container(std::unique_ptr<std::map<K, std::vector<V>>> container) { container_ = std::move(container); }
 
  private:
+  /// Sorted item container
+  std::unique_ptr<std::map<K, std::vector<V>>> container_ = nullptr;
 
   /// File data loader
   std::unique_ptr<mapreduce::proc::DataLoader> loader_;
