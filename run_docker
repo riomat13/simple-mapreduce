@@ -27,7 +27,16 @@ if __name__ == '__main__':
     parser.add_argument('--rmi', action='store_true',
                         help='Remove docker image after finished')
 
+    parser.add_argument(
+      '--app', type=str, default='wordcount',
+      help='App type to build. Valid app: '
+           '["wordcount"(default), "wordcount-with-combiner", "movielens", "custom"]'
+    )
+
     args = parser.parse_args()
+
+    if (args.app not in ["wordcount", "wordcount-with-combiner", "movielens", "custom"]):
+        raise ValueError(f'Invalid app name: {args.app}')
 
     curr_dir = os.getcwd()
     input_dir = os.path.abspath(args.input)
@@ -37,7 +46,12 @@ if __name__ == '__main__':
 
     bash_script = f'''
     # create docker image with compiling source codes
-    docker build -t simple-mr .
+    docker build -t simple-mr --build-arg APPNAME="{args.app}" .
+
+    if [ $? -ne 0 ]; then
+      printf "\nFailed to build.\nExiting...\n"
+      exit 1;
+    fi
 
     echo ""
     echo "[Start MapReduce]"

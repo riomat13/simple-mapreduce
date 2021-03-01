@@ -167,6 +167,18 @@ $ ./run_docker --input ./inputs --output ./outputs
 $ ./run_docker -i ./inputs -o ./outputs --rmi
 ```
 
+Target app to build can be chosen as following:
+```sh
+# for word count with combiner
+$ ./run_docker --app wordcount-with-combiner -i ./inputs -o ./outputs
+
+# for calculating movie rating mean with movielens dataset
+$ ./run_docker --app movielens -i ./inputs -o ./outputs
+
+# for custom app
+$ ./run_docker --app custom -i ./inputs -o ./outputs
+```
+
 (Note: currently running on a single container)
 
 ### 3.4 Another example
