@@ -1,8 +1,6 @@
 #ifndef SIMPLEMAPREDUCE_PROC_WRITER_H_
 #define SIMPLEMAPREDUCE_PROC_WRITER_H_
 
-#include <iostream>
-
 #include <filesystem>
 #include <fstream>
 #include <memory>
