@@ -22,6 +22,9 @@ class ByteData {
   /// Only reference is accepted to avoid copy
   ByteData(mapreduce::type::String&&);
 
+  template <typename T1, typename T2>
+  ByteData(mapreduce::type::CompositeKey<T1, T2>&&);
+
   ByteData(const ByteData&);
   ByteData &operator=(const ByteData&);
   ByteData(ByteData&&);
@@ -45,6 +48,9 @@ class ByteData {
   void set_data(mapreduce::type::Double) noexcept;
   /// Only reference is accepted to avoid copy
   void set_data(mapreduce::type::String&&) noexcept;
+
+  template <typename T1, typename T2>
+  void set_data(mapreduce::type::CompositeKey<T1, T2>&&) noexcept;
 
   /**
    * Set array data.
@@ -88,6 +94,9 @@ class ByteData {
   template <typename T>
   T get_data() const;
 
+  template <typename T1, typename T2>
+  mapreduce::type::CompositeKey<T1, T2> get_pair() const;
+
   /** Get data as bytes in char array. */
   const char* get_byte() { return data_.data(); }
 
@@ -109,12 +118,12 @@ class ByteData {
   void push_back(T& data);
 
  private:
-  /** Helper function to set data */
+  /** Helper function to set data. */
   template <typename T>
   inline void set_data_(T& data);
 
   /**
-   * Helper function to set data
+   * Helper function to set data.
    * 
    *  @param data   pointer to array
    *  @param size   length of data in given data type
@@ -122,11 +131,34 @@ class ByteData {
   template <typename T>
   inline void set_data_(T* data, const size_t& size);
 
-  /** Helper function to get data */
+  /** Helper function to get data. */
   template <typename T>
   inline T get_data_() const;
 
-  /** Helper function to append byte data */
+  /**
+   * Helper function to get data with offset.
+   * This will read data from `begin() + offset` to `end()`.
+   *
+   *  @param offset  offset size from begin()
+   */
+  template <typename T>
+  inline T get_data_(size_t) const;
+
+  /**
+   * Helper function to get data with range.
+   * This will read data from `begin() + start` to `begin() + end()`.
+   * This is used for reading string data.
+   *
+   *  @param start  start index to read data
+   *  @param end    end index to read data exclusive
+   */
+  template <typename T>
+  inline T get_data_(size_t, size_t) const;
+
+  template <typename T1, typename T2>
+  inline mapreduce::type::CompositeKey<T1, T2> get_pair_() const;
+
+  /** Helper function to append byte data. */
   template <typename T>
   inline void push_back_(T& data);
 

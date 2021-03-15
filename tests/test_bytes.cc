@@ -26,7 +26,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata1.get_data<Int16>() == 10);
   }
 
-  SECTION("int16") {
+  SECTION("Int16") {
     ByteData bdata1, bdata2;
     Int16 value = 10;
 
@@ -51,7 +51,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata1.get_data<Int16>() == bdata3.get_data<Int16>());
   }
 
-  SECTION("int32") {
+  SECTION("Int32") {
     ByteData bdata1, bdata2;
     Int32 value = 100;
 
@@ -74,7 +74,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata1.get_data<Int32>() == bdata3.get_data<Int32>());
   }
 
-  SECTION("int64") {
+  SECTION("Int64") {
     ByteData bdata1, bdata2;
     Int64 value = 123456789;
 
@@ -93,7 +93,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata1.get_data<long>() == bdata3.get_data<long>());
   }
 
-  SECTION("float") {
+  SECTION("Float") {
     ByteData bdata1, bdata2;
     Float value = 10.234f;
 
@@ -116,7 +116,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata1.get_data<Float>() == Approx(bdata3.get_data<Float>()));
   }
 
-  SECTION("double") {
+  SECTION("Double") {
     ByteData bdata1, bdata2;
     Double value = 1.23456789012345;
 
@@ -134,7 +134,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata1.get_data<Double>() == Approx(bdata3.get_data<Double>()));
   }
 
-  SECTION("string") {
+  SECTION("String") {
     using namespace std::string_literals;
 
     ByteData bdata1, bdata2;
@@ -153,7 +153,7 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE(bdata2.get_data<String>() == bdata3.get_data<String>());
   }
 
-  SECTION("int16 array") {
+  SECTION("Int16 array") {
     ByteData bdata1, bdata2;
 
     std::vector<Int16> arr{1, 2, 3, 4};
@@ -163,7 +163,47 @@ TEST_CASE("ByteData", "[byte][data]") {
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(arr));
   }
 
-  SECTION("double bytes array") {
+  SECTION("Int array") {
+    ByteData bdata1, bdata2;
+
+    std::vector<Int> arr{1, 2, 3, 4};
+    bdata1.set_data(arr.data(), arr.size());
+
+    std::vector<Int> res = bdata1.get_data<std::vector<Int>>();
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(arr));
+  }
+
+  SECTION("Long array") {
+    ByteData bdata1, bdata2;
+
+    std::vector<Long> arr{1, 2, 3, 4};
+    bdata1.set_data(arr.data(), arr.size());
+
+    std::vector<Long> res = bdata1.get_data<std::vector<Long>>();
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(arr));
+  }
+
+  SECTION("Float array") {
+    ByteData bdata1, bdata2;
+
+    std::vector<Float> arr{1.23, 2.34, -3.45, 4.56};
+    bdata1.set_data(arr.data(), arr.size());
+
+    std::vector<Float> res = bdata1.get_data<std::vector<Float>>();
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(arr));
+  }
+
+  SECTION("Double array") {
+    ByteData bdata1, bdata2;
+
+    std::vector<Double> arr{1.23, 2.34, -3.45, 4.56};
+    bdata1.set_data(arr.data(), arr.size());
+
+    std::vector<Double> res = bdata1.get_data<std::vector<Double>>();
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(arr));
+  }
+
+  SECTION("Double bytes array") {
     ByteData bdata1, bdata2;
 
     /// Create byte array to store
@@ -177,6 +217,72 @@ TEST_CASE("ByteData", "[byte][data]") {
     /// Extract data as array
     std::vector<Double> res = bdata1.get_data<std::vector<Double>>();
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
+  }
+}
+
+TEST_CASE("ByteData CompositeKey", "[byte][data][pair]") {
+
+  SECTION("Int/Int pair") {
+    CompositeKey<Int, Int> pair(123, 456);
+    ByteData bdata(std::move(pair));
+
+    auto [first, second] = bdata.get_pair<Int, Int>();
+
+    REQUIRE(first == 123);
+    REQUIRE(second == 456);
+  }
+
+  SECTION("String/Long pair") {
+    String word{"composite"};
+    CompositeKey<String, Long> pair(String(word), 1234567890);
+    ByteData bdata(std::move(pair));
+
+    auto [first, second] = bdata.get_pair<String, Long>();
+
+    REQUIRE(first == word);
+    REQUIRE(second == 1234567890l);
+  }
+
+  SECTION("Int16/Float pair") {
+    CompositeKey<Int16, Float> pair(123, -123.456);
+    ByteData bdata(std::move(pair));
+
+    auto [first, second] = bdata.get_pair<Int16, Float>();
+
+    REQUIRE(first == 123);
+    REQUIRE(second == Approx(-123.456));
+  }
+
+  SECTION("Long/Double pair") {
+    CompositeKey<Long, Double> pair(123, -123.456);
+    ByteData bdata(std::move(pair));
+
+    auto [first, second] = bdata.get_pair<Long, Double>();
+
+    REQUIRE(first == 123);
+    REQUIRE(second == Approx(-123.456));
+  }
+
+  SECTION("Long/String pair") {
+    String str{"composite"};
+    CompositeKey<Long, String> pair(123, String(str));
+    ByteData bdata(std::move(pair));
+
+    auto [first, second] = bdata.get_pair<Long, String>();
+
+    REQUIRE(first == 123);
+    REQUIRE(second == str);
+  }
+
+  SECTION("String/String pair") {
+    String str1{"key"};
+    String str2{"value"};
+    ByteData bdata{CompositeKey<String, String>(String(str1), String(str2))};
+
+    auto [first, second] = bdata.get_pair<String, String>();
+
+    REQUIRE(first == str1);
+    REQUIRE(second == str2);
   }
 }
 
@@ -200,7 +306,7 @@ TEST_CASE("ByteData File", "[byte][data][file]") {
 
 TEST_CASE("ByteData Modification", "[byte][data]") {
 
-  SECTION("int32 array") {
+  SECTION("Int32 array") {
     std::vector<Int32> target{1, 10, 15, 25, -10};
     ByteData bdata;
     for (auto& val: target)
@@ -210,7 +316,7 @@ TEST_CASE("ByteData Modification", "[byte][data]") {
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(target));
   }
 
-  SECTION("float array") {
+  SECTION("Float array") {
     std::vector<Float> target{1.4, -30.5, 22, 5.4};
     ByteData bdata;
     for (auto& val: target)

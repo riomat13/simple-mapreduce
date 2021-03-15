@@ -16,6 +16,9 @@ using Float = float;
 using Double = double;
 using String = std::string;
 
+template <typename T1, typename T2>
+using CompositeKey = std::pair<T1, T2>;
+
 }  // namespace type
 }  // namespace mapreduce
 

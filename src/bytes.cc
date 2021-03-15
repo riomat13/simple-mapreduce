@@ -79,6 +79,13 @@ void ByteData::read_file(const fs::path& path) {
   size_ = data_size;
 }
 
+template <>
+String ByteData::get_data_(size_t start, size_t end) const {
+  char data[end-start];
+  std::memcpy(&data, data_.data() + start, end - start);
+  return String(data, end - start);
+}
+
 template<> Int16 ByteData::get_data() const { return get_data_<Int16>(); }
 template<> Int ByteData::get_data() const { return get_data_<Int>(); }
 template<> Long ByteData::get_data() const { return get_data_<Long>(); }
@@ -122,6 +129,9 @@ template<> void ByteData::push_back(Int& value) { push_back_<Int>(value); }
 template<> void ByteData::push_back(Long& value) { push_back_<Long>(value); }
 template<> void ByteData::push_back(Float& value) { push_back_<Float>(value); }
 template<> void ByteData::push_back(Double& value) { push_back_<Double>(value); }
+template<> void ByteData::push_back(String& value) {
+  data_.insert(data_.end(), value.begin(), value.end());
+}
 
 bool ByteData::operator==(const ByteData& rhs) const {
   return data_ == rhs.data_;
