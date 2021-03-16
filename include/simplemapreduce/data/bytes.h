@@ -94,6 +94,14 @@ class ByteData {
   template <typename T>
   T get_data() const;
 
+  /**
+   * Get primary key data from byte data.
+   * This is used for shuffling process with hashing by the key
+   * and will not directly convert numeric value to the string
+   * so that it cannot be used for converting value to string.
+   */
+  mapreduce::type::String get_key() const;
+
   template <typename T1, typename T2>
   mapreduce::type::CompositeKey<T1, T2> get_pair() const;
 

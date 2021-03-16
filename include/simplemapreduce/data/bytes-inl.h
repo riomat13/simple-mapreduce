@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cstring>
 #include <stdexcept>
-#include <iostream>
 
 namespace mapreduce {
 namespace data {

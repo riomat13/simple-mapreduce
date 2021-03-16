@@ -124,6 +124,11 @@ std::vector<Double> ByteData::get_data() const {
   return out;
 }
 
+mapreduce::type::String ByteData::get_key() const {
+  /// If this is not CompositeKey, read primary key, otherwise read all data
+  return mapreduce::type::String(data_.begin(), std::find(data_.begin(), data_.end(), '\1'));
+}
+
 template<> void ByteData::push_back(Int16& value) { push_back_<Int16>(value); }
 template<> void ByteData::push_back(Int& value) { push_back_<Int>(value); }
 template<> void ByteData::push_back(Long& value) { push_back_<Long>(value); }
