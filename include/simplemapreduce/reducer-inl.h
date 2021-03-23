@@ -11,15 +11,15 @@ std::filesystem::path Reducer<IK, IV, OK, OV>::get_output_filepath() {
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-std::unique_ptr<mapreduce::Context<IK, IV>> Reducer<IK, IV, OK, OV>::get_context(const std::string& path) {
+std::unique_ptr<mapreduce::Context<OK, OV>> Reducer<IK, IV, OK, OV>::get_context(const std::string& path) {
   std::unique_ptr<mapreduce::proc::OutputWriter<IK, IV>> writer = std::make_unique<mapreduce::proc::OutputWriter<IK, IV>>(path);
-  return std::make_unique<mapreduce::Context<IK, IV>>(std::move(writer));
+  return std::make_unique<mapreduce::Context<OK, OV>>(std::move(writer));
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-std::unique_ptr<mapreduce::Context<IK, IV>> Reducer<IK, IV, OK, OV>::get_context(std::shared_ptr<mapreduce::data::MessageQueue> mq) {
+std::unique_ptr<mapreduce::Context<OK, OV>> Reducer<IK, IV, OK, OV>::get_context(std::shared_ptr<mapreduce::data::MessageQueue> mq) {
   std::unique_ptr<mapreduce::proc::MQWriter> writer = std::make_unique<mapreduce::proc::MQWriter>(mq);
-  return std::make_unique<mapreduce::Context<IK, IV>>(std::move(writer));
+  return std::make_unique<mapreduce::Context<OK, OV>>(std::move(writer));
 }
 
 template <typename IK, typename IV, typename OK, typename OV>

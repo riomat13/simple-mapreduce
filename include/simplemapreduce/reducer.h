@@ -72,14 +72,14 @@ class Reducer : public mapreduce::base::ReduceTask {
    *
    *  @param path   output file path
    */
-  std::unique_ptr<mapreduce::Context<IKeyType, IValueType>> get_context(const std::string&);
+  std::unique_ptr<mapreduce::Context<OKeyType, OValueType>> get_context(const std::string&);
 
   /**
    * Create output data writer for combiner.
    *
    *  @param mq     MessageQueue to store output data
    */
-  std::unique_ptr<mapreduce::Context<IKeyType, IValueType>> get_context(std::shared_ptr<mapreduce::data::MessageQueue>);
+  std::unique_ptr<mapreduce::Context<OKeyType, OValueType>> get_context(std::shared_ptr<mapreduce::data::MessageQueue>);
 
   /** Get const Sorter instance. */
   std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter();

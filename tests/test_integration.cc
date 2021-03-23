@@ -60,13 +60,13 @@ class TestCombiner: public Reducer<K, V, K, V> {
   }
 };
 
-template <typename K, typename V>
-class TestReducer: public Reducer<K, V, K, V> {
+template <typename IK, typename IV, typename OK, typename OV>
+class TestReducer: public Reducer<IK, IV, OK, OV> {
  public:
-  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context) {
-    K key(ikey);
+  void reduce(const IK& ikey, const std::vector<IV>& ivalues, const Context<OK, OV>& context) {
+    OK key(ikey);
     /// For testing, only returns vector size
-    V value = static_cast<V>(ivalues.size());
+    OV value = static_cast<OV>(ivalues.size());
     context.write(key, value);
   }
 };
@@ -78,8 +78,8 @@ class TestReducer: public Reducer<K, V, K, V> {
  *  @param target_keys&   data used as key
  *  @param count&         number of times to generate data per key
  */
-template <typename K, typename V>
-void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
+template <typename IK, typename IV, typename OK, typename OV>
+void test_mapreduce(std::vector<OK>& target_keys, const unsigned int& count) {
   fs::path input_dir = tmpdir / "test_job" / "inputs";
   fs::path output_dir = tmpdir / "test_job" / "outputs";
 
@@ -90,8 +90,8 @@ void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
 
   job.set_config("log_level", 4);
 
-  job.template set_mapper<TestMapper<K, V>>();
-  job.template set_reducer<TestReducer<K, V>>();
+  job.template set_mapper<TestMapper<IK, IV>>();
+  job.template set_reducer<TestReducer<IK, IV, OK, OV>>();
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -103,7 +103,7 @@ void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
     fs::create_directories(input_dir);
 
     /// Store keys processed by MapReduce
-    std::vector<K> res;
+    std::vector<OK> res;
 
     /// Write input data
     for (unsigned int i = 0; i < count; ++i) {
@@ -122,8 +122,8 @@ void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
     for (auto& path: fs::directory_iterator(output_dir)) {
       std::ifstream ifs(path.path());
       std::string line;
-      K key;
-      V value;
+      OK key;
+      OV value;
       while (std::getline(ifs, line)) {
         std::istringstream iss(line);
         iss >> key >> value;
@@ -140,6 +140,18 @@ void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
     /// For child nodes
     job.run();
   }
+}
+
+/**
+ * Integration test with the same key/value type in mapper and reducer outputs.
+ * This will test with given types.
+ *
+ *  @param target_keys&   data used as key
+ *  @param count&         number of times to generate data per key
+ */
+template <typename K, typename V>
+void test_mapreduce(std::vector<K>& target_keys, const unsigned int& count) {
+  test_mapreduce<K, V, K, V>(target_keys, count);
 }
 
 /**
@@ -162,7 +174,7 @@ void test_mapreduce_with_combiner(std::vector<K>& target_keys, const unsigned in
 
   job.template set_mapper<TestMapper<K, V>>();
   job.template set_combiner<TestCombiner<K, V>>();
-  job.template set_reducer<TestReducer<K, V>>();
+  job.template set_reducer<TestReducer<K, V, K, V>>();
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -238,27 +250,33 @@ TEST_CASE("Integration Test", "[job][mapreduce][integrate]") {
     test_mapreduce<Long, Int>(keys, 10);
   }
 #endif  // INTEGRATION3
+#ifdef INTEGRATION4
+  SECTION("Job:String/Int to String/Long") {
+    std::vector<String> keys{"test", "example", "mapreduce"};
+    test_mapreduce<String, Int, String, Long>(keys, 3);
+  }
+#endif  // INTEGRATION4
   fs::remove_all(tmpdir);
 }
 
 TEST_CASE("Integration Test with Combiner", "[job][mapreduce][combiner][integrate]") {
-#ifdef INTEGRATION4
+#ifdef INTEGRATION5
   SECTION("Job:String/Int") {
     std::vector<String> keys{"test", "example", "mapreduce"};
     test_mapreduce_with_combiner<String, Int>(keys, 3);
   }
-#endif  // INTEGRATION4
-#ifdef INTEGRATION5
+#endif  // INTEGRATION5
+#ifdef INTEGRATION6
   SECTION("Job:Int/Double") {
     std::vector<Int> keys{100, 200, 300};
     test_mapreduce_with_combiner<Int, Double>(keys, 5);
   }
-#endif  // INTEGRATION5
-#ifdef INTEGRATION6
+#endif  // INTEGRATION6
+#ifdef INTEGRATION7
   SECTION("Job:Long/Int") {
     std::vector<Long> keys{100000, 200000, 300000};
     test_mapreduce_with_combiner<Long, Int>(keys, 10);
   }
-#endif  // INTEGRATION6
+#endif  // INTEGRATION7
   fs::remove_all(tmpdir);
 }
