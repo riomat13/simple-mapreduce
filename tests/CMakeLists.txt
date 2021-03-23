@@ -180,7 +180,7 @@ if(SIMPLEMR_TEST_INTEGRATION)
     message(STATUS "Processor Count: ${N_PROC}")
   endif()
 
-  foreach(type RANGE 1 6)
+  foreach(type RANGE 1 7)
     set(ITEST_NAME simplemr-itests${type})
 
     set(ITEST_SOURCES
