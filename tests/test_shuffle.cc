@@ -27,7 +27,7 @@ using namespace mapreduce::type;
  * Read binary file.
  * The key type is string and value type is any non-array datatype.
  */
-template <typename T>
+template <typename K, typename V>
 class BinFileReader {
  public:
   BinFileReader(const fs::path& path) {
@@ -35,23 +35,15 @@ class BinFileReader {
   }
   ~BinFileReader() { ifs.close(); }
 
-  void read_binary(std::vector<BytePair>& items) {
+  void read_data(std::vector<BytePair>& items) {
     while (true) {
-      size_t keysize;
-      ifs.read(reinterpret_cast<char*>(&keysize), sizeof(size_t));
-      if(ifs.eof())
+      auto key = read_binary<K>(ifs);
+      if (ifs.eof())
         break;
 
-      /// Read key data
-      char keydata[keysize];
-      ifs.read(keydata, sizeof(char) * keysize);
-      std::string key(keydata, keysize);
-
       /// Read value data
-      T value;
-      ifs.read(reinterpret_cast<char*>(&value), sizeof(T));
-
-      items.emplace_back(ByteData(std::move(key)), ByteData(std::move(value)));
+      auto value = read_binary<V>(ifs);
+      items.emplace_back(key, value);
     }
   }
 
@@ -68,8 +60,8 @@ class BinFileReader {
 template <typename K, typename V>
 void read_all_data(std::vector<fs::path>& files, std::vector<BytePair>& container) {
   for (auto& file: files) {
-    BinFileReader<V> reader(file);
-    reader.read_binary(container);
+    BinFileReader<K, V> reader(file);
+    reader.read_data(container);
   }
 }
 
@@ -100,10 +92,11 @@ void test_shuffle(std::vector<BytePair>& dataset) {
 
     shuffle.run();
 
-    /// Take all data stored for the same worker node,
+    /// Take all data stored for the same worker node
     auto data = mq->receive();
     while (!data.first.empty()) {
       kv_items.emplace_back(std::move(data.first), std::move(data.second));
+      data = mq->receive();
     }
   }
 
@@ -167,6 +160,53 @@ TEST_CASE("Shuffle", "[shuffle]") {
     };
 
     test_shuffle<String, Double>(dataset);
+  }
+
+  fs::remove_all(tmpdir);
+}
+
+TEST_CASE("Shuffle with CompositeKey", "[shuffle][pair]") {
+
+  SECTION("CompositeKey<String, Int>/Long") {
+    using KeyType = CompositeKey<String, Int>;
+
+    /// Target key-value dataset
+    std::vector<BytePair> dataset{
+      {ByteData{KeyType(String{"test"}, 121)}, ByteData(Long{10})},
+      {ByteData{KeyType(String{"test"}, 122)}, ByteData(Long{-1234})},
+      {ByteData{KeyType(String{"example"}, 123)}, ByteData(Long{5000})},
+      {ByteData{KeyType(String{"example"}, 124)}, ByteData(Long{-76543})}
+    };
+
+    test_shuffle<KeyType, Long>(dataset);
+  }
+
+  SECTION("CompositeKey<Long, Int>/Double") {
+    using KeyType = CompositeKey<Long, Int>;
+
+    /// Target key-value dataset
+    std::vector<BytePair> dataset{
+      {ByteData{KeyType(1234567890, 1001)}, ByteData{Double{198765432.04497}}},
+      {ByteData{KeyType(1234567891, 1001)}, ByteData{Double{-123456789.12345}}},
+      {ByteData{KeyType(1234567892, 1001)}, ByteData{Double{50005000.50005}}},
+      {ByteData{KeyType(1234567893, 1001)}, ByteData{Double{-76543.123}}}
+    };
+
+    test_shuffle<KeyType, Double>(dataset);
+  }
+
+  SECTION("CompositeKey<Int32, Int16>/Float") {
+    using KeyType = CompositeKey<Int32, Int16>;
+
+    /// Target key-value dataset
+    std::vector<BytePair> dataset{
+      {ByteData{KeyType(1234, 100)}, ByteData{Float{1.2345f}}},
+      {ByteData{KeyType(1234, 101)}, ByteData{Float{-5.4321f}}},
+      {ByteData{KeyType(1234, 102)}, ByteData{Float{102.5987f}}},
+      {ByteData{KeyType(1234, 103)}, ByteData{Float{-980.7628f}}}
+    };
+
+    test_shuffle<KeyType, Float>(dataset);
   }
 
   fs::remove_all(tmpdir);

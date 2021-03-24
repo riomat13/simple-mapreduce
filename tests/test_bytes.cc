@@ -255,101 +255,125 @@ TEST_CASE("ByteData", "[byte][data]") {
 TEST_CASE("ByteData CompositeKey", "[byte][data][pair]") {
 
   SECTION("Int/Int pair") {
-    CompositeKey<Int, Int> pair(123, 456);
+    using KeyType = CompositeKey<Int, Int>;
+
+    KeyType pair(123, 456);
     ByteData bdata(std::move(pair));
 
-    auto [first, second] = bdata.get_pair<Int, Int>();
+    REQUIRE(bdata.size() == 2);
+
+    auto [first, second] = bdata.get_data<KeyType>();
 
     REQUIRE(first == 123);
     REQUIRE(second == 456);
 
-    ByteData bdata2(CompositeKey<Int, Int>(123, 1111));
+    ByteData bdata2(KeyType(123, 1111));
     REQUIRE(bdata.get_key() == bdata2.get_key());
 
-    ByteData bdata3(CompositeKey<Int, Int>(124, 1111));
+    ByteData bdata3(KeyType(124, 1111));
     REQUIRE(bdata.get_key() != bdata3.get_key());
   }
 
   SECTION("String/Long pair") {
+    using KeyType = CompositeKey<String, Long>;
+
     String word{"composite"};
-    CompositeKey<String, Long> pair(String(word), 1234567890);
+    KeyType pair(String(word), 1234567890);
     ByteData bdata(std::move(pair));
 
-    auto [first, second] = bdata.get_pair<String, Long>();
+    REQUIRE(bdata.size() == 2);
+
+    auto [first, second] = bdata.get_data<KeyType>();
 
     REQUIRE(first == word);
     REQUIRE(second == 1234567890l);
 
-    ByteData bdata2(CompositeKey<String, Long>(String(word), 1111));
+    ByteData bdata2(KeyType(String(word), 1111));
     REQUIRE(bdata.get_key() == bdata2.get_key());
 
-    ByteData bdata3(CompositeKey<String, Long>(String{"test"}, 1111));
+    ByteData bdata3(KeyType(String{"test"}, 1111));
     REQUIRE(bdata.get_key() != bdata3.get_key());
   }
 
   SECTION("Int16/Float pair") {
-    CompositeKey<Int16, Float> pair(123, -123.456);
+    using KeyType = CompositeKey<Int16, Float>;
+
+    KeyType pair(123, -123.456);
     ByteData bdata(std::move(pair));
 
-    auto [first, second] = bdata.get_pair<Int16, Float>();
+    REQUIRE(bdata.size() == 2);
+
+    auto [first, second] = bdata.get_data<KeyType>();
 
     REQUIRE(first == 123);
     REQUIRE(second == Approx(-123.456));
 
-    ByteData bdata2(CompositeKey<Int16, Float>(123, 1.111));
+    ByteData bdata2(KeyType(123, 1.111));
     REQUIRE(bdata.get_key() == bdata2.get_key());
 
-    ByteData bdata3(CompositeKey<Int16, Float>(124, 1.111));
+    ByteData bdata3(KeyType(124, 1.111));
     REQUIRE(bdata.get_key() != bdata3.get_key());
   }
 
   SECTION("Long/Double pair") {
-    CompositeKey<Long, Double> pair(123, -123.456);
+    using KeyType = CompositeKey<Long, Double>;
+
+    KeyType pair(123, -123.456);
     ByteData bdata(std::move(pair));
 
-    auto [first, second] = bdata.get_pair<Long, Double>();
+    REQUIRE(bdata.size() == 2);
+
+    auto [first, second] = bdata.get_data<KeyType>();
 
     REQUIRE(first == 123);
     REQUIRE(second == Approx(-123.456));
 
-    ByteData bdata2(CompositeKey<Long, Double>(123, 1.111));
+    ByteData bdata2(KeyType(123, 1.111));
     REQUIRE(bdata.get_key() == bdata2.get_key());
 
-    ByteData bdata3(CompositeKey<Long, Double>(124, 1.111));
+    ByteData bdata3(KeyType(124, 1.111));
     REQUIRE(bdata.get_key() != bdata3.get_key());
   }
 
   SECTION("Long/String pair") {
+    using KeyType = CompositeKey<Long, String>;
+
     String str{"composite"};
-    CompositeKey<Long, String> pair(123, String(str));
+    KeyType pair(123, String(str));
     ByteData bdata(std::move(pair));
 
-    auto [first, second] = bdata.get_pair<Long, String>();
+    REQUIRE(bdata.size() == 2);
+
+    auto [first, second] = bdata.get_data<KeyType>();
 
     REQUIRE(first == 123);
     REQUIRE(second == str);
 
-    ByteData bdata2(CompositeKey<Long, String>(123, String("test")));
+    ByteData bdata2(KeyType(123, String("test")));
     REQUIRE(bdata.get_key() == bdata2.get_key());
 
-    ByteData bdata3(CompositeKey<Long, String>(124, String("sample")));
+    ByteData bdata3(KeyType(124, String("sample")));
     REQUIRE(bdata.get_key() != bdata3.get_key());
   }
 
   SECTION("String/String pair") {
+    using KeyType = CompositeKey<String, String>;
+
     String str1{"key"};
     String str2{"value"};
-    ByteData bdata{CompositeKey<String, String>(String(str1), String(str2))};
+    ByteData bdata{KeyType(String(str1), String(str2))};
 
-    auto [first, second] = bdata.get_pair<String, String>();
+    REQUIRE(bdata.size() == 2);
+
+    auto [first, second] = bdata.get_data<KeyType>();
 
     REQUIRE(first == str1);
     REQUIRE(second == str2);
 
-    ByteData bdata2(CompositeKey<String, String>(String(str1), String("test")));
+    ByteData bdata2(KeyType(String(str1), String("test")));
     REQUIRE(bdata.get_key() == bdata2.get_key());
 
-    ByteData bdata3(CompositeKey<String, String>(String(str2), String("sample")));
+    ByteData bdata3(KeyType(String(str2), String("sample")));
     REQUIRE(bdata.get_key() != bdata3.get_key());
   }
 }

@@ -3,10 +3,12 @@
 
 #include <filesystem>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "simplemapreduce/data/type.h"
+#include "simplemapreduce/util/type_check.h"
 
 namespace mapreduce {
 namespace data {
@@ -91,7 +93,18 @@ class ByteData {
   /**
    * Get data as given type.
    */
-  template <typename T>
+  /// For primitive data types
+  template <typename T,
+            std::enable_if_t<std::is_arithmetic<T>::value
+              || std::is_same<T, mapreduce::type::String>::value, bool> = true>
+  T get_data() const;
+
+  /// For composite key
+  template <typename T, std::enable_if_t<mapreduce::util::is_compositekey<T>::value, bool> = true>
+  T get_data() const;
+
+  /// For vector
+  template <typename T, std::enable_if_t<mapreduce::util::is_vector<T>::value, bool> = true>
   T get_data() const;
 
   /**
@@ -101,9 +114,6 @@ class ByteData {
    * so that it cannot be used for converting value to string.
    */
   mapreduce::type::String get_key() const;
-
-  template <typename T1, typename T2>
-  mapreduce::type::CompositeKey<T1, T2> get_pair() const;
 
   /** Get data as bytes in char array. */
   const char* get_byte() { return data_.data(); }
@@ -162,9 +172,6 @@ class ByteData {
    */
   template <typename T>
   inline T get_data_(size_t, size_t) const;
-
-  template <typename T1, typename T2>
-  inline mapreduce::type::CompositeKey<T1, T2> get_pair_() const;
 
   /** Helper function to append byte data. */
   template <typename T>

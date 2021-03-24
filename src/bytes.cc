@@ -81,9 +81,9 @@ void ByteData::read_file(const fs::path& path) {
 
 template <>
 String ByteData::get_data_(size_t start, size_t end) const {
-  char data[end-start];
-  std::memcpy(&data, data_.data() + start, end - start);
-  return String(data, end - start);
+  std::vector<char> data;
+  data.insert(data.end(), data_.begin() + start, data_.begin() + end);
+  return String(data.begin(), data.end());
 }
 
 template<> Int16 ByteData::get_data() const { return get_data_<Int16>(); }
@@ -112,7 +112,8 @@ std::vector<Long> ByteData::get_data() const {
   std::memcpy(out.data(), data_.data(), size_ * sizeof(Long));
   return out;
 }
-template<> std::vector<Float> ByteData::get_data() const {
+template<>
+std::vector<Float> ByteData::get_data() const {
   std::vector<Float> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(Float));
   return out;

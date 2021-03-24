@@ -3,13 +3,21 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <map>
+#include <type_traits>
 #include <vector>
 
 #include "catch.hpp"
 
+#include "simplemapreduce/commons.h"
 #include "simplemapreduce/data/bytes.h"
+#include "simplemapreduce/data/type.h"
 #include "simplemapreduce/proc/loader.h"
+
+/// This is test use only so add aliases
+using namespace mapreduce::data;
+using namespace mapreduce::type;
 
 /// Directory to store all temporary files for testing
 extern std::filesystem::path tmpdir;
@@ -60,6 +68,40 @@ bool check_map_items(std::map<K, std::vector<V>>& input,
     }
   }
   return true;
+}
+
+/**
+ * Read binary data and return as actual data type.
+ *
+ *  @param ifs  input file stream to read data
+ */
+template <typename T>
+ByteData read_binary(std::ifstream& ifs) {
+  /// Read numeric data
+  ByteData bdata;
+  if (std::is_arithmetic_v<T>) {
+    char buffer[sizeof(T)];
+    ifs.read(buffer, sizeof(T));
+
+    /// Break if reachs EOF
+    if (ifs.eof())
+      return bdata;
+
+    bdata.set_bytes<T>(buffer, sizeof(T));
+  } else {
+    /// Read String or CompositeKey
+    Size_t data_size;
+    ifs.read(reinterpret_cast<char*>(&data_size), sizeof(Size_t));
+
+    /// Break if reachs EOF
+    if (ifs.eof())
+      return bdata;
+
+    char buffer[data_size];
+    ifs.read(buffer, data_size);
+    bdata.set_bytes<T>(buffer, data_size);
+  }
+  return bdata;
 }
 
 class TestDataLoader : public mapreduce::proc::DataLoader {

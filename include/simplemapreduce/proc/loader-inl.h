@@ -1,5 +1,24 @@
+#include "simplemapreduce/commons.h"
 namespace mapreduce {
 namespace proc {
+
+template <typename T, std::enable_if_t<!std::is_arithmetic<T>::value, bool> = true>
+mapreduce::data::ByteData load_byte_data(std::ifstream& fin) {
+  /// Read data from CompositeKey
+  mapreduce::type::Size_t data_size;
+  fin.read(reinterpret_cast<char*>(&data_size), sizeof(mapreduce::type::Size_t));
+
+  if (fin.eof())
+    return mapreduce::data::ByteData();
+
+  char buffer[data_size];
+  fin.read(buffer, sizeof(char) * data_size);
+
+  mapreduce::data::ByteData data;
+  data.set_bytes<T>(&buffer[0], data_size);
+  // std::cerr << "Loading: " << data.get_data<T>() << std::endl;
+  return data;
+}
 
 template <typename K, typename V>
 BinaryFileDataLoader<K, V>::BinaryFileDataLoader(std::shared_ptr<mapreduce::JobConf> conf) : conf_(conf) {

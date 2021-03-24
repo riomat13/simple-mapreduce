@@ -341,4 +341,24 @@ TEST_CASE("MQDataLoader", "[data_loader][mq]") {
     /// Check if original data and data got from loader are the same
     REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
   }
+
+  SECTION("CompositeKey<String, Long>/Double") {
+    std::vector<BytePair> targets{
+      {ByteData(CompositeKey<String, Long>(String{"test"}, Long{101})), ByteData(Double{13579.02468})},
+      {ByteData(CompositeKey<String, Long>(String{"test"}, Long{102})), ByteData(Double{-540.19283})},
+    };
+
+    for (auto& kv: targets)
+      mq->send(std::pair(kv));
+    mq->end();
+
+    /// Get all data from loader
+    std::vector<BytePair> res;
+    BytePair data;
+    while (!(data = loader->get_item()).first.empty())
+      res.push_back(std::move(data));
+
+    /// Check if original data and data got from loader are the same
+    REQUIRE_THAT(res, Catch::Matchers::UnorderedEquals(targets));
+  }
 }

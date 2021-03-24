@@ -21,6 +21,12 @@ namespace proc {
 template <typename T>
 void write_binary(std::ofstream&, T&&);
 
+template <typename T1, typename T2>
+void write_binary(std::ofstream&, mapreduce::type::CompositeKey<T1, T2>&);
+
+template <typename T1, typename T2>
+void write_binary(std::ofstream&, mapreduce::type::CompositeKey<T1, T2>&&);
+
 /**
  * Format value to output.
  *
