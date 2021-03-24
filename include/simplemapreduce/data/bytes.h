@@ -3,10 +3,12 @@
 
 #include <filesystem>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "simplemapreduce/data/type.h"
+#include "simplemapreduce/util/type_check.h"
 
 namespace mapreduce {
 namespace data {
@@ -21,6 +23,9 @@ class ByteData {
   explicit ByteData(mapreduce::type::Double);
   /// Only reference is accepted to avoid copy
   ByteData(mapreduce::type::String&&);
+
+  template <typename T1, typename T2>
+  ByteData(mapreduce::type::CompositeKey<T1, T2>&&);
 
   ByteData(const ByteData&);
   ByteData &operator=(const ByteData&);
@@ -45,6 +50,9 @@ class ByteData {
   void set_data(mapreduce::type::Double) noexcept;
   /// Only reference is accepted to avoid copy
   void set_data(mapreduce::type::String&&) noexcept;
+
+  template <typename T1, typename T2>
+  void set_data(mapreduce::type::CompositeKey<T1, T2>&&) noexcept;
 
   /**
    * Set array data.
@@ -85,8 +93,27 @@ class ByteData {
   /**
    * Get data as given type.
    */
-  template <typename T>
+  /// For primitive data types
+  template <typename T,
+            std::enable_if_t<std::is_arithmetic<T>::value
+              || std::is_same<T, mapreduce::type::String>::value, bool> = true>
   T get_data() const;
+
+  /// For composite key
+  template <typename T, std::enable_if_t<mapreduce::util::is_compositekey<T>::value, bool> = true>
+  T get_data() const;
+
+  /// For vector
+  template <typename T, std::enable_if_t<mapreduce::util::is_vector<T>::value, bool> = true>
+  T get_data() const;
+
+  /**
+   * Get primary key data from byte data.
+   * This is used for shuffling process with hashing by the key
+   * and will not directly convert numeric value to the string
+   * so that it cannot be used for converting value to string.
+   */
+  mapreduce::type::String get_key() const;
 
   /** Get data as bytes in char array. */
   const char* get_byte() { return data_.data(); }
@@ -109,12 +136,12 @@ class ByteData {
   void push_back(T& data);
 
  private:
-  /** Helper function to set data */
+  /** Helper function to set data. */
   template <typename T>
   inline void set_data_(T& data);
 
   /**
-   * Helper function to set data
+   * Helper function to set data.
    * 
    *  @param data   pointer to array
    *  @param size   length of data in given data type
@@ -122,11 +149,31 @@ class ByteData {
   template <typename T>
   inline void set_data_(T* data, const size_t& size);
 
-  /** Helper function to get data */
+  /** Helper function to get data. */
   template <typename T>
   inline T get_data_() const;
 
-  /** Helper function to append byte data */
+  /**
+   * Helper function to get data with offset.
+   * This will read data from `begin() + offset` to `end()`.
+   *
+   *  @param offset  offset size from begin()
+   */
+  template <typename T>
+  inline T get_data_(size_t) const;
+
+  /**
+   * Helper function to get data with range.
+   * This will read data from `begin() + start` to `begin() + end()`.
+   * This is used for reading string data.
+   *
+   *  @param start  start index to read data
+   *  @param end    end index to read data exclusive
+   */
+  template <typename T>
+  inline T get_data_(size_t, size_t) const;
+
+  /** Helper function to append byte data. */
   template <typename T>
   inline void push_back_(T& data);
 

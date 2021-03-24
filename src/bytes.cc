@@ -79,6 +79,13 @@ void ByteData::read_file(const fs::path& path) {
   size_ = data_size;
 }
 
+template <>
+String ByteData::get_data_(size_t start, size_t end) const {
+  std::vector<char> data;
+  data.insert(data.end(), data_.begin() + start, data_.begin() + end);
+  return String(data.begin(), data.end());
+}
+
 template<> Int16 ByteData::get_data() const { return get_data_<Int16>(); }
 template<> Int ByteData::get_data() const { return get_data_<Int>(); }
 template<> Long ByteData::get_data() const { return get_data_<Long>(); }
@@ -105,7 +112,8 @@ std::vector<Long> ByteData::get_data() const {
   std::memcpy(out.data(), data_.data(), size_ * sizeof(Long));
   return out;
 }
-template<> std::vector<Float> ByteData::get_data() const {
+template<>
+std::vector<Float> ByteData::get_data() const {
   std::vector<Float> out(size_);
   std::memcpy(out.data(), data_.data(), size_ * sizeof(Float));
   return out;
@@ -117,11 +125,19 @@ std::vector<Double> ByteData::get_data() const {
   return out;
 }
 
+mapreduce::type::String ByteData::get_key() const {
+  /// If this is not CompositeKey, read primary key, otherwise read all data
+  return mapreduce::type::String(data_.begin(), std::find(data_.begin(), data_.end(), '\1'));
+}
+
 template<> void ByteData::push_back(Int16& value) { push_back_<Int16>(value); }
 template<> void ByteData::push_back(Int& value) { push_back_<Int>(value); }
 template<> void ByteData::push_back(Long& value) { push_back_<Long>(value); }
 template<> void ByteData::push_back(Float& value) { push_back_<Float>(value); }
 template<> void ByteData::push_back(Double& value) { push_back_<Double>(value); }
+template<> void ByteData::push_back(String& value) {
+  data_.insert(data_.end(), value.begin(), value.end());
+}
 
 bool ByteData::operator==(const ByteData& rhs) const {
   return data_ == rhs.data_;

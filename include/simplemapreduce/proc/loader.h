@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -18,7 +19,10 @@ namespace proc {
  *
  *  @param fin  input binary file stream
  */
-template <typename T>
+template <typename T, std::enable_if_t<std::is_arithmetic<T>::value, bool> = true>
+mapreduce::data::ByteData load_byte_data(std::ifstream&);
+
+template <typename T, std::enable_if_t<!std::is_arithmetic<T>::value, bool> = true>
 mapreduce::data::ByteData load_byte_data(std::ifstream&);
 
 /**

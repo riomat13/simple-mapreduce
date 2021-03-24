@@ -12,7 +12,7 @@ std::filesystem::path Reducer<IK, IV, OK, OV>::get_output_filepath() {
 
 template <typename IK, typename IV, typename OK, typename OV>
 std::unique_ptr<mapreduce::Context<OK, OV>> Reducer<IK, IV, OK, OV>::get_context(const std::string& path) {
-  std::unique_ptr<mapreduce::proc::OutputWriter<IK, IV>> writer = std::make_unique<mapreduce::proc::OutputWriter<IK, IV>>(path);
+  std::unique_ptr<mapreduce::proc::OutputWriter<OK, OV>> writer = std::make_unique<mapreduce::proc::OutputWriter<OK, OV>>(path);
   return std::make_unique<mapreduce::Context<OK, OV>>(std::move(writer));
 }
 

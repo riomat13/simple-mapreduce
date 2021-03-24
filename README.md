@@ -28,6 +28,7 @@ The directory is structured as following.
 |   ├─ CMakeLists.txt    # cmake file for main task
 |   ├─ sourcelist.cmake  # put all source file used in the mapreduce task
 |   ├─ movielens/        # example app to compute movie rating mean
+|   ├─ rainfall/         # example app for secondary sort using CompositeKey
 |   ├─ wordcount/        # example app to count words in texts
 |   └─ wordcount_with_combiner/
 |                        # example app to count words using Combiner

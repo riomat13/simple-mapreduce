@@ -27,11 +27,8 @@ Shuffle<K, V>::Shuffle(std::shared_ptr<mapreduce::data::MessageQueue> mq, std::s
 }
 
 template <typename K, typename V>
-int Shuffle<K, V>::hash(const K& data) {
-  std::hash<K> hasher;
-  auto hashed = hasher(data) % conf_->n_groups;
-
-  return hashed;
+int Shuffle<K, V>::hash(const mapreduce::type::String& data) {
+  return std::hash<std::string>{}(data) % conf_->n_groups;
 }
 
 template <typename K, typename V>
@@ -41,7 +38,7 @@ void Shuffle<K, V>::run() {
 
   /// Run until all processed and receive empty when finished the process
   while (!data.first.empty()) {
-    int id = hash(data.first.get_data<K>());
+    int id = hash(data.first.get_key());
     if (id == conf_->worker_rank) {
       /// data processed on the same worker node at reduce will be stored back to MessageQueue
       /// and retrieve it later

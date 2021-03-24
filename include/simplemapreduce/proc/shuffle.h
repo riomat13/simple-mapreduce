@@ -7,6 +7,7 @@
 
 #include "simplemapreduce/commons.h"
 #include "simplemapreduce/data/queue.h"
+#include "simplemapreduce/data/type.h"
 #include "simplemapreduce/ops/conf.h"
 #include "simplemapreduce/ops/context.h"
 #include "simplemapreduce/proc/writer.h"
@@ -56,7 +57,7 @@ class Shuffle : public ShuffleTask {
   std::shared_ptr<mapreduce::JobConf> conf_;
 
   /// Hash function to group the intermediate states
-  int hash(const K&);
+  int hash(const mapreduce::type::String&);
 
   /// Message Queue to get data to process
   std::shared_ptr<mapreduce::data::MessageQueue> mq_ = nullptr;

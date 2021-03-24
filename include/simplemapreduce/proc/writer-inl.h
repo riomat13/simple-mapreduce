@@ -1,9 +1,21 @@
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include "simplemapreduce/commons.h"
 namespace mapreduce {
 namespace proc {
+
+// TODO
+template <typename T1, typename T2>
+void write_binary(std::ofstream& ofs, mapreduce::type::CompositeKey<T1, T2>& data) {
+  write_binary(ofs, mapreduce::data::ByteData(std::move(data)));
+}
+
+template <typename T1, typename T2>
+void write_binary(std::ofstream& ofs, mapreduce::type::CompositeKey<T1, T2>&& data) {
+  write_binary(ofs, mapreduce::data::ByteData(std::move(data)));
+}
 
 template <typename K, typename V>
 BinaryFileWriter<K, V>::BinaryFileWriter(const std::filesystem::path& path) : path_(std::move(path)) {
