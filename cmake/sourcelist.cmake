@@ -1,6 +1,7 @@
 target_sources(simplemapreduce PRIVATE
   ${SimpleMapReduce_SOURCE_DIR}/src/argparse.cc
   ${SimpleMapReduce_SOURCE_DIR}/src/bytes.cc
+  ${SimpleMapReduce_SOURCE_DIR}/src/commons.cc
   ${SimpleMapReduce_SOURCE_DIR}/src/job.cc
   ${SimpleMapReduce_SOURCE_DIR}/src/job_runner.cc
   ${SimpleMapReduce_SOURCE_DIR}/src/loader.cc

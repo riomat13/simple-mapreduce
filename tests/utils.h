@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -23,11 +24,19 @@ using namespace mapreduce::type;
 extern std::filesystem::path tmpdir;
 
 /**
+ * Check if sequence ends with target string.
+ *
+ *  @param sequence   sequence to be checked
+ *  @param target     string to check if it is in the end of sequence
+ */
+bool ends_with(std::string_view, std::string_view);
+
+/**
  * Clear all content in a file with given path.
  *
  *  @param path  target file path to clear data
  */
-void clear_file(const std::filesystem::path& path);
+void clear_file(const std::filesystem::path&);
 
 /**
  * Extract files in the given directory.

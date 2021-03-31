@@ -1,6 +1,6 @@
 #include <type_traits>
 
-#include "simplemapreduce/util/log.h"
+#include "simplemapreduce/commons.h"
 
 namespace mapreduce {
 

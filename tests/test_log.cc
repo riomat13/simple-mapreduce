@@ -1,9 +1,16 @@
 #include "simplemapreduce/util/log.h"
 
+#include <filesystem>
+#include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "catch.hpp"
+
+#include "utils.h"
+
+namespace fs = std::filesystem;
 
 using namespace mapreduce::util;
 
@@ -97,9 +104,106 @@ TEST_CASE("Logger", "[log][logger]") {
     REQUIRE(log.find("critical 12345 sample") != std::string::npos);
   }
 
-  SECTION("CRITICAL") {
+  SECTION("DISABLE") {
     Logger logger{};
     logger.set_log_level(LogLevel::DISABLE);
     REQUIRE(logger.critical("test") == nullptr);
   }
+}
+
+using Logs = std::vector<std::string>;
+
+/** Test function by comparing logs and logged file. */
+void compare_log_file(fs::path& path, Logs& targets) {
+  Logs lines;
+
+  std::ifstream ifs(path);
+  std::string line;
+
+  while (std::getline(ifs, line)) {
+    lines.push_back(std::move(line));
+  }
+
+  REQUIRE(lines.size() == targets.size());
+  for (size_t i = 0; i < lines.size(); ++i) {
+    REQUIRE(ends_with(lines[i], targets[i]));
+  }
+}
+
+TEST_CASE("Logger with file", "[log][logger][file]") {
+  Logs targets;
+  fs::path dirpath{tmpdir / "test_log"};
+  fs::create_directories(dirpath);
+
+  SECTION("INFO") {
+    fs::path logfile = dirpath / "log_info.txt";
+    {
+      Logger logger{};
+      logger.set_log_level(LogLevel::INFO);
+      logger.info("test", "not to write");
+      logger.set_filepath(logfile);
+
+      logger.debug("test ", "debug");
+      logger.info("test ", "info");
+      targets.push_back("test info");
+      logger.error("test ", "error");
+      targets.push_back("test error");
+    }
+
+    compare_log_file(logfile, targets);
+  }
+
+  SECTION("ERROR") {
+    fs::path logfile = dirpath / "log_error.txt";
+
+    {
+      Logger logger{};
+      logger.set_log_level(LogLevel::ERROR);
+      logger.set_filepath(logfile);
+
+      logger.debug("test ", "debug");
+      logger.info("test ", "info");
+      logger.error("test ", "error");
+      targets.push_back("test error");
+    }
+
+    compare_log_file(logfile, targets);
+  }
+
+  SECTION("stdout/file = DEBUG/INFO") {
+    fs::path logfile = dirpath / "log_debug-info.txt";
+
+    {
+      Logger logger{};
+      logger.set_log_level(LogLevel::DEBUG);
+      logger.set_log_level_for_file(LogLevel::INFO);
+      logger.set_filepath(logfile);
+
+      logger.debug("test ", "debug");
+      logger.info("test ", "info");
+      targets.push_back("test info");
+    }
+
+    compare_log_file(logfile, targets);
+  }
+
+  SECTION("stdout/file = INFO/WARNING") {
+    fs::path logfile = dirpath / "log_debug-info.txt";
+
+    {
+      Logger logger{};
+      logger.set_log_level_for_file(LogLevel::WARNING);
+      logger.set_log_level(LogLevel::INFO);
+      logger.set_filepath(logfile);
+
+      logger.debug("test ", "debug");
+      logger.info("test ", "info");
+      logger.warning("test ", "warning");
+      targets.push_back("test warning");
+    }
+
+    compare_log_file(logfile, targets);
+  }
+
+  fs::remove_all(tmpdir);
 }

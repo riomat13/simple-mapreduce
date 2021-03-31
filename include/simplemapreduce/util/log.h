@@ -8,6 +8,8 @@
 
 #include <chrono>
 #include <ctime>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -46,6 +48,19 @@ namespace util {
     OSS oss;
   };
 
+  class LogWriter {
+   public:
+    LogWriter(std::filesystem::path&);
+    ~LogWriter();
+
+    void write(const std::string&);
+
+    void flush();
+
+   private:
+    std::ofstream ofs_;
+  };
+
   /// Reference: https://stackoverflow.com/a/50923834
   /**
    * Logger class.
@@ -56,6 +71,8 @@ namespace util {
    */
   class Logger {
    public:
+    Logger() {}
+
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
     Logger(Logger&&) = delete;
@@ -64,8 +81,22 @@ namespace util {
     /**
      * Set logging level.
      * This will be applied to all logger methods.
+     * This is also be used for writing out to a file
+     * unless specify the level by `set_log_level_for_file`.
      */
-    void set_log_level(LogLevel&& level);
+    void set_log_level(LogLevel&&);
+
+    /**
+     * Set file path to write logs.
+     *
+     *  @param path   target file path
+     */
+    void set_filepath(std::filesystem::path&);
+
+    /**
+     * Set logging level specifically for file.
+     */
+    void set_log_level_for_file(LogLevel&&);
 
     /**
      * Simple logger.
@@ -137,9 +168,17 @@ namespace util {
       static LogLevel log_level = LogLevel::INFO;
       return log_level;
     }
+
+    LogLevel& get_file_log_level() {
+      static LogLevel log_level = LogLevel::INFO;
+      return log_level;
+    }
+
+    bool is_set_file = false;
+    std::unique_ptr<LogWriter> log_writer_ = nullptr;
   };
 
-  extern Logger logger;
+  Logger get_logger();
 
 } // namespace util
 } // namespace mapreduce

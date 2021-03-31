@@ -5,9 +5,9 @@
 
 #include <mpi.h>
 
+#include "simplemapreduce/commons.h"
 #include "simplemapreduce/base/job_tasks.h"
 #include "simplemapreduce/data/bytes.h"
-#include "simplemapreduce/util/log.h"
 
 namespace fs = std::filesystem;
 

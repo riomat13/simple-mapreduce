@@ -8,13 +8,13 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include "simplemapreduce/commons.h"
 #include "simplemapreduce/data/bytes.h"
 #include "simplemapreduce/local/fileformat.h"
 #include "simplemapreduce/local/manager.h"
 #include "simplemapreduce/local/runner.h"
 #include "simplemapreduce/proc/writer.h"
 #include "simplemapreduce/util/argparse.h"
-#include "simplemapreduce/util/log.h"
 #include "simplemapreduce/util/parser.h"
 
 namespace fs = std::filesystem;

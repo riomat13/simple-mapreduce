@@ -53,6 +53,7 @@ set(UTEST_NAME simplemr-utests)
 set(LIB_SOURCES
   ${PROJECT_SOURCE_DIR}/../src/argparse.cc
   ${PROJECT_SOURCE_DIR}/../src/bytes.cc
+  ${PROJECT_SOURCE_DIR}/../src/commons.cc
   ${PROJECT_SOURCE_DIR}/../src/loader.cc
   ${PROJECT_SOURCE_DIR}/../src/local_fileformat.cc
   ${PROJECT_SOURCE_DIR}/../src/log.cc
