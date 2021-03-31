@@ -9,15 +9,25 @@ namespace util {
 
   std::string LogBuffer::to_string() { return oss.str(); }
 
-  LogWriter::LogWriter(fs::path& path) : ofs_(std::ofstream(path)) {
+  LogWriter::LogWriter(const std::string& path) {
+    ofs_.open(path);
+  }
+  LogWriter::LogWriter(const fs::path& path) {
+    ofs_.open(path);
   }
 
   LogWriter::~LogWriter() {
-    ofs_.close();
+    if (ofs_.is_open()) {
+      ofs_.close();
+    }
   }
 
   void LogWriter::write(const std::string& log) {
     ofs_ << log << '\n';
+  }
+
+  void LogWriter::flush() {
+    ofs_.flush();
   }
 
   void Logger::set_log_level(LogLevel&& level) {
@@ -27,7 +37,11 @@ namespace util {
     }
   }
 
-  void Logger::set_filepath(fs::path& filepath) {
+  void Logger::set_filepath(const std::string& filepath) {
+    set_filepath(fs::path(filepath));
+  }
+
+  void Logger::set_filepath(const fs::path& filepath) {
     log_writer_ = std::make_unique<LogWriter>(filepath);
   }
 

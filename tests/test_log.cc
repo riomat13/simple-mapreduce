@@ -32,6 +32,50 @@ TEST_CASE("LogBuffer", "[log][buffer]") {
   REQUIRE(buffer.to_string() == "10test42.1424 sample");
 }
 
+TEST_CASE("LogWriter", "[log][file]") {
+  fs::path dirpath = tmpdir / "test_log";
+  fs::create_directories(dirpath);
+
+  SECTION("Constructor(string)") {
+    std::string path((dirpath / "writer_str.txt").string());
+    {
+      LogWriter writer(path);
+    }
+    REQUIRE(fs::exists(path));
+    REQUIRE(fs::is_regular_file(path));
+  }
+
+  SECTION("Constructor(fs::path)") {
+    fs::path path = dirpath / "writer_path.txt";
+    {
+      LogWriter writer(path);
+    }
+    REQUIRE(fs::exists(path));
+    REQUIRE(fs::is_regular_file(path));
+  }
+
+  SECTION("write and flush buffer") {
+    fs::path path = dirpath / "writer_log.txt";
+    std::string log = "this is a sample log";
+    {
+      LogWriter writer(path);
+      writer.write(log);
+      REQUIRE(fs::exists(path));
+      REQUIRE(fs::file_size(path) == 0);
+
+      /// Write out to log file
+      writer.flush();
+      REQUIRE(fs::file_size(path) != 0);
+
+      std::ifstream ifs(path);
+      std::string line;
+      std::getline(ifs, line);
+      REQUIRE(line == log);
+      ifs.close();
+    }
+  }
+}
+
 TEST_CASE("Logger", "[log][logger]") {
 
   SECTION("general")

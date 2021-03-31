@@ -30,7 +30,7 @@ class RatingMeanReducer : public Reducer<Long, Double, Long, Double> {
 
 int main(int argc, char *argv[]) {
   Job job{argc, argv};
-  job.set_config("log_level", mapreduce::util::LogLevel::INFO);
+  job.set_config(Config::log_level, mapreduce::util::LogLevel::INFO);
   job.set_mapper<RatingMeanMapper>();
   job.set_reducer<RatingMeanReducer>();
 

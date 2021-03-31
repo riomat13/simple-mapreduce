@@ -88,7 +88,7 @@ void test_mapreduce(std::vector<OK>& target_keys, const unsigned int& count) {
   job.add_input_path(input_dir);
   job.set_output_path(output_dir);
 
-  job.set_config("log_level", 4);
+  job.set_config(Config::log_level, 4);
 
   job.template set_mapper<TestMapper<IK, IV>>();
   job.template set_reducer<TestReducer<IK, IV, OK, OV>>();
@@ -170,7 +170,7 @@ void test_mapreduce_with_combiner(std::vector<K>& target_keys, const unsigned in
   Job job;
   job.add_input_path(input_dir);
   job.set_output_path(output_dir);
-  job.set_config("log_level", 4);
+  job.set_config(Config::log_level, 4);
 
   job.template set_mapper<TestMapper<K, V>>();
   job.template set_combiner<TestCombiner<K, V>>();

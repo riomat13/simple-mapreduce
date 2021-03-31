@@ -104,6 +104,23 @@ Job::~Job() {
 /* --------------------------------------------------
  *   Setup
  * -------------------------------------------------- */
+// TODO: remove hardcoded key name
+template <>
+void Job::set_config(mapreduce::Config key, const std::string& value) {
+  std::string keyname;
+  switch (key) {
+    case mapreduce::Config::log_dirpath:
+      std::filesystem::create_directories(value);
+      mapreduce::util::logger.set_filepath(value);
+      keyname = "log_dirpath";
+      break;
+  }
+
+  /// Only show the change from master node to avoid duplicates
+  if (is_master_)
+    mapreduce::util::logger.info("[Master] Config: ", keyname, "=", value);
+}
+
 void Job::add_input_path(const std::string& path) {
   file_fmt_->add_input_path(std::move(path));
 }

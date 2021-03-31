@@ -14,4 +14,7 @@
 /// Helper functions/macros
 #include "simplemapreduce/ops/func.h"
 
+/// Configuration
+#include "simplemapreduce/config.h"
+
 #endif  // SIMPLEMAPREDUCE_H_
