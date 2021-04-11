@@ -9,6 +9,7 @@
 #include <mpi.h>
 
 #include "simplemapreduce/commons.h"
+#include "simplemapreduce/config.h"
 #include "simplemapreduce/base/fileformat.h"
 #include "simplemapreduce/base/job_manager.h"
 #include "simplemapreduce/base/job_runner.h"
@@ -54,7 +55,10 @@ class Job {
    * Set configurations for Job.
    */
   template <typename T>
-  void set_config(const std::string &, T&&);
+  void set_config(Config, T&&);
+
+  template <int N>
+  inline void set_config(Config, char[N]);
 
   /**
    * Setup Mapper.

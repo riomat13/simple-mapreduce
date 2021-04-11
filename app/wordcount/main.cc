@@ -37,14 +37,16 @@ class WordCountReducer : public mapreduce::Reducer<mapreduce::type::String,
 
 int main(int argc, char *argv[]) {
   mapreduce::Job job{argc, argv};
-  job.set_config("n_groups", -1);  // Number of workers to run reduced task
-                                   // This will be a number of output files
-                                   // (Note: even if this is set to small value,
-                                   //  all workers will be used for other processes)
-                                   // -1 for using all workers
-  job.set_config("log_level", mapreduce::util::LogLevel::INFO);
-                                   // Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL, DISABLE
-                                   // Disable logs which levels are less than it
+
+  // Number of workers to run reduced task.
+  // This will be a number of output files.
+  // (Note: even if this is set to small value, all workers will be used for other processes)
+  // -1 for using all workers
+  job.set_config(mapreduce::Config::n_groups, -1);
+
+  // Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL, DISABLE
+  // Disable logs which levels are less than it
+  job.set_config(mapreduce::Config::log_level, mapreduce::util::LogLevel::INFO);
 
   job.set_mapper<WordCountMapper>();
   job.set_reducer<WordCountReducer>();

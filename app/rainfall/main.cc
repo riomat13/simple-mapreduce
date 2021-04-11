@@ -26,7 +26,7 @@ class RainfallReducer: public Reducer<CompositeKey<String, String>, Double, Stri
 int main(int argc, char* argv[]) {
   Job job{argc, argv};
 
-  job.set_config("log_level", mapreduce::util::LogLevel::INFO);
+  job.set_config(Config::log_level, mapreduce::util::LogLevel::INFO);
   job.set_mapper<RainfallMapper>();
   job.set_reducer<RainfallReducer>();
 

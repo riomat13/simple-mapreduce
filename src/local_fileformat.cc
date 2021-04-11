@@ -4,7 +4,6 @@
 #include <thread>
 
 #include "simplemapreduce/commons.h"
-#include "simplemapreduce/util/log.h"
 
 namespace fs = std::filesystem;
 

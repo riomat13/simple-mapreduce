@@ -9,7 +9,6 @@ namespace util {
     return *this;
   }
 
-  /// Reference: https://stackoverflow.com/a/50923834
   template <typename ...Args>
   std::unique_ptr<LogBuffer> Logger::log(const LogLevel& log_level, Args&&... args) {
     switch (log_level) {
@@ -38,8 +37,17 @@ namespace util {
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
     std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
-    *buff << "\033[0;92m[INFO] ";
+    *buff << "[INFO] ";
     log_stdout_root(*buff, args...);
+    auto log_str = buff->to_string();
+
+    std::cout << "\033[0;92m" << log_str << "\033[0m" << std::endl;
+
+    /// Write to log file
+    if (log_writer_ != nullptr && get_file_log_level() < LogLevel::WARNING) {
+      log_writer_->write(log_str);
+    }
+
     return buff;
   }
 
@@ -53,6 +61,15 @@ namespace util {
     std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
     *buff << "[DEBUG] ";
     log_stdout_root(*buff, args...);
+    auto log_str = buff->to_string();
+
+    std::cout << log_str << std::endl;
+
+    /// Write to log file
+    if (log_writer_ != nullptr && get_file_log_level() < LogLevel::INFO) {
+      log_writer_->write(log_str);
+    }
+
     return buff;
   }
 
@@ -64,8 +81,17 @@ namespace util {
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
     std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
-    *buff << "\033[0;33m[WARNING] ";
+    *buff << "[WARNING] ";
     log_stderr_root(*buff, args...);
+    auto log_str = buff->to_string();
+
+    std::cout << "\033[0;33m" << log_str << "\033[0m" << std::endl;
+
+    /// Write to log file
+    if (log_writer_ != nullptr && get_file_log_level() < LogLevel::ERROR) {
+      log_writer_->write(log_str);
+    }
+
     return buff;
   }
 
@@ -77,8 +103,17 @@ namespace util {
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
     std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
-    *buff << "\033[0;91m[ERROR] ";
+    *buff << "[ERROR] ";
     log_stderr_root(*buff, args...);
+    auto log_str = buff->to_string();
+
+    std::cout << "\033[0;91m" << log_str << "\033[0m" << std::endl;
+
+    /// Write to log file
+    if (log_writer_ != nullptr && get_file_log_level() < LogLevel::CRITICAL) {
+      log_writer_->write(log_str);
+    }
+
     return buff;
   }
 
@@ -90,8 +125,17 @@ namespace util {
     std::unique_ptr<LogBuffer> buff = std::make_unique<LogBuffer>();
 
     std::lock_guard<std::mutex> lock(mapreduce::commons::mr_mutex);
-    *buff << "\033[1;35m[URGENT] ";
+    *buff << "[URGENT] ";
     log_stderr_root(*buff, args...);
+    auto log_str = buff->to_string();
+
+    std::cout << "\033[1;35m" << log_str << "\033[0m" << std::endl;
+
+    /// Write to log file
+    if (log_writer_ != nullptr && get_file_log_level() < LogLevel::DISABLE) {
+      log_writer_->write(log_str);
+    }
+
     return buff;
   }
 
@@ -101,9 +145,6 @@ namespace util {
     log_append_time_tag(buff);
 
     log_stdout(buff, args...);
-    buff << "\033[0m";
-
-    std::cout << buff.to_string() << std::endl;
   }
 
   template <typename ...Args>
@@ -112,9 +153,6 @@ namespace util {
     log_append_time_tag(buff);
 
     log_stdout(buff, args...);
-    buff << "\033[0m";
-
-    std::cerr << buff.to_string() << std::endl;
   }
 
   template <typename T>
