@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
-#include <type_traits>
 
 #include "simplemapreduce/commons.h"
 #include "simplemapreduce/data/bytes.h"
@@ -65,8 +64,8 @@ Job::Job(int &argc, char *argv[]) {
 }
 
 void Job::start_up() {
-  int mpi_rank, mpi_size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &(mpi_rank));
+  int mpi_size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &(conf_->mpi_rank));
   MPI_Comm_size(MPI_COMM_WORLD, &(mpi_size));
 
   if (mpi_size == 1) {
@@ -76,7 +75,7 @@ void Job::start_up() {
 
   conf_->worker_size = mpi_size - 1;
 
-  if (mpi_rank == 0) {
+  if (conf_->mpi_rank == 0) {
     /// Set up master node
     is_master_ = true;
 
@@ -91,7 +90,7 @@ void Job::start_up() {
 
     /// Exclude master node as a count of workers
     /// This will be used for later computation and identifiers
-    conf_->worker_rank = mpi_rank - 1;
+    conf_->worker_rank = conf_->mpi_rank - 1;
   }
 }
 
@@ -106,13 +105,80 @@ Job::~Job() {
  * -------------------------------------------------- */
 // TODO: remove hardcoded key name
 template <>
-void Job::set_config(mapreduce::Config key, const std::string& value) {
+void Job::set_config(mapreduce::Config key, int&& value) {
+  std::string keyname;
+  switch (key) {
+    case mapreduce::Config::n_groups:
+      keyname = "n_groups";
+      if (value > conf_->worker_size || value < 1) {
+        /// Group size can be at most the number of workers
+        conf_->n_groups = conf_->worker_size;
+        if (is_master_) {
+          if (value > 0) {
+            mapreduce::util::logger.warning("Group size exceeds the number of worker nodes. Use the number of worker nodes instead.");
+          } else if (value == 0) {
+            mapreduce::util::logger.warning("Group size must be non-zero. Use the number of worker nodes instead.");
+          }
+          mapreduce::util::logger.info("[Master] Config: ", keyname, "=", conf_->worker_size);
+        }
+        return;
+      } else {
+        conf_->n_groups = value;
+      }
+      break;
+
+    case mapreduce::Config::log_level:
+      mapreduce::util::logger.set_log_level(mapreduce::util::LogLevel(value));
+      keyname = "log_level";
+      break;
+
+    case mapreduce::Config::log_file_level:
+      mapreduce::util::logger.set_log_level_for_file(mapreduce::util::LogLevel(value));
+      keyname = "log_file_level";
+      break;
+
+    default:
+      if (is_master_)
+        mapreduce::util::logger.warning("Invalid parameter key: ", key);
+      return;
+  }
+
+  /// Only show the change from master node to avoid duplicates
+  if (is_master_)
+    mapreduce::util::logger.info("[Master] Config: ", keyname, "=", value);
+}
+
+template <>
+void Job::set_config(mapreduce::Config key, mapreduce::util::LogLevel&& value) {
+  std::string keyname;
+  switch (key) {
+    case mapreduce::Config::log_level:
+      mapreduce::util::logger.set_log_level(mapreduce::util::LogLevel(value));
+      keyname = "log_level";
+      break;
+
+    default:
+      if (is_master_)
+        mapreduce::util::logger.warning("Invalid parameter key: ", key);
+      return;
+  }
+
+  /// Only show the change from master node to avoid duplicates
+  if (is_master_)
+    mapreduce::util::logger.info("[Master] Config: ", keyname, "=", value);
+}
+
+template <>
+void Job::set_config(mapreduce::Config key, std::string&& value) {
   std::string keyname;
   switch (key) {
     case mapreduce::Config::log_dirpath:
-      std::filesystem::create_directories(value);
-      mapreduce::util::logger.set_filepath(value);
+      fs::create_directories(value);
+      std::string file_number = std::to_string(conf_->mpi_rank);
+      fs::path path = fs::path(value);
+      mapreduce::util::logger.set_filepath(path / (std::string(8 - file_number.size(), '0') + file_number));
       keyname = "log_dirpath";
+      value = fs::absolute(path).string();
       break;
   }
 

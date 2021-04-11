@@ -57,6 +57,9 @@ class Job {
   template <typename T>
   void set_config(Config, T&&);
 
+  template <int N>
+  inline void set_config(Config, char[N]);
+
   /**
    * Setup Mapper.
    */

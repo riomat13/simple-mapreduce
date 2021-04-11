@@ -30,6 +30,8 @@ namespace util {
     ofs_.flush();
   }
 
+  Logger::Logger(const std::string& path) { set_filepath(path); }
+
   void Logger::set_log_level(LogLevel&& level) {
     get_log_level() = level;
     if (!is_set_file) {
@@ -61,6 +63,11 @@ namespace util {
     buff << "[" << std::put_time(std::localtime(&tm), "%F %T")
       << "." << std::setw(3) << std::setfill('0') << millisecs << "] ";
   }
+
+Logger& get_logger() {
+  static Logger logger = Logger();
+  return logger;
+}
 
 } // namespace util
 } // namespace mapreduce

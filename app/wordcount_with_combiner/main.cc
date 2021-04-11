@@ -5,6 +5,7 @@
 
 #include "simplemapreduce.h"
 
+using namespace std::string_literals;
 using namespace mapreduce;
 using namespace mapreduce::type;
 
@@ -36,6 +37,7 @@ int main(int argc, char *argv[]) {
 
   job.set_config(Config::n_groups, -1);
   job.set_config(Config::log_level, mapreduce::util::LogLevel::INFO);
+  job.set_config(Config::log_dirpath, "logs"s);
 
   job.set_mapper<WordCountMapper>();
   job.set_reducer<WordCountReducer>();

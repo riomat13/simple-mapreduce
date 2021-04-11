@@ -88,7 +88,13 @@ class LogWriter {
  */
 class Logger {
   public:
+  /**
+   * Logger constructor.
+   *
+   *  @param path file path to write out logs
+   */
   Logger() {}
+  Logger(const std::string&);
 
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
@@ -195,6 +201,9 @@ class Logger {
   bool is_set_file = false;
   std::unique_ptr<LogWriter> log_writer_ = nullptr;
 };
+
+/** Logger used in globally. */
+Logger& get_logger();
 
 } // namespace util
 } // namespace mapreduce

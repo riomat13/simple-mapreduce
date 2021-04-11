@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 #include <mpi.h>

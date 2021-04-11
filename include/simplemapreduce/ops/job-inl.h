@@ -1,5 +1,3 @@
-#include <type_traits>
-
 #include "simplemapreduce/commons.h"
 
 namespace mapreduce {
@@ -35,49 +33,9 @@ void Job::set_reducer() {
     job_runner_->set_reducer(std::make_unique<Reducer>());
 }
 
-// TODO: remove hardcoded key name
-template <typename T>
-void Job::set_config(mapreduce::Config key, T&& value) {
-  std::string keyname;
-  switch (key) {
-    case mapreduce::Config::n_groups:
-      keyname = "n_groups";
-      if (value > conf_->worker_size || value < 1) {
-        /// Group size can be at most the number of workers
-        conf_->n_groups = conf_->worker_size;
-        if (is_master_) {
-          if (value > 0) {
-            mapreduce::util::logger.warning("Group size exceeds the number of worker nodes. Use the number of worker nodes instead.");
-          } else if (value == 0) {
-            mapreduce::util::logger.warning("Group size must be non-zero. Use the number of worker nodes instead.");
-          }
-          mapreduce::util::logger.info("[Master] Config: ", keyname, "=", conf_->worker_size);
-        }
-        return;
-      } else {
-        conf_->n_groups = value;
-      }
-      break;
-
-    case mapreduce::Config::log_level:
-      mapreduce::util::logger.set_log_level(mapreduce::util::LogLevel(value));
-      keyname = "log_level";
-      break;
-
-    case mapreduce::Config::log_file_level:
-      mapreduce::util::logger.set_log_level_for_file(mapreduce::util::LogLevel(value));
-      keyname = "log_file_level";
-      break;
-
-    default:
-      if (is_master_)
-        mapreduce::util::logger.warning("Invalid parameter key: ", key);
-      return;
-  }
-
-  /// Only show the change from master node to avoid duplicates
-  if (is_master_)
-    mapreduce::util::logger.info("[Master] Config: ", keyname, "=", value);
+template <int N>
+void Job::set_config(mapreduce::Config key, char value[N]) {
+  set_config(key, std::string(value));
 }
-  
+
 }  // namespace mapreduce

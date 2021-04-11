@@ -14,6 +14,7 @@ namespace mapreduce {
     /* Output file path */           std::filesystem::path output_dirpath;
     /* # of worker to run tasks */   int worker_size{0};
     /* Current worker rank */        int worker_rank{0};
+    /* Current MPI world rank */     int mpi_rank{0};
   };
 
 }  // namespace mapreduce
