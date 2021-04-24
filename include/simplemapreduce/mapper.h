@@ -44,7 +44,7 @@ class Mapper : public mapreduce::base::MapTask {
    *  @param key    Mapper input key data
    *  @param value  Mapper input value data
    */
-  void run(mapreduce::data::ByteData&, mapreduce::data::ByteData&);
+  void run(mapreduce::data::ByteData&, mapreduce::data::ByteData&) override;
 };
 
 }  // namespace mapreduce

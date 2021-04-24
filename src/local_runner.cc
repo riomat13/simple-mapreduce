@@ -110,7 +110,6 @@ void LocalJobRunner::run_map_tasks() {
 void LocalJobRunner::run_shuffle_tasks() {
   auto shuffle = mapper_->get_shuffle();
   shuffle->run();
-  reducer_->set_shuffle(std::move(shuffle));
 }
 
 void LocalJobRunner::run_reduce_tasks() {

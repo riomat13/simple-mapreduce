@@ -30,11 +30,11 @@ TEST_CASE("REDUCE_AVE", "[average][reduce]") {
   REQUIRE(REDUCE_MEAN(values_s) == Approx(-1./3.));
 
   std::vector<Int> values_i{3, 2, 1, -2, -3};
-  REQUIRE(REDUCE_MEAN(values_i) == Approx(0.2d));
+  REQUIRE(REDUCE_MEAN(values_i) == Approx(0.2));
 
   std::vector<Long> values_l{444, 333, 222, 111};
-  REQUIRE(REDUCE_MEAN(values_l) == Approx(277.5d));
+  REQUIRE(REDUCE_MEAN(values_l) == Approx(277.5));
 
   std::vector<Float> values_f{4.44, 3.33, 2.22, 1.11};
-  REQUIRE(REDUCE_MEAN(values_f) == Approx(2.775d));
+  REQUIRE(REDUCE_MEAN(values_f) == Approx(2.775));
 }

@@ -12,6 +12,8 @@ namespace base {
 
 class JobRunner {
  public:
+  virtual ~JobRunner() = default;
+
   virtual void start() = 0;
 
   void set_mapper(std::unique_ptr<mapreduce::base::MapTask>);

@@ -2,7 +2,7 @@
 namespace mapreduce {
 namespace proc {
 
-template <typename T, std::enable_if_t<!std::is_arithmetic<T>::value, bool> = true>
+template <typename T, std::enable_if_t<!std::is_arithmetic<T>::value, bool>>
 mapreduce::data::ByteData load_byte_data(std::ifstream& fin) {
   /// Read data from CompositeKey
   mapreduce::type::Size_t data_size;
@@ -16,7 +16,6 @@ mapreduce::data::ByteData load_byte_data(std::ifstream& fin) {
 
   mapreduce::data::ByteData data;
   data.set_bytes<T>(&buffer[0], data_size);
-  // std::cerr << "Loading: " << data.get_data<T>() << std::endl;
   return data;
 }
 

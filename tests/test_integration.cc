@@ -33,7 +33,7 @@ template<> std::string convert_key(const std::string& key) { return std::string(
 template <typename K, typename V>
 class TestMapper: public Mapper<String, Long, K, V> {
  public:
-  void map(const String& ikey, const Long&, const Context<K, V>& context) {
+  void map(const String& ikey, const Long&, const Context<K, V>& context) override {
     std::string line, word;
     std::istringstream iss(ikey);
     while (std::getline(iss, line)) {
@@ -50,7 +50,7 @@ class TestMapper: public Mapper<String, Long, K, V> {
 template <typename K, typename V>
 class TestCombiner: public Reducer<K, V, K, V> {
  public:
-  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context) {
+  void reduce(const K& ikey, const std::vector<V>& ivalues, const Context<K, V>& context) override {
     K key(ikey);
     /// In reducer, only counts length of vector
     /// so that the result on this process does not affect the result
@@ -62,7 +62,7 @@ class TestCombiner: public Reducer<K, V, K, V> {
 template <typename IK, typename IV, typename OK, typename OV>
 class TestReducer: public Reducer<IK, IV, OK, OV> {
  public:
-  void reduce(const IK& ikey, const std::vector<IV>& ivalues, const Context<OK, OV>& context) {
+  void reduce(const IK& ikey, const std::vector<IV>& ivalues, const Context<OK, OV>& context) override {
     OK key(ikey);
     /// For testing, only returns vector size
     OV value = static_cast<OV>(ivalues.size());

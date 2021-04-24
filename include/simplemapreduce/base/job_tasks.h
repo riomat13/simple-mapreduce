@@ -34,6 +34,8 @@ enum TaskType {
 
 class JobTask {
  public:
+  virtual ~JobTask() {};
+
   /**
    * Set MapReduce job configuration.
    */
@@ -47,7 +49,6 @@ class JobTask {
 
 class MapTask : public JobTask {
  public:
-
   MapTask() {
     mq_ = std::make_shared<mapreduce::data::MessageQueue>(mapreduce::data::MessageQueue());
   }
@@ -78,13 +79,6 @@ class ReduceTask : public JobTask {
    * Run Reduce process.
    */
   virtual void run() = 0;
-
-  /**
-   * Set a ShuffleTask object for reduce.
-   * This should have initial data in container which is not shuffled
-   * because it would be processed by the same worker and directly stored to the container.
-   */
-  virtual void set_shuffle(std::unique_ptr<mapreduce::proc::ShuffleTask>) = 0;
 
   /**
    * Set a MessageQueue object for combiner.

@@ -35,11 +35,6 @@ std::unique_ptr<mapreduce::proc::Sorter<IK, IV>> Reducer<IK, IV, OK, OV>::get_so
 }
 
 template <typename IK, typename IV, typename OK, typename OV>
-void Reducer<IK, IV, OK, OV>::set_shuffle(std::unique_ptr<mapreduce::proc::ShuffleTask> shuffle) {
-  shuffle_ = std::unique_ptr<mapreduce::proc::Shuffle<IK, IV>>(static_cast<mapreduce::proc::Shuffle<IK, IV>*>(shuffle.get()));
-}
-
-template <typename IK, typename IV, typename OK, typename OV>
 void Reducer<IK, IV, OK, OV>::run() {
   if (is_combiner_)
     this->run_();
@@ -76,8 +71,9 @@ void Reducer<IK, IV, OK, OV>::run_(const std::filesystem::path& outpath) {
 
   auto context = this->get_context(outpath);
 
-  for (const auto& [key, values] : *container)
+  for (const auto& [key, values] : *container) {
     reduce(key, values, *context);
+  }
 }
 
 }  // namespace mapreduce

@@ -38,7 +38,7 @@ class Shuffle : public ShuffleTask {
    *  @param conf   Configuration set in Job class
    */
   Shuffle(std::shared_ptr<mapreduce::data::MessageQueue>, std::shared_ptr<mapreduce::JobConf>);
-  ~Shuffle() {};
+  ~Shuffle() {}
 
   /// Not use for copy/move and to avoid accidentaly pass objects
   Shuffle &operator=(const Shuffle&) = delete;
@@ -50,7 +50,7 @@ class Shuffle : public ShuffleTask {
    * The data is taken from MessageQueue,
    * then shuffle and write to intermediate file.
    */
-  void run();
+  void run() override;
 
  private:
   /// Job configuration
