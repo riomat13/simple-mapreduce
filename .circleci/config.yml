@@ -1,0 +1,173 @@
+version: 2.1
+
+executors:
+  xenial: &xenial
+    docker:
+      - image: ubuntu:xenial
+  bionic: &bionic
+    docker:
+      - image: ubuntu:bionic
+  focal: &focal
+    docker:
+      - image: ubuntu:focal
+
+jobs:
+  # TODO: separate build and test
+  build_and_test:
+    parameters:
+      type_name:
+        type: string
+      executor:
+        type: executor
+      cxx_compiler:
+        description: Compiler type
+        type: string
+      cxx_version:
+        description: Compiler version
+        type: integer
+    executor: << parameters.executor >>
+    environment:
+      CXX: << parameters.cxx_compiler >>-<< parameters.cxx_version >>
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-<< parameters.type_name >>
+      - run: apt-get update
+      # Install CMake
+      - when:
+          condition:
+            equal: [ *xenial, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Setup latest CMake installation
+                command: |
+                  apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common wget
+                  wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
+                  apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
+                  apt-get update
+      - run:
+          name: Install CMake
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get install -y cmake
+      # Install g++
+      - when:
+          condition:
+            and:
+              - or:
+                - equal: [ *xenial, << parameters.executor >> ]
+                - equal: [ *bionic, << parameters.executor >> ]
+              - equal: [ g++, << parameters.cxx_compiler >> ]
+          steps:
+            - run:
+                name: g++-9 installation
+                command: |
+                  if [ ! -f /usr/bin/g++-9 ]; then
+                    apt-get -y upgrade
+                    apt-get -y dist-upgrade
+                    apt-get install -y build-essential software-properties-common
+                    add-apt-repository -y ppa:ubuntu-toolchain-r/test
+                    apt-get update -y
+                    apt-get install -y g++-9
+                  else
+                    echo 'Skipping g++ installtion'
+                  fi
+      - when:
+          condition:
+            and:
+              - equal: [ *focal, << parameters.executor >> ]
+              - equal: [ g++, << parameters.cxx_compiler >> ]
+          steps:
+            - run:
+                name: g++ installation
+                command: |
+                  if [ ! -f /usr/bin/${CXX} ]; then
+                    apt-get install -y ${CXX}
+                  else
+                    echo 'Skipping g++ installtion'
+                  fi
+      # Ubuntu 18.04 needs to install SSH
+      - when:
+          condition:
+            equal: [ *bionic, << parameters.executor >> ]
+          steps:
+            - run: apt-get install -y openssh-server
+      # Install MPI
+      - run:
+          name: Package installation
+          command: |
+            if [ ! -f /usr/bin/mpiexec ]; then
+              apt-get install -y libopenmpi-dev openmpi-bin openmpi-common
+            else
+              echo 'Skipping openmpi installtion'
+            fi
+      - run:
+          name: Build testing executables
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_CXX_COMPILER=/usr/bin/${CXX} -DSIMPLEMR_BUILD_TEST=ON -DSIMPLEMR_TEST_MPI_ARGS="--allow-run-as-root" ..
+            make VERBOSE=1 -j 2
+      - save_cache:
+          key: dependency-cache-<< parameters.cxx_compiler >>-<< parameters.cxx_version >>
+          paths:
+            - /usr/bin
+            - /usr/include
+            - /usr/lib
+            - /lib
+      # Testing
+      - run:
+          name: Testing
+          command: |
+            cd build
+            ctest -VV
+
+workflows:
+  version: 2
+  build-and-test-g++9-ubuntu1604:
+    jobs:
+      - build_and_test:
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+          type_name: g++9-ubuntu1604
+          executor: xenial
+          cxx_compiler: g++
+          cxx_version: 9
+  build-and-test-g++9-ubuntu1804:
+    jobs:
+      - build_and_test:
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+          type_name: g++9-ubuntu1804
+          executor: bionic
+          cxx_compiler: g++
+          cxx_version: 9
+  build-and-test-g++9-ubuntu2004:
+    jobs:
+      - build_and_test:
+          filters:
+            branches:
+              only:
+                - master
+          type_name: g++9-ubuntu2004
+          executor: focal
+          cxx_compiler: g++
+          cxx_version: 9
+  build-and-test-g++10-ubuntu2004:
+    jobs:
+      - build_and_test:
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+          type_name: g++10-ubuntu2004
+          executor: focal
+          cxx_compiler: g++
+          cxx_version: 10
