@@ -11,6 +11,8 @@ namespace base {
 
 class JobManager {
  public:
+  virtual ~JobManager() = default;
+
   virtual void start() = 0;
 
   void set_conf(std::shared_ptr<mapreduce::JobConf> conf) { conf_ = conf; }

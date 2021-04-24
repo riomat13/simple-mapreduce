@@ -16,14 +16,14 @@ using namespace mapreduce::type;
 TEST_CASE("ByteData", "[byte][data]") {
 
   SECTION("Constructor") {
-    ByteData bdata1, bdata2;
+    ByteData bdata1;
 
     Int16 value = 10;
     bdata1 = ByteData(value);
     REQUIRE(bdata1.get_data<Int16>() == 10);
 
-    ByteData bdata(ByteData(value));
-    REQUIRE(bdata1.get_data<Int16>() == 10);
+    ByteData bdata2 = ByteData(value);
+    REQUIRE(bdata2.get_data<Int16>() == 10);
   }
 
   SECTION("Int16") {

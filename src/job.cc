@@ -74,6 +74,7 @@ void Job::start_up() {
   }
 
   conf_->worker_size = mpi_size - 1;
+  conf_->n_groups = mpi_size - 1;
 
   if (conf_->mpi_rank == 0) {
     /// Set up master node
@@ -108,13 +109,13 @@ template <>
 void Job::set_config(mapreduce::Config key, int&& value) {
   std::string keyname;
   switch (key) {
-    case mapreduce::Config::n_groups:
+    case mapreduce::Config::n_groups: {
       keyname = "n_groups";
       if (value > conf_->worker_size || value < 1) {
         /// Group size can be at most the number of workers
         conf_->n_groups = conf_->worker_size;
         if (is_master_) {
-          if (value > 0) {
+          if (value > conf_->n_groups) {
             mapreduce::util::logger.warning("Group size exceeds the number of worker nodes. Use the number of worker nodes instead.");
           } else if (value == 0) {
             mapreduce::util::logger.warning("Group size must be non-zero. Use the number of worker nodes instead.");
@@ -126,21 +127,25 @@ void Job::set_config(mapreduce::Config key, int&& value) {
         conf_->n_groups = value;
       }
       break;
+    }
 
-    case mapreduce::Config::log_level:
+    case mapreduce::Config::log_level: {
       mapreduce::util::logger.set_log_level(mapreduce::util::LogLevel(value));
       keyname = "log_level";
       break;
+    }
 
-    case mapreduce::Config::log_file_level:
+    case mapreduce::Config::log_file_level: {
       mapreduce::util::logger.set_log_level_for_file(mapreduce::util::LogLevel(value));
       keyname = "log_file_level";
       break;
+    }
 
-    default:
+    default: {
       if (is_master_)
         mapreduce::util::logger.warning("Invalid parameter key: ", key);
       return;
+    }
   }
 
   /// Only show the change from master node to avoid duplicates
@@ -152,15 +157,17 @@ template <>
 void Job::set_config(mapreduce::Config key, mapreduce::util::LogLevel&& value) {
   std::string keyname;
   switch (key) {
-    case mapreduce::Config::log_level:
+    case mapreduce::Config::log_level: {
       mapreduce::util::logger.set_log_level(mapreduce::util::LogLevel(value));
       keyname = "log_level";
       break;
+    }
 
-    default:
+    default: {
       if (is_master_)
         mapreduce::util::logger.warning("Invalid parameter key: ", key);
       return;
+    }
   }
 
   /// Only show the change from master node to avoid duplicates
@@ -172,7 +179,7 @@ template <>
 void Job::set_config(mapreduce::Config key, std::string&& value) {
   std::string keyname;
   switch (key) {
-    case mapreduce::Config::log_dirpath:
+    case mapreduce::Config::log_dirpath: {
       fs::create_directories(value);
       std::string file_number = std::to_string(conf_->mpi_rank);
       fs::path path = fs::path(value);
@@ -180,6 +187,11 @@ void Job::set_config(mapreduce::Config key, std::string&& value) {
       keyname = "log_dirpath";
       value = fs::absolute(path).string();
       break;
+    }
+
+    default: {
+      return;
+    }
   }
 
   /// Only show the change from master node to avoid duplicates

@@ -22,7 +22,6 @@ template <typename /* Input key datatype    */ IKeyType,
           typename /* Output value datatype */ OValueType>
 class Reducer : public mapreduce::base::ReduceTask {
  public:
-
   /**
    * Reducer function
    *
@@ -51,13 +50,6 @@ class Reducer : public mapreduce::base::ReduceTask {
 
   /** Run reduce task as combiner. */
   inline void run_();
-
-  /**
-   * Set a ShuffleTask object for reduce.
-   * This should have initial data in container which is not shuffled
-   * because it would be processed by the same worker and directly stored to the container.
-   */
-  void set_shuffle(std::unique_ptr<mapreduce::proc::ShuffleTask> shuffle) override;
 
   /**
    * Set a MessageQueue object for combiner.
@@ -90,9 +82,6 @@ class Reducer : public mapreduce::base::ReduceTask {
    *  @param mq     MessageQueue created at Mapper task or the previous Combiner/Reducer task
    */
   std::unique_ptr<mapreduce::proc::Sorter<IKeyType, IValueType>> get_sorter(std::shared_ptr<mapreduce::data::MessageQueue>);
-
-  /// MessageQueue to store data
-  std::unique_ptr<mapreduce::proc::Shuffle<IKeyType, IValueType>> shuffle_ = nullptr;
 
   /// Container to store shuffled key/value data
   std::unique_ptr<std::map<IKeyType, std::vector<IValueType>>> container_ = nullptr;
