@@ -52,12 +52,12 @@ jobs:
             apt-get install -y cmake
       # Install g++
       - when:
+          # For ubuntu 16.04 and 18.04, test with only g++-9.
+          # The libstdc++ is used for clang as well.
           condition:
-            and:
-              - or:
-                - equal: [ *xenial, << parameters.executor >> ]
-                - equal: [ *bionic, << parameters.executor >> ]
-              - equal: [ g++, << parameters.cxx_compiler >> ]
+            or:
+              - equal: [ *xenial, << parameters.executor >> ]
+              - equal: [ *bionic, << parameters.executor >> ]
           steps:
             - run:
                 name: g++-9 installation
@@ -86,6 +86,58 @@ jobs:
                   else
                     echo 'Skipping g++ installtion'
                   fi
+      # Install clang
+      - when:
+          condition:
+            and:
+              - equal: [ *xenial, << parameters.executor >> ]
+              - equal: [ clang++, << parameters.cxx_compiler >> ]
+          steps:
+            - run:
+                name: clang++ installation
+                command: |
+                  if [ ! -f /usr/bin/${CXX} ]; then
+                    apt-get install -y software-properties-common wget
+                    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+                    add-apt-repository 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-<< parameters.cxx_version >> main'
+                    apt-get install -y clang-<< parameters.cxx_version >>
+                  else
+                    echo 'Skipping clang++ installtion'
+                  fi
+      - when:
+          condition:
+            and:
+              - equal: [ *bionic, << parameters.executor >> ]
+              - equal: [ clang++, << parameters.cxx_compiler >> ]
+          steps:
+            - run:
+                name: clang++ installation
+                command: |
+                  if [ ! -f /usr/bin/${CXX} ]; then
+                    apt-get install -y software-properties-common wget
+                    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+                    add-apt-repository 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-<< parameters.cxx_version >> main'
+                    apt-get install -y clang-<< parameters.cxx_version >>
+                  else
+                    echo 'Skipping clang++ installtion'
+                  fi
+      - when:
+          condition:
+            and:
+              - equal: [ *focal, << parameters.executor >> ]
+              - equal: [ clang++, << parameters.cxx_compiler >> ]
+          steps:
+            - run:
+                name: clang++ installation
+                command: |
+                  if [ ! -f /usr/bin/${CXX} ]; then
+                    apt-get install -y software-properties-common wget
+                    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+                    add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-<< parameters.cxx_version >> main'
+                    apt-get install -y clang-<< parameters.cxx_version >>
+                  else
+                    echo 'Skipping clang++ installtion'
+                  fi
       # Ubuntu 18.04 needs to install SSH
       - when:
           condition:
@@ -108,13 +160,29 @@ jobs:
             cd build
             cmake -DCMAKE_CXX_COMPILER=/usr/bin/${CXX} -DSIMPLEMR_BUILD_TEST=ON -DSIMPLEMR_TEST_MPI_ARGS="--allow-run-as-root" ..
             make VERBOSE=1 -j 2
-      - save_cache:
-          key: dependency-cache-<< parameters.cxx_compiler >>-<< parameters.cxx_version >>
-          paths:
-            - /usr/bin
-            - /usr/include
-            - /usr/lib
-            - /lib
+      - when:
+          condition:
+            equal: [ g++, << parameters.cxx_compiler >> ]
+          steps:
+            - save_cache:
+                key: dependency-cache-<< parameters.type_name >>
+                paths:
+                  - /usr/bin
+                  - /usr/include
+                  - /usr/lib
+                  - /lib
+      - when:
+          condition:
+            equal: [ clang++, << parameters.cxx_compiler >> ]
+          steps:
+            - save_cache:
+                key: dependency-cache-<< parameters.type_name >>
+                paths:
+                  - /usr/bin
+                  - /usr/include
+                  - /usr/lib
+                  - /usr/local/clang_<< parameters.cxx_compiler>>.0.0
+                  - /lib
       # Testing
       - run:
           name: Testing
@@ -142,22 +210,22 @@ workflows:
           filters:
             branches:
               only:
-                - dev
                 - master
           type_name: g++9-ubuntu1804
           executor: bionic
           cxx_compiler: g++
           cxx_version: 9
-  build-and-test-g++9-ubuntu2004:
+  build-and-test-clang9-ubuntu1804:
     jobs:
       - build_and_test:
           filters:
             branches:
               only:
+                - dev
                 - master
-          type_name: g++9-ubuntu2004
-          executor: focal
-          cxx_compiler: g++
+          type_name: clang++9-ubuntu1804
+          executor: bionic
+          cxx_compiler: clang++
           cxx_version: 9
   build-and-test-g++10-ubuntu2004:
     jobs:
@@ -165,9 +233,19 @@ workflows:
           filters:
             branches:
               only:
-                - dev
                 - master
           type_name: g++10-ubuntu2004
           executor: focal
           cxx_compiler: g++
+          cxx_version: 10
+  build-and-test-clang10-ubuntu2004:
+    jobs:
+      - build_and_test:
+          filters:
+            branches:
+              only:
+                - master
+          type_name: clang++10-ubuntu2004
+          executor: focal
+          cxx_compiler: clang++
           cxx_version: 10

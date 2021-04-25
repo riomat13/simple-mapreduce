@@ -58,6 +58,11 @@ If use `open-mpi`, run the following command,
 $ sudo apt install g++ cmake openmpi-bin openmpi-common libopenmpi-dev
 ```
 
+You can use `clang++` instead of `g++`(tested with `clang++-9` and `clang++-10`),
+however, this uses `<filesystem>` so that make sure `libstdc++` has it,
+such as, on Ubuntu 18.04 or Ubuntu 16.04.
+(Easiest way is install `g++>=9`)
+
 Optionally, you can use `libtbb-dev` on Ubuntu 20.04.
 
 If you use alternatives such as `MPICH`, check their website and install it manually.
@@ -355,11 +360,10 @@ The details is described in [link](./app/movielens/README.md).
 
 ## <a name="5-todo"></a>5 TODO
 
-- Add configurations
-- Logging configuration
-  - Write logs to files
-- Run on distributed memory
-- Composite key
+- Run on distributed memory (low)
+- Refactoring
+  - Network communication
+  - Configuration
 
 ## <a name="6-references"></a>6 References
 
