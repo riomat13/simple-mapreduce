@@ -28,6 +28,9 @@ else()
   set(SIMPLEMR_TEST_INTEGRATION OFF CACHE INTERNAL "Integration testing")
 endif()
 
+set(SIMPLEMR_TEST_MPI_NUM_NODES 2 CACHE INTERNAL "Number of NPI nodes")
+set(SIMPLEMR_TEST_MPI_ARGS "" CACHE INTERNAL "MPI arguments for testing")
+
 # # MPI
 find_package(MPI REQUIRED)
 if(MPI_FOUND)
@@ -199,6 +202,6 @@ if(SIMPLEMR_TEST_INTEGRATION)
     add_executable(${ITEST_NAME} ${LIB_SOURCES} ${ITEST_SOURCES})
     target_compile_definitions(${ITEST_NAME} PRIVATE "INTEGRATION${type}")
     setup_test(${ITEST_NAME} ON)
-    add_test(NAME ${ITEST_NAME} COMMAND ${MPIEXEC} -np 2 ./${ITEST_NAME})
+    add_test(NAME ${ITEST_NAME} COMMAND ${MPIEXEC} -np ${SIMPLEMR_TEST_MPI_NUM_NODES} ${SIMPLEMR_TEST_MPI_ARGS} ./${ITEST_NAME})
   endforeach()
 endif()
