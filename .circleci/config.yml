@@ -198,6 +198,7 @@ workflows:
           filters:
             branches:
               only:
+                - circleci-setup
                 - dev
                 - master
           type_name: g++9-ubuntu1604
@@ -210,6 +211,7 @@ workflows:
           filters:
             branches:
               only:
+                - circleci-setup
                 - master
           type_name: g++9-ubuntu1804
           executor: bionic
@@ -221,6 +223,7 @@ workflows:
           filters:
             branches:
               only:
+                - circleci-setup
                 - dev
                 - master
           type_name: clang++9-ubuntu1804
@@ -233,6 +236,7 @@ workflows:
           filters:
             branches:
               only:
+                - circleci-setup
                 - master
           type_name: g++10-ubuntu2004
           executor: focal
@@ -244,6 +248,7 @@ workflows:
           filters:
             branches:
               only:
+                - circleci-setup
                 - master
           type_name: clang++10-ubuntu2004
           executor: focal
